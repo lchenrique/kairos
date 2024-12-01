@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Configurações da igreja (uma única entrada)
+model Church {
+  id          String   @id @default("default")
+  name        String
+  address     String?
+  phone       String?
+  email       String?
+  logo        String?
+  theme       String?  @default("light") // light, dark
+  timezone    String?  @default("America/Sao_Paulo")
+  dateFormat  String?  @default("DD/MM/YYYY")
+  timeFormat  String?  @default("HH:mm")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Usuários do sistema (admin, líderes)
+model User {
+  id                 String    @id @default(cuid())
+  name               String
+  email              String    @unique
+  password           String
+  role               String    @default("USER")
+  resetToken         String?   @unique
+  resetTokenExpiresAt DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+// Membros da igreja
+model Member {
+  id           String             @id @default(cuid())
+  name         String
+  email        String?
+  phone        String?
+  address      String?
+  birthDate    DateTime?
+  baptismDate  DateTime?
+  status       String             @default("ACTIVE")
+  profession   String?
+  maritalStatus String?           @default("SINGLE")
+  notes        String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  image        String?
+  events       EventParticipant[]
+  groups       MemberGroup[]
+}
+
+// Grupos da igreja (células, ministérios, etc)
+model Group {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  type        String        // CELL, MINISTRY, DEPARTMENT, etc
+  meetingDay  String?
+  startTime   String?      // Hora de início (HH:mm)
+  endTime     String?      // Hora de término (HH:mm)
+  location    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  members     MemberGroup[]
+
+  @@unique([meetingDay, startTime, endTime, location])
+}
+
+// Relacionamento many-to-many entre membros e grupos
+model MemberGroup {
+  id        String   @id @default(cuid())
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  memberId  String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId   String
+  role      String   @default("MEMBER") // LEADER, MEMBER
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([memberId, groupId])
+}
+
+// Eventos
+model Event {
+  id           String             @id @default(cuid())
+  title        String
+  description  String?
+  startDate    DateTime
+  endDate      DateTime?
+  location     String?
+  type         String             @default("OTHER") // SERVICE, CELL, MINISTRY, OTHER
+  status       String             @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  participants EventParticipant[]
+}
+
+// Participação em Eventos
+model EventParticipant {
+  id        String   @id @default(cuid())
+  eventId   String
+  memberId  String
+  status    String   @default("CONFIRMED") // CONFIRMED, PENDING, CANCELLED
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, memberId])
+}
+
+// Configurações do sistema
+model Setting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
