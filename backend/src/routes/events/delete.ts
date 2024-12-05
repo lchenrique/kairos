@@ -1,5 +1,6 @@
 import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { prisma } from '../../lib/prisma'
+import { errorResponseSchema, idSchema, noContentResponseSchema } from '../../schemas/shared'
 import { z } from 'zod'
 
 export const remove: FastifyPluginAsyncZod = async (app) => {
@@ -7,11 +8,11 @@ export const remove: FastifyPluginAsyncZod = async (app) => {
     schema: {
       tags: ['events'],
       description: 'Remove um evento',
-      params: z.object({
-        id: z.string()
-      }),
+      params: idSchema,
       response: {
-        204: z.object({}).describe('Evento removido com sucesso')
+        204: noContentResponseSchema,
+        404: errorResponseSchema,
+        500: errorResponseSchema
       },
       security: [{ bearerAuth: [] }]
     }

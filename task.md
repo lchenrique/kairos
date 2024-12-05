@@ -15,117 +15,153 @@
 - [x] Cadastro completo
   - [x] Dados pessoais
   - [x] Contatos
-  - [x] Datas importantes
-  - [x] Profissão
-  - [x] Estado civil
 - [x] Listagem com filtros
   - [x] Por status
   - [x] Por grupo
   - [x] Por data
-- [x] Histórico de participação
-  - [x] Eventos
-  - [x] Grupos
-- [x] Deleção com cascade
+- [ ] Histórico de participação
+  - [ ] Eventos
+  - [ ] Grupos
+- [ ] Deleção com cascade
+- [ ] Ações em massa (UI implementada)
+  - [ ] Ativar/Desativar
+  - [ ] Adicionar/Remover de grupos
+  - [ ] Excluir
+- [x] Interface implementada
+  - [x] Visualizar detalhes
+  - [x] Criar novo membro
+  - [x] Editar membro
+  - [x] Menu de ações com ícones
+  - [x] Visualização em tabela e grid
+  - [x] Animações e transições
 - [ ] Aniversariantes
 
 ### 3. Grupos/Células 
-- [x] Cadastro de grupos
-  - [x] Nome e descrição
-  - [x] Tipo (célula, ministério, curso)
-  - [x] Local e horário
-  - [x] Validação de conflitos
-    - [x] Prevenção de sobreposição
-    - [x] Múltiplos grupos em salas diferentes
-    - [x] Validação de formato (HH:mm)
-- [x] Associação de membros
-  - [x] Definição de líderes
-  - [x] Histórico de participação
-  - [x] Deleção com cascade
+- [ ] Cadastro de grupos
+  - [ ] Nome e descrição
+  - [ ] Tipo (célula, ministério, curso)
+  - [ ] Local e horário
+  - [ ] Validação de conflitos
+    - [ ] Prevenção de sobreposição
+    - [ ] Múltiplos grupos em salas diferentes
+    - [ ] Validação de formato (HH:mm)
+- [ ] Associação de membros
+  - [ ] Definição de líderes
+  - [ ] Histórico de participação
+  - [ ] Deleção com cascade
 - [ ] Relatórios
   - [ ] Frequência
   - [ ] Crescimento
 
 ### 4. Eventos 
-- [x] Criação de eventos
-  - [x] Título e descrição
-  - [x] Data e hora
-  - [x] Local
-  - [x] Tipo
-- [x] Controle de presença
-  - [x] Lista de participantes
-  - [x] Check-in
+- [ ] Criação de eventos
+  - [ ] Título e descrição
+  - [ ] Data e hora
+  - [ ] Local
+  - [ ] Tipo de evento
+- [ ] Check-in
+  - [ ] QR Code
+  - [ ] Lista manual
 - [ ] Relatórios
-  - [ ] Participação
-  - [ ] Estatísticas
+  - [ ] Presença
+  - [ ] Crescimento
 
-### 5. Dashboard 
-- [ ] Visão geral
-  - [ ] Total de membros
+### 5. Dashboard
+- [x] Estatísticas gerais
+  - [x] Total de membros
+  - [x] Membros ativos/inativos
+  - [x] Grupos ativos
+- [ ] Gráficos
+  - [ ] Crescimento mensal
   - [ ] Distribuição por status
-  - [ ] Grupos ativos
-- [ ] Aniversariantes do mês
-- [ ] Próximos eventos
-- [ ] Novos membros
+  - [ ] Frequência em eventos
+- [ ] Alertas
+  - [ ] Aniversariantes do mês
+  - [ ] Membros inativos
+  - [ ] Eventos próximos
 
-### 6. Relatórios 
-- [ ] Crescimento
-  - [ ] Novos membros
-  - [ ] Batismos
-- [ ] Frequência
-  - [ ] Eventos
-  - [ ] Grupos
-- [ ] Exportação
-  - [ ] Excel
-  - [ ] PDF
+### 6. Configurações
+- [x] Dados da igreja
+  - [x] Nome e CNPJ
+  - [x] Endereço
+  - [x] Contatos
+- [ ] Customização
+  - [ ] Logo
+  - [ ] Cores
+  - [ ] Idioma
 
-## Infraestrutura 
+## Infraestrutura
 
-### Backend
-- [x] Fastify
-- [x] Prisma
-- [x] SQLite
-- [x] JWT Auth
-- [x] Modularização das rotas
-  - [x] Autenticação
-  - [x] Membros
-  - [x] Grupos
-  - [x] Eventos
-  - [x] Sistema
-  - [x] Uploads
-- [x] Schemas padronizados
-  - [x] Validação com Zod
-  - [x] Respostas de erro
-  - [x] Respostas de sucesso
-  - [x] Paginação
-- [x] Testes
-  - [x] Autenticação
-    - [x] Registro de usuário
-    - [x] Login
-    - [x] Perfil
-    - [x] Troca de senha
-  - [x] Membros
-    - [x] Criação
-    - [x] Listagem
-    - [x] Detalhes
-    - [x] Atualização
-    - [x] Deleção com cascade
-  - [x] Grupos
-    - [x] Criação
-    - [x] Listagem
-    - [x] Adição de membros
-    - [x] Remoção de membros
-    - [x] Deleção com cascade
-  - [x] Sistema
-    - [x] Informações
-    - [x] Configurações da igreja
-
-### Frontend
-- [x] Next.js 14
+### 1. Backend
+- [x] Node.js com Express
 - [x] TypeScript
-- [x] Tailwind
-- [x] shadcn/ui
+- [x] PostgreSQL
+- [x] Prisma ORM
+- [x] JWT Authentication
+- [x] API Documentation
+- [x] Testes de API
+  - [x] Autenticação
+    - [x] Login/Logout
+    - [x] Recuperação de senha
+    - [x] Proteção de rotas
+  - [x] Membros
+    - [x] Criação
+    - [x] Listagem e filtros
+    - [x] Atualização
+    - [x] Deleção
+  - [x] Grupos
+    - [x] CRUD completo
+    - [x] Associação de membros
+  - [ ] Eventos (não testado)
+    - [ ] CRUD
+    - [ ] Check-in
+- [ ] Testes
+  - [ ] Unitários
+  - [ ] E2E
 
-## Distribuição 
+### 2. Frontend
+- [x] Next.js 14 com App Router
+- [x] TypeScript strict mode
+- [x] Tailwind CSS + shadcn/ui
+- [x] Gerenciamento de estado
+  - [x] Zustand para estado global
+  - [x] React Query para cache
+  - [x] Zod para validação
+- [x] Features por domínio
+  - [x] Membros
+    - [x] Listagem com grid/tabela
+    - [x] Filtros e busca
+    - [x] Formulário de cadastro
+    - [x] Formulário de edição
+    - [x] Visualização de detalhes
+    - [ ] Deleção
+    - [ ] Ações em massa (UI implementada)
+  - [ ] Grupos
+    - [ ] Listagem com grid/tabela
+    - [ ] Filtros e busca
+    - [ ] Formulário de cadastro/edição
+    - [ ] Associação de membros
+  - [ ] Eventos
+    - [ ] Listagem com grid/tabela
+    - [ ] Filtros e busca
+    - [ ] Formulário de cadastro/edição
+    - [ ] Check-in de participantes
+- [x] Componentes reutilizáveis
+  - [x] DataTable com seleção múltipla
+  - [x] Filtros dinâmicos
+  - [x] Cards de estatísticas
+  - [x] Formulários dinâmicos
+- [x] UI/UX
+  - [x] Design system consistente
+  - [x] Feedback visual (loading/erro)
+  - [x] Animações com Framer Motion
+  - [x] Layout responsivo
+- [ ] Testes
+  - [ ] Unitários
+  - [ ] Integração
+  - [ ] E2E
+
+### 3. DevOps
 - [ ] Docker
   - [ ] Backend
   - [ ] Frontend
@@ -133,7 +169,4 @@
 - [ ] CI/CD
   - [ ] GitHub Actions
   - [ ] Deploy automático
-- [ ] Monitoramento
-  - [ ] Logs
-  - [ ] Métricas
-  - [ ] Alertas
+  - [ ] Testes automáticos

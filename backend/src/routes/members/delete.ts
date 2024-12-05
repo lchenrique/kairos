@@ -42,8 +42,18 @@ export const remove: FastifyPluginAsyncZod = async (app) => {
         where: { id }
       })
 
-      return reply.status(204).send(null)
+      return reply.status(204).send()
     } catch (error) {
+      console.error('Erro ao deletar membro:', error) // Log para debug
+      
+      if (error instanceof Error) {
+        return reply.status(500).send({
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: error.message || 'Erro ao remover membro'
+        })
+      }
+
       return reply.status(500).send({
         statusCode: 500,
         error: 'Internal Server Error',

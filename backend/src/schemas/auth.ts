@@ -40,6 +40,23 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Senha é obrigatória')
 })
 
+// Schema de alteração de senha
+export const changePasswordSchema = z.object({
+  current_password: z.string().min(6, 'Senha atual deve ter pelo menos 6 caracteres'),
+  new_password: z.string().min(6, 'Nova senha deve ter pelo menos 6 caracteres')
+})
+
+// Schema de solicitação de reset de senha
+export const resetPasswordRequestSchema = z.object({
+  email: z.string().email('Email inválido')
+})
+
+// Schema de reset de senha
+export const resetPasswordSchema = z.object({
+  token: z.string(),
+  password: z.string().min(6, 'Nova senha deve ter pelo menos 6 caracteres')
+})
+
 // Tipos gerados dos schemas
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
@@ -47,3 +64,6 @@ export type User = z.infer<typeof userSchema>
 export type UserResponse = z.infer<typeof userResponseSchema>
 export type AuthResponse = z.infer<typeof authResponseSchema>
 export type ErrorResponse = z.infer<typeof errorResponseSchema>
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
+export type ResetPasswordRequestInput = z.infer<typeof resetPasswordRequestSchema>
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>

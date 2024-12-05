@@ -39,19 +39,20 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-full flex-col bg-card/50 backdrop-blur-lg border-r">
+    <div className="flex h-full flex-col bg-gradient-to-b from-card/90 to-card/50 backdrop-blur-lg border-r">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="border-b p-6"
+        className="p-6 relative overflow-hidden"
       >
-        <div className="flex items-center gap-2 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="flex items-center gap-3 overflow-hidden">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
-            className="flex items-center justify-center bg-primary/10 rounded-lg p-2"
+            className="flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl p-2 shadow-lg shadow-primary/20"
           >
             <Church className="h-6 w-6 text-primary" />
           </motion.div>
@@ -65,7 +66,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                 className="flex flex-col"
               >
                 <motion.h2
-                  className="text-2xl font-semibold tracking-tight"
+                  className="text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent"
                 >
                   Kairos
                 </motion.h2>
@@ -94,7 +95,11 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         </nav>
       </ScrollArea>
 
-      <ProfileSection isCollapsed={isCollapsed} />
+      <div className="mt-auto">
+        <div className="bg-gradient-to-t from-background/80 to-transparent py-4">
+          <ProfileSection isCollapsed={isCollapsed} />
+        </div>
+      </div>
     </div>
   )
 }

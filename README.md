@@ -162,7 +162,7 @@ Kairos é um sistema abrangente de gestão para igrejas, projetado para simplifi
 - **Testes**: Cobertura completa para funcionalidades principais
 
 ### Frontend
-- **Framework**: Next.js 14
+- **Framework**: Next.js 15
 - **Linguagem**: TypeScript
 - **Estilização**: Tailwind CSS
 - **Componentes UI**: shadcn/ui

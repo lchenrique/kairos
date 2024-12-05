@@ -33,18 +33,22 @@ export function NavItem({
     <Button
       variant={isActive ? "secondary" : "ghost"}
       className={cn(
-        "w-full justify-start relative group",
-        isActive && "bg-secondary",
+        "w-full justify-start relative group overflow-hidden",
+        isActive && "bg-gradient-to-r from-primary/20 to-transparent",
         isCollapsed && "justify-center"
       )}
       asChild
     >
       <Link href={href}>
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <motion.div
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          className={cn("mr-2", isCollapsed && "mr-0")}
+          className={cn(
+            "relative z-10 p-1 rounded-lg transition-colors", 
+            isCollapsed ? "mr-0" : "mr-2",
+            isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+          )}
         >
           <Icon className="h-4 w-4" />
         </motion.div>
@@ -54,7 +58,10 @@ export function NavItem({
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
               exit={{ opacity: 0, width: 0 }}
-              className="font-medium"
+              className={cn(
+                "font-medium transition-colors",
+                isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+              )}
             >
               {title}
             </motion.span>
@@ -63,7 +70,7 @@ export function NavItem({
         {isActive && (
           <motion.div
             layoutId="active-nav"
-            className="absolute left-0 w-1 h-full bg-primary rounded-full"
+            className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full shadow-[0_0_8px_rgba(var(--primary),0.5)]"
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           />
         )}
@@ -83,7 +90,7 @@ export function NavItem({
             <TooltipTrigger asChild>
               {NavButton}
             </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={20}>
+            <TooltipContent side="right" sideOffset={20} className="bg-card/80 backdrop-blur-lg">
               {title}
             </TooltipContent>
           </Tooltip>

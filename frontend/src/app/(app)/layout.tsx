@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { Sidebar } from "@/components/layout/sidebar"
 import { useState, useEffect } from "react"
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/lib/stores/auth-store"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/use-auth"
 
 export default function AppLayout({
   children,
@@ -18,21 +19,29 @@ export default function AppLayout({
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const { user, isAuthenticated } = useAuthStore()
+  const { user } = useAuthStore()
   const { theme, setTheme } = useTheme()
   const router = useRouter()
+  const { isAuthenticated } = useAuth()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
+    // Só redireciona se estiver montado para evitar redirecionamentos durante SSR
+    if (mounted && !isAuthenticated) {
+      router.replace('/login')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, mounted, router])
 
-  if (!mounted || !isAuthenticated) {
+  // Mostra nada durante SSR ou loading
+  if (!mounted) {
+    return null
+  }
+
+  // Se não estiver autenticado, não mostra nada mas permite o redirecionamento acontecer
+  if (!isAuthenticated) {
     return null
   }
 

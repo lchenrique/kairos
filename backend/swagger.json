@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.0.0",
   "info": {
     "title": "Kairos API",
     "description": "API do sistema Kairos para gestão de membros, grupos e eventos",
@@ -16,156 +16,6 @@
     "schemas": {}
   },
   "paths": {
-    "/auth/login": {
-      "post": {
-        "tags": [
-          "auth"
-        ],
-        "description": "Realiza login no sistema",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "format": "email"
-                  },
-                  "password": {
-                    "type": "string",
-                    "minLength": 6
-                  }
-                },
-                "required": [
-                  "email",
-                  "password"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Login realizado com sucesso",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "user": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "email": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "token": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/auth/logout": {
-      "post": {
-        "tags": [
-          "auth"
-        ],
-        "description": "Realiza logout do sistema",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Logout realizado com sucesso"
-          }
-        }
-      }
-    },
-    "/system/setup": {
-      "post": {
-        "tags": [
-          "system"
-        ],
-        "description": "Configura o sistema pela primeira vez",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "church": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string",
-                        "minLength": 3
-                      },
-                      "address": {
-                        "type": "string",
-                        "minLength": 5
-                      },
-                      "phone": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "name",
-                      "address"
-                    ]
-                  },
-                  "admin": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string",
-                        "minLength": 3
-                      },
-                      "email": {
-                        "type": "string",
-                        "format": "email"
-                      },
-                      "password": {
-                        "type": "string",
-                        "minLength": 6
-                      }
-                    },
-                    "required": [
-                      "name",
-                      "email",
-                      "password"
-                    ]
-                  }
-                },
-                "required": [
-                  "church",
-                  "admin"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Sistema configurado com sucesso"
-          }
-        }
-      }
-    },
     "/auth/register": {
       "post": {
         "tags": [
@@ -225,7 +75,120 @@
                         "email": {
                           "type": "string"
                         },
-                        "role": {
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "email",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "token",
+                    "user"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "description": "Autentica um usuário",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
                           "type": "string"
                         },
                         "createdAt": {
@@ -241,7 +204,6 @@
                         "id",
                         "name",
                         "email",
-                        "role",
                         "createdAt",
                         "updatedAt"
                       ],
@@ -256,31 +218,468 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
     },
-    "/auth/refresh-token": {
-      "post": {
+    "/auth/profile": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "description": "Obtém o perfil do usuário autenticado",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "email",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
     },
-    "/members/": {
+    "/auth/password/change": {
+      "put": {
+        "tags": [
+          "auth"
+        ],
+        "description": "Altera a senha do usuário autenticado",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentPassword": {
+                    "type": "string",
+                    "minLength": 6
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "minLength": 6
+                  }
+                },
+                "required": [
+                  "currentPassword",
+                  "newPassword"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "enum": [
+                    "null"
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/password/reset-request": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "description": "Solicita redefinição de senha",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                },
+                "required": [
+                  "email"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "enum": [
+                    "null"
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/password/reset": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "description": "Redefine a senha usando o token de redefinição",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6
+                  }
+                },
+                "required": [
+                  "token",
+                  "password"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "enum": [
+                    "null"
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/members": {
       "get": {
         "tags": [
           "members"
         ],
-        "description": "Lista membros com paginação, busca e filtros",
+        "description": "Lista membros com paginação e filtros",
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "exclusiveMinimum": true,
-              "minimum": 0,
+              "type": "number",
+              "minimum": 1,
               "default": 1
             },
             "in": "query",
@@ -289,9 +688,9 @@
           },
           {
             "schema": {
-              "type": "integer",
-              "exclusiveMinimum": true,
-              "minimum": 0,
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100,
               "default": 10
             },
             "in": "query",
@@ -311,8 +710,7 @@
               "type": "string",
               "enum": [
                 "ACTIVE",
-                "INACTIVE",
-                "REMOVED"
+                "INACTIVE"
               ]
             },
             "in": "query",
@@ -325,8 +723,7 @@
               "enum": [
                 "name",
                 "email",
-                "createdAt",
-                "status"
+                "createdAt"
               ],
               "default": "name"
             },
@@ -348,6 +745,11 @@
             "required": false
           }
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Default Response",
@@ -356,22 +758,19 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "members": {
+                    "data": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
                           "id": {
-                            "type": "string",
-                            "pattern": "^[cC][^\\s-]{8,}$"
+                            "type": "string"
                           },
                           "name": {
-                            "type": "string",
-                            "minLength": 3
+                            "type": "string"
                           },
                           "email": {
                             "type": "string",
-                            "format": "email",
                             "nullable": true
                           },
                           "phone": {
@@ -396,8 +795,7 @@
                             "type": "string",
                             "enum": [
                               "ACTIVE",
-                              "INACTIVE",
-                              "REMOVED"
+                              "INACTIVE"
                             ]
                           },
                           "notes": {
@@ -415,6 +813,25 @@
                           "updatedAt": {
                             "type": "string",
                             "format": "date-time"
+                          },
+                          "groups": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            }
                           }
                         },
                         "required": [
@@ -429,12 +846,13 @@
                           "notes",
                           "image",
                           "createdAt",
-                          "updatedAt"
+                          "updatedAt",
+                          "groups"
                         ],
                         "additionalProperties": false
                       }
                     },
-                    "pagination": {
+                    "meta": {
                       "type": "object",
                       "properties": {
                         "page": {
@@ -443,25 +861,60 @@
                         "limit": {
                           "type": "number"
                         },
-                        "total": {
+                        "totalItems": {
                           "type": "number"
                         },
                         "totalPages": {
                           "type": "number"
+                        },
+                        "hasNextPage": {
+                          "type": "boolean"
+                        },
+                        "hasPreviousPage": {
+                          "type": "boolean"
                         }
                       },
                       "required": [
                         "page",
                         "limit",
-                        "total",
-                        "totalPages"
+                        "totalItems",
+                        "totalPages",
+                        "hasNextPage",
+                        "hasPreviousPage"
                       ],
                       "additionalProperties": false
                     }
                   },
                   "required": [
-                    "members",
-                    "pagination"
+                    "data",
+                    "meta"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
                   ],
                   "additionalProperties": false
                 }
@@ -482,8 +935,7 @@
                 "type": "object",
                 "properties": {
                   "name": {
-                    "type": "string",
-                    "minLength": 3
+                    "type": "string"
                   },
                   "email": {
                     "type": "string",
@@ -496,19 +948,16 @@
                     "type": "string"
                   },
                   "birthDate": {
-                    "type": "string",
-                    "format": "date-time"
+                    "type": "string"
                   },
                   "baptismDate": {
-                    "type": "string",
-                    "format": "date-time"
+                    "type": "string"
                   },
                   "status": {
                     "type": "string",
                     "enum": [
                       "ACTIVE",
-                      "INACTIVE",
-                      "REMOVED"
+                      "INACTIVE"
                     ],
                     "default": "ACTIVE"
                   },
@@ -517,6 +966,21 @@
                   },
                   "image": {
                     "type": "string"
+                  },
+                  "groups": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "additionalProperties": false
+                    }
                   }
                 },
                 "required": [
@@ -528,6 +992,11 @@
           },
           "required": true
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "201": {
             "description": "Default Response",
@@ -537,16 +1006,13 @@
                   "type": "object",
                   "properties": {
                     "id": {
-                      "type": "string",
-                      "pattern": "^[cC][^\\s-]{8,}$"
+                      "type": "string"
                     },
                     "name": {
-                      "type": "string",
-                      "minLength": 3
+                      "type": "string"
                     },
                     "email": {
                       "type": "string",
-                      "format": "email",
                       "nullable": true
                     },
                     "phone": {
@@ -571,8 +1037,7 @@
                       "type": "string",
                       "enum": [
                         "ACTIVE",
-                        "INACTIVE",
-                        "REMOVED"
+                        "INACTIVE"
                       ]
                     },
                     "notes": {
@@ -590,6 +1055,25 @@
                     "updatedAt": {
                       "type": "string",
                       "format": "date-time"
+                    },
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name"
+                        ],
+                        "additionalProperties": false
+                      }
                     }
                   },
                   "required": [
@@ -604,7 +1088,62 @@
                     "notes",
                     "image",
                     "createdAt",
-                    "updatedAt"
+                    "updatedAt",
+                    "groups"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
                   ],
                   "additionalProperties": false
                 }
@@ -623,12 +1162,16 @@
         "parameters": [
           {
             "schema": {
-              "type": "string",
-              "pattern": "^[cC][^\\s-]{8,}$"
+              "type": "string"
             },
             "in": "path",
             "name": "id",
             "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
           }
         ],
         "responses": {
@@ -640,16 +1183,13 @@
                   "type": "object",
                   "properties": {
                     "id": {
-                      "type": "string",
-                      "pattern": "^[cC][^\\s-]{8,}$"
+                      "type": "string"
                     },
                     "name": {
-                      "type": "string",
-                      "minLength": 3
+                      "type": "string"
                     },
                     "email": {
                       "type": "string",
-                      "format": "email",
                       "nullable": true
                     },
                     "phone": {
@@ -674,8 +1214,7 @@
                       "type": "string",
                       "enum": [
                         "ACTIVE",
-                        "INACTIVE",
-                        "REMOVED"
+                        "INACTIVE"
                       ]
                     },
                     "notes": {
@@ -693,6 +1232,25 @@
                     "updatedAt": {
                       "type": "string",
                       "format": "date-time"
+                    },
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name"
+                        ],
+                        "additionalProperties": false
+                      }
                     }
                   },
                   "required": [
@@ -707,7 +1265,62 @@
                     "notes",
                     "image",
                     "createdAt",
-                    "updatedAt"
+                    "updatedAt",
+                    "groups"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
                   ],
                   "additionalProperties": false
                 }
@@ -720,7 +1333,7 @@
         "tags": [
           "members"
         ],
-        "description": "Atualiza um membro existente",
+        "description": "Atualiza um membro",
         "requestBody": {
           "content": {
             "application/json": {
@@ -728,8 +1341,7 @@
                 "type": "object",
                 "properties": {
                   "name": {
-                    "type": "string",
-                    "minLength": 3
+                    "type": "string"
                   },
                   "email": {
                     "type": "string",
@@ -742,19 +1354,16 @@
                     "type": "string"
                   },
                   "birthDate": {
-                    "type": "string",
-                    "format": "date-time"
+                    "type": "string"
                   },
                   "baptismDate": {
-                    "type": "string",
-                    "format": "date-time"
+                    "type": "string"
                   },
                   "status": {
                     "type": "string",
                     "enum": [
                       "ACTIVE",
-                      "INACTIVE",
-                      "REMOVED"
+                      "INACTIVE"
                     ],
                     "default": "ACTIVE"
                   },
@@ -763,6 +1372,21 @@
                   },
                   "image": {
                     "type": "string"
+                  },
+                  "groups": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "additionalProperties": false
+                    }
                   }
                 },
                 "additionalProperties": false
@@ -773,12 +1397,16 @@
         "parameters": [
           {
             "schema": {
-              "type": "string",
-              "pattern": "^[cC][^\\s-]{8,}$"
+              "type": "string"
             },
             "in": "path",
             "name": "id",
             "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
           }
         ],
         "responses": {
@@ -790,16 +1418,13 @@
                   "type": "object",
                   "properties": {
                     "id": {
-                      "type": "string",
-                      "pattern": "^[cC][^\\s-]{8,}$"
+                      "type": "string"
                     },
                     "name": {
-                      "type": "string",
-                      "minLength": 3
+                      "type": "string"
                     },
                     "email": {
                       "type": "string",
-                      "format": "email",
                       "nullable": true
                     },
                     "phone": {
@@ -824,8 +1449,7 @@
                       "type": "string",
                       "enum": [
                         "ACTIVE",
-                        "INACTIVE",
-                        "REMOVED"
+                        "INACTIVE"
                       ]
                     },
                     "notes": {
@@ -843,6 +1467,25 @@
                     "updatedAt": {
                       "type": "string",
                       "format": "date-time"
+                    },
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name"
+                        ],
+                        "additionalProperties": false
+                      }
                     }
                   },
                   "required": [
@@ -857,7 +1500,62 @@
                     "notes",
                     "image",
                     "createdAt",
-                    "updatedAt"
+                    "updatedAt",
+                    "groups"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
                   ],
                   "additionalProperties": false
                 }
@@ -875,26 +1573,152 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[cC][^\\s-]{8,}$"
+              "minLength": 1
             },
             "in": "path",
             "name": "id",
             "required": true
           }
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
-          "200": {
-            "description": "Default Response"
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": false,
+                  "description": "No Content"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
           }
         }
       }
     },
-    "/system/health": {
-      "get": {
+    "/uploads": {
+      "post": {
         "tags": [
-          "system"
+          "uploads"
         ],
-        "description": "Verifica o status do servidor",
+        "description": "Faz upload de uma imagem",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {}
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Default Response",
@@ -903,41 +1727,17 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "type": "string"
+                    "url": {
+                      "type": "string",
+                      "format": "uri"
                     },
-                    "timestamp": {
+                    "publicId": {
                       "type": "string"
-                    },
-                    "version": {
-                      "type": "string"
-                    },
-                    "memory": {
-                      "type": "object",
-                      "properties": {
-                        "rss": {
-                          "type": "number"
-                        },
-                        "heapTotal": {
-                          "type": "number"
-                        },
-                        "heapUsed": {
-                          "type": "number"
-                        }
-                      },
-                      "required": [
-                        "rss",
-                        "heapTotal",
-                        "heapUsed"
-                      ],
-                      "additionalProperties": false
                     }
                   },
                   "required": [
-                    "status",
-                    "timestamp",
-                    "version",
-                    "memory"
+                    "url",
+                    "publicId"
                   ],
                   "additionalProperties": false
                 }
@@ -946,33 +1746,1839 @@
           }
         }
       }
+    },
+    "/uploads/{publicId}": {
+      "delete": {
+        "tags": [
+          "uploads"
+        ],
+        "description": "Remove uma imagem do Cloudinary",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "publicId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "enum": [
+                    "null"
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/system/info": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "description": "Obtém informações do sistema",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    },
+                    "uptime": {
+                      "type": "number"
+                    },
+                    "memory": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number"
+                        },
+                        "free": {
+                          "type": "number"
+                        },
+                        "used": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "free",
+                        "used"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "cpu": {
+                      "type": "object",
+                      "properties": {
+                        "model": {
+                          "type": "string"
+                        },
+                        "cores": {
+                          "type": "number"
+                        },
+                        "speed": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "model",
+                        "cores",
+                        "speed"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "os": {
+                      "type": "object",
+                      "properties": {
+                        "platform": {
+                          "type": "string"
+                        },
+                        "release": {
+                          "type": "string"
+                        },
+                        "arch": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "platform",
+                        "release",
+                        "arch"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "version",
+                    "uptime",
+                    "memory",
+                    "cpu",
+                    "os"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/system/church": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "description": "Obtém as configurações da igreja",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 3
+                    },
+                    "address": {
+                      "type": "string"
+                    },
+                    "phone": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "logo": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "theme": {
+                      "type": "string",
+                      "enum": [
+                        "light",
+                        "dark"
+                      ],
+                      "default": "light"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "default": "America/Sao_Paulo"
+                    },
+                    "dateFormat": {
+                      "type": "string",
+                      "default": "DD/MM/YYYY"
+                    },
+                    "timeFormat": {
+                      "type": "string",
+                      "default": "HH:mm"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "system"
+        ],
+        "description": "Atualiza as configurações da igreja",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "address": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "logo": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "theme": {
+                    "type": "string",
+                    "enum": [
+                      "light",
+                      "dark"
+                    ],
+                    "default": "light"
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "default": "America/Sao_Paulo"
+                  },
+                  "dateFormat": {
+                    "type": "string",
+                    "default": "DD/MM/YYYY"
+                  },
+                  "timeFormat": {
+                    "type": "string",
+                    "default": "HH:mm"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 3
+                    },
+                    "address": {
+                      "type": "string"
+                    },
+                    "phone": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "logo": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "theme": {
+                      "type": "string",
+                      "enum": [
+                        "light",
+                        "dark"
+                      ],
+                      "default": "light"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "default": "America/Sao_Paulo"
+                    },
+                    "dateFormat": {
+                      "type": "string",
+                      "default": "DD/MM/YYYY"
+                    },
+                    "timeFormat": {
+                      "type": "string",
+                      "default": "HH:mm"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups": {
+      "get": {
+        "tags": [
+          "groups"
+        ],
+        "description": "Lista grupos com paginação e filtros",
+        "parameters": [
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "default": 1
+            },
+            "in": "query",
+            "name": "page",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "search",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CELL",
+                "MINISTRY",
+                "DEPARTMENT",
+                "OTHER"
+              ]
+            },
+            "in": "query",
+            "name": "type",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "type",
+                "createdAt"
+              ],
+              "default": "name"
+            },
+            "in": "query",
+            "name": "sortBy",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            },
+            "in": "query",
+            "name": "order",
+            "required": false
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "CELL",
+                              "MINISTRY",
+                              "DEPARTMENT",
+                              "OTHER"
+                            ]
+                          },
+                          "meetingDay": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "startTime": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "endTime": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "location": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "members": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "member": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "email": {
+                                      "type": "string"
+                                    },
+                                    "phone": {
+                                      "type": "string",
+                                      "nullable": true
+                                    },
+                                    "avatar": {
+                                      "type": "string",
+                                      "nullable": true
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name",
+                                    "email",
+                                    "phone",
+                                    "avatar"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "groupId": {
+                                  "type": "string"
+                                },
+                                "memberId": {
+                                  "type": "string"
+                                },
+                                "role": {
+                                  "type": "string",
+                                  "enum": [
+                                    "LEADER",
+                                    "MEMBER"
+                                  ]
+                                },
+                                "joinedAt": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                },
+                                "updatedAt": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                }
+                              },
+                              "required": [
+                                "member",
+                                "groupId",
+                                "memberId",
+                                "role",
+                                "joinedAt",
+                                "updatedAt"
+                              ],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "description",
+                          "type",
+                          "meetingDay",
+                          "startTime",
+                          "endTime",
+                          "location",
+                          "createdAt",
+                          "updatedAt",
+                          "members"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "number"
+                        },
+                        "limit": {
+                          "type": "number"
+                        },
+                        "totalItems": {
+                          "type": "number"
+                        },
+                        "totalPages": {
+                          "type": "number"
+                        },
+                        "hasNextPage": {
+                          "type": "boolean"
+                        },
+                        "hasPreviousPage": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "page",
+                        "limit",
+                        "totalItems",
+                        "totalPages",
+                        "hasNextPage",
+                        "hasPreviousPage"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "groups"
+        ],
+        "description": "Cria um novo grupo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "CELL",
+                      "MINISTRY",
+                      "DEPARTMENT",
+                      "OTHER"
+                    ]
+                  },
+                  "meetingDay": {
+                    "type": "string"
+                  },
+                  "startTime": {
+                    "type": "string",
+                    "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "endTime": {
+                    "type": "string",
+                    "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "members": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "memberId": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "LEADER",
+                            "MEMBER"
+                          ],
+                          "default": "MEMBER"
+                        }
+                      },
+                      "required": [
+                        "memberId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "type"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "CELL",
+                        "MINISTRY",
+                        "DEPARTMENT",
+                        "OTHER"
+                      ]
+                    },
+                    "meetingDay": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "startTime": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "endTime": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "location": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "members": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "member": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "email": {
+                                "type": "string"
+                              },
+                              "phone": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "email",
+                              "phone",
+                              "avatar"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "groupId": {
+                            "type": "string"
+                          },
+                          "memberId": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "LEADER",
+                              "MEMBER"
+                            ]
+                          },
+                          "joinedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "member",
+                          "groupId",
+                          "memberId",
+                          "role",
+                          "joinedAt",
+                          "updatedAt"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "type",
+                    "meetingDay",
+                    "startTime",
+                    "endTime",
+                    "location",
+                    "createdAt",
+                    "updatedAt",
+                    "members"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/{id}": {
+      "get": {
+        "tags": [
+          "groups"
+        ],
+        "description": "Obtém um grupo por ID",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "CELL",
+                        "MINISTRY",
+                        "DEPARTMENT",
+                        "OTHER"
+                      ]
+                    },
+                    "meetingDay": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "startTime": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "endTime": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "location": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "members": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "member": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "email": {
+                                "type": "string"
+                              },
+                              "phone": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "email",
+                              "phone",
+                              "avatar"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "groupId": {
+                            "type": "string"
+                          },
+                          "memberId": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "LEADER",
+                              "MEMBER"
+                            ]
+                          },
+                          "joinedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "member",
+                          "groupId",
+                          "memberId",
+                          "role",
+                          "joinedAt",
+                          "updatedAt"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "type",
+                    "meetingDay",
+                    "startTime",
+                    "endTime",
+                    "location",
+                    "createdAt",
+                    "updatedAt",
+                    "members"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "groups"
+        ],
+        "description": "Atualiza um grupo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "CELL",
+                      "MINISTRY",
+                      "DEPARTMENT",
+                      "OTHER"
+                    ]
+                  },
+                  "meetingDay": {
+                    "type": "string"
+                  },
+                  "startTime": {
+                    "type": "string",
+                    "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "endTime": {
+                    "type": "string",
+                    "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "members": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "memberId": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "LEADER",
+                            "MEMBER"
+                          ],
+                          "default": "MEMBER"
+                        }
+                      },
+                      "required": [
+                        "memberId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "CELL",
+                        "MINISTRY",
+                        "DEPARTMENT",
+                        "OTHER"
+                      ]
+                    },
+                    "meetingDay": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "startTime": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "endTime": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "location": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "members": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "member": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "email": {
+                                "type": "string"
+                              },
+                              "phone": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "email",
+                              "phone",
+                              "avatar"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "groupId": {
+                            "type": "string"
+                          },
+                          "memberId": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "LEADER",
+                              "MEMBER"
+                            ]
+                          },
+                          "joinedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "member",
+                          "groupId",
+                          "memberId",
+                          "role",
+                          "joinedAt",
+                          "updatedAt"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "type",
+                    "meetingDay",
+                    "startTime",
+                    "endTime",
+                    "location",
+                    "createdAt",
+                    "updatedAt",
+                    "members"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "groups"
+        ],
+        "description": "Remove um grupo",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Grupo removido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": false,
+                  "description": "Grupo removido com sucesso"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/{id}/members": {
+      "post": {
+        "tags": [
+          "groups"
+        ],
+        "description": "Adiciona um membro ao grupo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "memberId": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "LEADER",
+                      "MEMBER"
+                    ],
+                    "default": "MEMBER"
+                  }
+                },
+                "required": [
+                  "memberId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "member": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "phone": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "email",
+                        "phone",
+                        "avatar"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "groupId": {
+                      "type": "string"
+                    },
+                    "memberId": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "LEADER",
+                        "MEMBER"
+                      ]
+                    },
+                    "joinedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "member",
+                    "groupId",
+                    "memberId",
+                    "role",
+                    "joinedAt",
+                    "updatedAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/{id}/members/{memberId}": {
+      "delete": {
+        "tags": [
+          "groups"
+        ],
+        "description": "Remove um membro do grupo",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "memberId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": false,
+                  "description": "No Content"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          }
+        }
+      }
     }
-  },
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
-  "tags": [
-    {
-      "name": "auth",
-      "description": "Autenticação e autorização"
-    },
-    {
-      "name": "members",
-      "description": "Gerenciamento de membros"
-    },
-    {
-      "name": "groups",
-      "description": "Gerenciamento de grupos"
-    },
-    {
-      "name": "events",
-      "description": "Gerenciamento de eventos"
-    },
-    {
-      "name": "system",
-      "description": "Sistema e monitoramento"
-    }
-  ]
+  }
 }

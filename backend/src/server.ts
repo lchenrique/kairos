@@ -11,7 +11,11 @@ import { systemRoutes } from './routes/system'
 import { uploadRoutes } from './routes/uploads'
 import { groupRoutes } from './routes/groups'
 import { env } from './config/env'
-import { eventRoutes } from './routes/events'
+// import { eventRoutes } from './routes/events'
+
+import { writeFileSync } from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 // Tipos do Fastify
 declare module 'fastify' {
@@ -22,9 +26,9 @@ declare module 'fastify' {
 
 declare module '@fastify/jwt' {
   interface FastifyJWT {
-    payload: { 
+    payload: {
       sub: string
-      name: string 
+      name: string
       email: string
       iat?: number
       exp?: number
@@ -36,6 +40,8 @@ declare module '@fastify/jwt' {
     }
   }
 }
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 const app = Fastify({
   logger: {
@@ -75,41 +81,39 @@ app.setSerializerCompiler(serializerCompiler)
 
 // Swagger
 await app.register(fastifySwagger, {
-  swagger: {
+  openapi: {
+    openapi: '3.0.0',
     info: {
       title: 'Kairos API',
       description: 'API do sistema Kairos para gestão de membros, grupos e eventos',
       version: '1.0.0'
     },
-    securityDefinitions: {
-      bearerAuth: {
-        type: 'apiKey',
-        name: 'Authorization',
-        in: 'header'
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
       }
-    },
-    consumes: ['application/json'],
-    produces: ['application/json']
+    }
   },
   transform: jsonSchemaTransform
 })
 
 await app.register(fastifySwaggerUi, {
-  routePrefix: '/docs',
-  transformSpecification: (swaggerObject) => {
-    return swaggerObject
-  },
+  routePrefix: '/docs'
 })
 
 // Autenticação
-app.decorate('authenticate', async function(request: FastifyRequest, reply: FastifyReply) {
+app.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
   try {
     const payload = await request.jwtVerify<{
       sub: string
       name: string
       email: string
     }>()
-    
+
     request.user = {
       sub: payload.sub,
       name: payload.name,
@@ -129,7 +133,7 @@ app.register(memberRoutes, { prefix: '/members' })
 app.register(uploadRoutes, { prefix: '/uploads' })
 app.register(systemRoutes, { prefix: '/system' })
 app.register(groupRoutes, { prefix: '/groups' })
-app.register(eventRoutes, { prefix: '/events' })
+// app.register(eventRoutes, { prefix: '/events' })
 
 // Start
 try {
@@ -140,3 +144,15 @@ try {
   app.log.error(err)
   process.exit(1)
 }
+
+app.ready(() => {
+  const swagger = app.swagger()
+  try {
+    writeFileSync(
+      path.resolve(__dirname, '../swagger.json'),
+      JSON.stringify(swagger, null, 2)
+    )
+  } catch (err) {
+    console.error('Error writing swagger.json:', err)
+  }
+})

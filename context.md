@@ -1,103 +1,146 @@
 # Kairos - Contexto do Desenvolvimento
 
-## Última Sessão (01/12/2023)
+## Última Sessão (06/12/2023)
 
 ### Estado Atual do Backend
 
-#### Autenticação e Setup
+#### Implementado e Testado 
+
+##### Autenticação e Setup
 - Sistema de autenticação completo com JWT
 - Proteção de rotas implementada
 - Setup inicial com dados da igreja
 - Recuperação de senha funcionando
+- Testes de API passando
 
-#### Gestão de Membros
+##### Gestão de Membros
 - CRUD completo implementado
-- Dados pessoais, contatos, datas importantes
+- Dados pessoais e contatos
 - Filtros por status, grupo e data
-- Histórico de participação em eventos e grupos
-- Deleção em cascade funcionando
+- Testes de API passando
+  - Criação
+  - Listagem e filtros
+  - Atualização
+  - Deleção
 
-#### Grupos e Células
+##### Grupos e Células
 - Cadastro completo com validações
-- Sistema avançado de agendamento:
-  - Prevenção de conflitos de horário
-  - Suporte a grupos simultâneos em salas diferentes
-  - Validação de formato HH:mm
-- Associação de membros com roles
-- Deleção em cascade implementada
+- Sistema de agendamento
+- Associação de membros
+- Testes de API passando
+  - CRUD completo
+  - Associação de membros
 
-#### Eventos
-- Criação com título, descrição, data e local
-- Controle de presença e check-in
-- Tipos de evento configuráveis
+#### Em Desenvolvimento 
 
-### Infraestrutura
+##### Eventos
+- API implementada mas não testada
+- Funcionalidades planejadas:
+  - Criação de eventos
+  - Controle de presença
+  - Check-in de participantes
+  - Tipos de evento configuráveis
 
-#### Backend (Node.js)
-- Fastify com TypeScript
-- Prisma ORM com SQLite
-- Autenticação JWT
-- Modularização por domínio:
-  ```
-  backend/
-  ├── src/
-  │   ├── routes/          # Rotas por domínio
-  │   │   ├── auth/        # Autenticação
-  │   │   ├── members/     # Membros
-  │   │   ├── groups/      # Grupos
-  │   │   ├── events/      # Eventos
-  │   │   └── system/      # Sistema
-  │   ├── schemas/         # Schemas Zod
-  │   ├── lib/            # Utilitários
-  │   └── server.ts       # Setup do servidor
-  ├── prisma/
-  │   └── schema.prisma   # Modelo do banco
-  └── package.json
-  ```
+### Estado Atual do Frontend
 
-#### Schemas e Validações
-- Schemas padronizados com Zod
-- Respostas de erro consistentes:
-  ```typescript
-  {
-    statusCode: number
-    error: string
-    message: string
-  }
-  ```
-- Respostas de sucesso padronizadas
-- Paginação implementada
+#### Implementado 
 
-#### Testes
-- Cobertura completa das principais rotas:
-  - Autenticação (registro, login, perfil, senha)
-  - Membros (CRUD completo)
-  - Grupos (CRUD e membros)
-  - Sistema (info e configurações)
-- Testes passando com sucesso
+##### Arquitetura
+- Next.js 14 com App Router
+- TypeScript strict mode
+- Tailwind CSS para estilização
+- shadcn/ui para componentes base
+- Orval para geração de client API
+- Tanstack React Query para cache
+- Zod para validação de formulários
+- Framer Motion para animações
 
-### Ambiente de Desenvolvimento
-- API: http://localhost:3333
-- Banco: SQLite (dev.db)
-- Testes: Jest com supertest
+##### Membros
+- Visualização em tabela e grid
+- Filtros por status
+- Criar novo membro
+- Editar membro
+- Visualizar detalhes
+- Interface parcialmente responsiva
+- Animações e transições
+
+#### Em Desenvolvimento 
+
+##### Membros - UI Pronta (sem integração)
+- Menu de ações
+- Ações em massa
+- Seleção múltipla
+- Deleção de membros
+
+##### Pendente
+- Histórico de participação
+- Integração com grupos
+- Integração com eventos
+- Grupos (interface + integração)
+- Eventos (interface + integração)
+
+#### Estrutura do Projeto
+```
+frontend/
+├── src/
+│   ├── app/              # Páginas do Next.js
+│   │   └── (app)/       # Rotas protegidas
+│   │       ├── members/  # Páginas de membros
+│   │       ├── groups/   # Páginas de grupos
+│   │       └── events/   # Páginas de eventos
+│   ├── components/       # Componentes compartilhados
+│   │   └── ui/          # Componentes base (shadcn)
+│   ├── features/        # Features por domínio
+│   │   ├── members/     # Feature de membros
+│   │   ├── groups/      # Feature de grupos
+│   │   └── events/      # Feature de eventos
+│   ├── lib/            # Utilitários e configurações
+│   │   ├── api/        # Cliente API gerado
+│   │   └── utils/      # Funções utilitárias
+│   └── store/          # Estado global
+```
 
 ### Próximos Passos
-1. Dashboard com visão geral
-2. Relatórios de crescimento e frequência
-3. Gerenciamento de usuários (staff)
-4. Sistema de aniversariantes
 
-### Melhorias Futuras
-- Frequência dos grupos (semanal, quinzenal)
-- Capacidade das salas
-- Exceções para feriados
-- Exportação de relatórios
-- Monitoramento e logs
+#### Backend
+1. Implementar testes de eventos
+2. Adicionar testes unitários
+3. Implementar testes E2E
+4. Melhorar documentação da API
 
-### Padrões do Projeto
-- TypeScript strict mode
-- Schemas Zod em todas as rotas
-- Respostas padronizadas
-- Tratamento de erros consistente
-- Testes automatizados
-- Commits semânticos
+#### Frontend
+1. Implementar funcionalidades de deleção
+2. Integrar ações em massa
+3. Desenvolver interfaces de grupos
+4. Desenvolver interfaces de eventos
+5. Implementar testes
+
+### Considerações Técnicas
+- Manter consistência no uso de tipos
+- Seguir padrões de UI/UX estabelecidos
+- Priorizar performance e acessibilidade
+- Documentar decisões de arquitetura
+
+### Padrões e Boas Práticas
+1. **Código**
+   - TypeScript strict mode
+   - ESLint + Prettier
+   - Conventional Commits
+
+2. **UI/UX**
+   - Design system consistente
+   - Feedback visual claro
+   - Animações sutis
+   - Responsividade
+
+3. **Performance**
+   - Code splitting
+   - Lazy loading
+   - Otimização de imagens
+   - Cache eficiente
+
+4. **Segurança**
+   - Validação de inputs
+   - Sanitização de dados
+   - Proteção de rotas
+   - Tratamento de erros

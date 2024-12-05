@@ -1,19 +1,20 @@
 import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { prisma } from '../../lib/prisma'
-import { type UpdateEventInput, updateEventSchema, eventSchema } from '../../schemas/events'
-import { z } from 'zod'
+import { type UpdateEventInput, updateEventSchema, eventSchema, ParticipantStatusEnum } from '../../schemas/events'
+import { errorResponseSchema, idSchema } from '../../schemas/shared'
 
 export const update: FastifyPluginAsyncZod = async (app) => {
   app.put('/:id', {
     schema: {
       tags: ['events'],
       description: 'Atualiza um evento',
-      params: z.object({
-        id: z.string()
-      }),
+      params: idSchema,
       body: updateEventSchema,
       response: {
-        200: eventSchema
+        200: eventSchema,
+        400: errorResponseSchema,
+        404: errorResponseSchema,
+        500: errorResponseSchema
       },
       security: [{ bearerAuth: [] }]
     }
@@ -29,7 +30,7 @@ export const update: FastifyPluginAsyncZod = async (app) => {
           deleteMany: {},
           create: participants.map(memberId => ({
             memberId,
-            status: 'CONFIRMED'
+            status: ParticipantStatusEnum.enum.CONFIRMED
           }))
         } : undefined
       },

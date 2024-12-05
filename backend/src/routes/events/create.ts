@@ -1,20 +1,32 @@
 import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { prisma } from '../../lib/prisma'
-import { type CreateEventInput, createEventSchema, eventSchema, EVENT_STATUS } from '../../schemas/events'
+import { 
+  type CreateEventInput, 
+  createEventSchema, 
+  eventSchema, 
+  EVENT_STATUS,
+  ParticipantStatusEnum
+} from '../../schemas/events'
+import { errorResponseSchema } from '../../schemas/shared'
 
 export const create: FastifyPluginAsyncZod = async (app) => {
-  app.post('/', {
+  app.post<{
+    Body: CreateEventInput
+  }>('/', {
+    onRequest: [app.authenticate],
     schema: {
       tags: ['events'],
       description: 'Cria um novo evento',
       body: createEventSchema,
       response: {
-        201: eventSchema
+        201: eventSchema,
+        400: errorResponseSchema,
+        500: errorResponseSchema
       },
       security: [{ bearerAuth: [] }]
     }
   }, async (request, reply) => {
-    const { participants, ...eventData } = request.body as CreateEventInput
+    const { participants, ...eventData } = request.body
 
     const event = await prisma.event.create({
       data: {
@@ -23,7 +35,7 @@ export const create: FastifyPluginAsyncZod = async (app) => {
         participants: participants ? {
           create: participants.map(memberId => ({
             memberId,
-            status: 'CONFIRMED'
+            status: ParticipantStatusEnum.enum.CONFIRMED
           }))
         } : undefined
       },

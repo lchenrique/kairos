@@ -1,0 +1,1 @@
+leia os arquvivos task.md e context.md no root do projeto e fale comigo em ptbr

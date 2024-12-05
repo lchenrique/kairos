@@ -1,13 +1,14 @@
 import { z } from 'zod'
+import { paginationSchema, paginationMetaSchema, searchSchema, idSchema } from './shared'
 
-// Enums como const para type safety
-export const EVENT_TYPE = {
-  SERVICE: 'SERVICE',
-  CELL: 'CELL',
-  MINISTRY: 'MINISTRY',
-  OTHER: 'OTHER'
-} as const
+// Enums
+export const EventTypeEnum = z.enum(['SERVICE', 'CELL', 'MINISTRY', 'OTHER']).describe('Tipo do evento')
+export const EventStatusEnum = z.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).describe('Status do evento')
+export const ParticipantStatusEnum = z.enum(['CONFIRMED', 'PENDING', 'CANCELLED']).describe('Status do participante')
+export const EventSortByEnum = z.enum(['title', 'startDate', 'type', 'createdAt']).describe('Campo para ordenação')
+export const OrderEnum = z.enum(['asc', 'desc']).describe('Direção da ordenação')
 
+// Constantes
 export const EVENT_STATUS = {
   SCHEDULED: 'SCHEDULED',
   IN_PROGRESS: 'IN_PROGRESS',
@@ -15,81 +16,95 @@ export const EVENT_STATUS = {
   CANCELLED: 'CANCELLED'
 } as const
 
-export const PARTICIPANT_STATUS = {
-  CONFIRMED: 'CONFIRMED',
-  PENDING: 'PENDING',
-  CANCELLED: 'CANCELLED'
-} as const
-
-// Types
-export type EventType = typeof EVENT_TYPE[keyof typeof EVENT_TYPE]
-export type EventStatus = typeof EVENT_STATUS[keyof typeof EVENT_STATUS]
-export type ParticipantStatus = typeof PARTICIPANT_STATUS[keyof typeof PARTICIPANT_STATUS]
-
 // Schema do participante
 export const eventParticipantSchema = z.object({
-  id: z.string(),
-  memberId: z.string(),
-  eventId: z.string(),
-  status: z.string(),
-  createdAt: z.date(),
+  id: z.string().describe('ID do participante'),
+  memberId: z.string().describe('ID do membro'),
+  eventId: z.string().describe('ID do evento'),
+  status: ParticipantStatusEnum,
+  createdAt: z.coerce.date().describe('Data de criação'),
   member: z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string().nullable(),
-    phone: z.string().nullable(),
-    image: z.string().nullable()
-  })
-})
+    id: z.string().describe('ID do membro'),
+    name: z.string().describe('Nome do membro'),
+    email: z.string().nullable().describe('Email do membro'),
+    phone: z.string().nullable().describe('Telefone do membro'),
+    image: z.string().nullable().describe('URL da imagem do membro')
+  }).describe('Dados do membro')
+}).describe('Participante do evento')
 
 // Schema base do evento
 export const eventSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string().nullable(),
-  startDate: z.date(),
-  endDate: z.date().nullable(),
-  location: z.string().nullable(),
-  type: z.string(),
-  status: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  participants: z.array(eventParticipantSchema).optional()
-})
+  id: z.string().describe('ID do evento'),
+  title: z.string().describe('Título do evento'),
+  description: z.string().nullable().describe('Descrição do evento'),
+  startDate: z.coerce.date().describe('Data de início'),
+  endDate: z.coerce.date().nullable().describe('Data de término'),
+  type: EventTypeEnum,
+  status: EventStatusEnum,
+  location: z.string().nullable().describe('Local do evento'),
+  createdAt: z.coerce.date().describe('Data de criação'),
+  updatedAt: z.coerce.date().describe('Data de atualização'),
+  participants: z.array(eventParticipantSchema).describe('Lista de participantes')
+}).describe('Evento')
+
+// Schema base para criação e atualização
+const baseEventSchema = z.object({
+  title: z.string().min(3).describe('Título do evento'),
+  description: z.string().nullable().optional().describe('Descrição do evento'),
+  startDate: z.coerce.date().describe('Data de início'),
+  endDate: z.coerce.date().nullable().optional().describe('Data de término'),
+  type: EventTypeEnum,
+  status: EventStatusEnum.optional().default('SCHEDULED'),
+  location: z.string().nullable().optional().describe('Local do evento'),
+  participants: z.array(z.string()).optional().describe('IDs dos participantes')
+}).describe('Dados base do evento')
+
+// Validação de datas
+const validateEventDates = (data: any) => {
+  if (data.endDate && data.startDate > data.endDate) {
+    return false
+  }
+  return true
+}
 
 // Schema de criação
-export const createEventSchema = z.object({
-  title: z.string().min(3),
-  description: z.string().optional(),
-  startDate: z.date(),
-  endDate: z.date().optional(),
-  location: z.string().optional(),
-  type: z.enum([EVENT_TYPE.SERVICE, EVENT_TYPE.CELL, EVENT_TYPE.MINISTRY, EVENT_TYPE.OTHER]),
-  participants: z.array(z.string()).optional() // Array de IDs dos membros
-})
+export const createEventSchema = baseEventSchema
+  .refine(validateEventDates, { 
+    message: "Data de início deve ser anterior à data de término" 
+  })
+  .describe('Dados para criação de evento')
 
 // Schema de atualização
-export const updateEventSchema = createEventSchema.partial()
+export const updateEventSchema = baseEventSchema
+  .partial()
+  .refine(validateEventDates, { 
+    message: "Data de início deve ser anterior à data de término" 
+  })
+  .describe('Dados para atualização de evento')
 
 // Schema de listagem
 export const listEventsSchema = z.object({
-  page: z.number().min(1).default(1),
-  limit: z.number().min(1).max(100).default(10),
-  search: z.string().optional(),
-  type: z.enum([EVENT_TYPE.SERVICE, EVENT_TYPE.CELL, EVENT_TYPE.MINISTRY, EVENT_TYPE.OTHER]).optional(),
-  status: z.enum([EVENT_STATUS.SCHEDULED, EVENT_STATUS.IN_PROGRESS, EVENT_STATUS.COMPLETED, EVENT_STATUS.CANCELLED]).optional(),
-  startDate: z.date().optional(),
-  endDate: z.date().optional()
-})
+  ...paginationSchema.shape,
+  ...searchSchema.shape,
+  type: EventTypeEnum.optional().describe('Filtrar por tipo'),
+  status: EventStatusEnum.optional().describe('Filtrar por status'),
+  startDate: z.coerce.date().optional().describe('Filtrar por data de início'),
+  endDate: z.coerce.date().optional().describe('Filtrar por data de término'),
+  sortBy: EventSortByEnum.optional().default('startDate'),
+  order: OrderEnum.optional().default('asc')
+}).describe('Parâmetros de listagem de eventos')
 
 // Schema de resposta paginada
 export const paginatedEventsSchema = z.object({
-  items: z.array(eventSchema),
-  total: z.number(),
-  page: z.number(),
-  limit: z.number(),
-  pages: z.number()
-})
+  data: z.array(eventSchema),
+  meta: paginationMetaSchema
+}).describe('Resposta paginada de eventos')
+
+// Schema de participante
+export const participantSchema = z.object({
+  ...idSchema.shape,
+  status: ParticipantStatusEnum.optional().default('PENDING')
+}).describe('Dados do participante')
 
 // Tipos gerados dos schemas
 export type Event = z.infer<typeof eventSchema>

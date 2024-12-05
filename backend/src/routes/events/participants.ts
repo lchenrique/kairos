@@ -1,7 +1,8 @@
 import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { prisma } from '../../lib/prisma'
 import { z } from 'zod'
-import { PARTICIPANT_STATUS, eventParticipantSchema } from '../../schemas/events'
+import { ParticipantStatusEnum, eventParticipantSchema, participantSchema } from '../../schemas/events'
+import { errorResponseSchema, idSchema, noContentResponseSchema } from '../../schemas/shared'
 
 export const participants: FastifyPluginAsyncZod = async (app) => {
   // Atualizar status do participante
@@ -10,14 +11,17 @@ export const participants: FastifyPluginAsyncZod = async (app) => {
       tags: ['events'],
       description: 'Atualiza o status de um participante no evento',
       params: z.object({
-        eventId: z.string(),
-        memberId: z.string()
-      }),
+        ...idSchema.shape,
+        eventId: z.string().describe('ID do evento'),
+        memberId: z.string().describe('ID do membro')
+      }).describe('Parâmetros da rota'),
       body: z.object({
-        status: z.enum([PARTICIPANT_STATUS.CONFIRMED, PARTICIPANT_STATUS.PENDING, PARTICIPANT_STATUS.CANCELLED])
-      }),
+        status: ParticipantStatusEnum
+      }).describe('Dados para atualização de status'),
       response: {
-        200: eventParticipantSchema
+        200: eventParticipantSchema,
+        400: errorResponseSchema,
+        404: errorResponseSchema
       },
       security: [{ bearerAuth: [] }]
     }
@@ -55,20 +59,19 @@ export const participants: FastifyPluginAsyncZod = async (app) => {
       tags: ['events'],
       description: 'Adiciona um participante ao evento',
       params: z.object({
-        eventId: z.string()
-      }),
-      body: z.object({
-        memberId: z.string(),
-        status: z.enum([PARTICIPANT_STATUS.CONFIRMED, PARTICIPANT_STATUS.PENDING, PARTICIPANT_STATUS.CANCELLED]).default(PARTICIPANT_STATUS.CONFIRMED)
-      }),
+        eventId: z.string().describe('ID do evento')
+      }).describe('Parâmetros da rota'),
+      body: participantSchema.describe('Dados do participante'),
       response: {
-        201: eventParticipantSchema
+        201: eventParticipantSchema,
+        400: errorResponseSchema,
+        404: errorResponseSchema
       },
       security: [{ bearerAuth: [] }]
     }
   }, async (request, reply) => {
     const { eventId } = request.params
-    const { memberId, status } = request.body
+    const { memberId, status = ParticipantStatusEnum.enum.CONFIRMED } = request.body
 
     const participant = await prisma.eventParticipant.create({
       data: {
@@ -98,9 +101,14 @@ export const participants: FastifyPluginAsyncZod = async (app) => {
       tags: ['events'],
       description: 'Remove um participante do evento',
       params: z.object({
-        eventId: z.string(),
-        memberId: z.string()
-      }),
+        eventId: z.string().describe('ID do evento'),
+        memberId: z.string().describe('ID do membro')
+      }).describe('Parâmetros da rota'),
+      response: {
+        204: noContentResponseSchema,
+        400: errorResponseSchema,
+        404: errorResponseSchema
+      },
       security: [{ bearerAuth: [] }]
     }
   }, async (request, reply) => {

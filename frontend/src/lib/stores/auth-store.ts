@@ -23,16 +23,22 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       login: (user, token) => {
+        console.log('Login chamado com token:', !!token)
         setAuthCookie(token)
         set({ user, token, isAuthenticated: true })
       },
       logout: () => {
+        console.log('Logout chamado')
         removeAuthCookie()
         set({ user: null, token: null, isAuthenticated: false })
       },
     }),
     {
       name: 'auth-storage',
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated
+      })
     }
   )
 )

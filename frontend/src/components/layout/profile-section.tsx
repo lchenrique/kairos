@@ -14,6 +14,7 @@ import { useAuthStore } from "@/lib/stores/auth-store"
 import { LogOut, Settings, User } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 interface ProfileSectionProps {
   isCollapsed?: boolean
@@ -28,19 +29,27 @@ export function ProfileSection({ isCollapsed = false }: ProfileSectionProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.6 }}
-      className="border-t p-4"
+      className="px-4"
     >
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button 
             variant="ghost" 
-            className={`w-full justify-start gap-2 relative group ${isCollapsed ? "justify-center" : ""}`}
+            className={cn(
+              "w-full relative group overflow-hidden",
+              isCollapsed ? "justify-center" : "justify-start gap-3"
+            )}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg" />
-            <Avatar className="h-6 w-6">
-              <AvatarImage src={`https://avatar.vercel.sh/${user?.email}`} />
-              <AvatarFallback>{user?.name?.[0] || "A"}</AvatarFallback>
-            </Avatar>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-primary/30 rounded-full blur opacity-0 group-hover:opacity-75 transition-opacity" />
+              <Avatar className="relative h-8 w-8 border-2 border-background">
+                <AvatarImage src={`https://avatar.vercel.sh/${user?.email}`} />
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {user?.name?.[0] || "A"}
+                </AvatarFallback>
+              </Avatar>
+            </div>
             <AnimatePresence>
               {!isCollapsed && (
                 <motion.div
@@ -56,21 +65,28 @@ export function ProfileSection({ isCollapsed = false }: ProfileSectionProps) {
             </AnimatePresence>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" side="right">
-          <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+        <DropdownMenuContent className="w-56 bg-card/80 backdrop-blur-lg" align="end" side="right">
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">{user?.name}</p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {user?.email}
+              </p>
+            </div>
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            Perfil
+          <DropdownMenuItem className="gap-2">
+            <User className="h-4 w-4 text-primary" />
+            <span>Perfil</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            Configurações
+          <DropdownMenuItem className="gap-2">
+            <Settings className="h-4 w-4 text-primary" />
+            <span>Configurações</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={logout} className="text-destructive">
-            <LogOut className="mr-2 h-4 w-4" />
-            Sair
+          <DropdownMenuItem onClick={logout} className="gap-2 text-destructive focus:text-destructive">
+            <LogOut className="h-4 w-4" />
+            <span>Sair</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
