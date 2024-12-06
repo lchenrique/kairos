@@ -8,7 +8,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useDrawerStore } from "@/store/use-drawer-store"
+import { useDrawerStore } from "@/lib/stores/drawer-store"
 
 export function Drawer() {
   const { isOpen, title, subtitle, content, close } = useDrawerStore()

@@ -21,7 +21,7 @@ import {
 import type { GetGroups200GroupsItem } from '@/lib/api/generated/model'
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion, AnimatePresence } from "framer-motion"
-import { useDrawerStore } from "@/store/use-drawer-store"
+import { useDrawerStore } from "@/lib/stores/drawer-store"
 import { useState } from "react"
 import { useListGroups } from "../../hooks/use-list-groups"
 import { GroupCard } from "../group-card"

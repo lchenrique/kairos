@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { useDrawerStore } from "@/store/use-drawer-store"
+import { useDrawerStore } from "@/lib/stores/drawer-store"
 import { Users } from "lucide-react"
 
 export function GroupListHeader() {

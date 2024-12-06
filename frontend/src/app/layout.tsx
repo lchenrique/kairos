@@ -4,6 +4,7 @@ import "./globals.css"
 import { Toaster } from "sonner"
 import { QueryProvider } from "@/lib/api/query-client"
 import { Providers } from '@/components/providers/providers'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -23,8 +24,8 @@ export default function RootLayout({
         <QueryProvider>
           <Providers>
             {children}
+            <ReactQueryDevtools initialIsOpen={false} />
           </Providers>
-          <Toaster richColors />
         </QueryProvider>
       </body>
     </html>

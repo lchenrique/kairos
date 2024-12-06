@@ -1,47 +1,56 @@
-"use client"
-
-import { ColumnDef } from "@tanstack/react-table"
-import { GetMembers200DataItem } from "@/lib/api/generated/model"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { 
-  MoreHorizontalIcon, 
-  PencilIcon, 
-  Trash2Icon, 
-  EyeIcon,
-  UserIcon,
-  CheckIcon,
-  XIcon,
-  UsersIcon,
-  UserPlusIcon,
-  UserMinusIcon
-} from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { ColumnDef } from "@tanstack/react-table"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import type { GetMembers200DataItem as Member } from "@/lib/api/generated/model/getMembers200DataItem"
+import { Badge } from "@/components/ui/badge"
+import { MoreHorizontal, Trash, Eye, Pencil } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { format } from "date-fns"
-import { ptBR } from "date-fns/locale"
-import { useDrawerStore } from "@/store/use-drawer-store"
-import { MemberForm } from "../../components/member-form/form"
-import { MemberView } from "../../components/member-view/view"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getGetMembersQueryKey, useDeleteMembersId } from "@/lib/api/generated/members/members"
+import { useToast } from "@/components/ui/use-toast"
+import { useQueryClient } from "@tanstack/react-query"
+import { useModalStore } from "@/lib/stores/modal-store"
+import { DialogFooter } from "@/components/ui/dialog"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { formatPhone, formatDate } from "@/lib/utils"
+import { useDrawerStore } from "@/lib/stores/drawer-store"
+import { MemberForm } from "../member-form/form"
+import { MemberView } from "../member-view/view"
+import { useMemberActions } from "@/features/members/hooks/use-member-actions"
 
-export const columns: ColumnDef<GetMembers200DataItem>[] = [
+export const columns: ColumnDef<Member>[] = [
+  {
+    id: "select",
+    enableSorting: false,
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Selecionar todos"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Selecionar linha"
+      />
+    ),
+  },
   {
     accessorKey: "name",
     header: "Nome",
+    enableSorting: true,
     cell: ({ row }) => {
       const member = row.original
-
       return (
         <div className="flex items-center gap-2">
           <Avatar>
@@ -51,7 +60,7 @@ export const columns: ColumnDef<GetMembers200DataItem>[] = [
               className="object-cover"
             />
             <AvatarFallback>
-              <UserIcon className="h-4 w-4 text-muted-foreground" />
+              {member.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
@@ -60,21 +69,30 @@ export const columns: ColumnDef<GetMembers200DataItem>[] = [
           </div>
         </div>
       )
-    }
+    },
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
+    enableSorting: true,
+    cell: ({ row }) => row.original.email
   },
   {
     accessorKey: "phone",
     header: "Telefone",
+    enableSorting: false,
     cell: ({ row }) => formatPhone(row.original.phone)
   },
   {
     accessorKey: "birthDate",
     header: "Data de Nascimento",
+    enableSorting: false,
     cell: ({ row }) => formatDate(row.original.birthDate)
   },
   {
     accessorKey: "baptismDate",
     header: "Data de Batismo",
+    enableSorting: false,
     cell: ({ row }) => {
       const baptismDate = row.original.baptismDate
       if (!baptismDate) return "Não informada"
@@ -84,6 +102,7 @@ export const columns: ColumnDef<GetMembers200DataItem>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    enableSorting: false,
     cell: ({ row }) => {
       const status = row.original.status
 
@@ -95,54 +114,43 @@ export const columns: ColumnDef<GetMembers200DataItem>[] = [
     }
   },
   {
+    accessorKey: "createdAt",
+    header: "Data de Cadastro",
+    enableSorting: true,
+    cell: ({ row }) => formatDate(row.original.createdAt)
+  },
+  {
     id: "actions",
     cell: ({ row }) => {
       const member = row.original
-      const open = useDrawerStore((state) => state.open)
-
-      const handleEdit = () => {
-        open({
-          title: "Editar Membro",
-          subtitle: "Edite os dados do membro",
-          content: <MemberForm initialData={member} />
-        })
-      }
-
-      const handleView = () => {
-        open({
-          title: "Detalhes do Membro",
-          subtitle: "Visualize os dados do membro",
-          content: <MemberView member={member} />
-        })
-      }
+      const { handleDelete, handleEdit, handleView } = useMemberActions(member)
 
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir menu</span>
-              <MoreHorizontalIcon className="h-4 w-4" />
+            <Button variant="ghost" size="icon">
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleView}>
-              <EyeIcon className="mr-2 h-4 w-4" />
-              <span>Visualizar</span>
+              <Eye className="mr-2 h-4 w-4" />
+              Visualizar
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleEdit}>
-              <PencilIcon className="mr-2 h-4 w-4" />
-              <span>Editar</span>
+              <Pencil className="mr-2 h-4 w-4" />
+              Editar
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              <Trash2Icon className="mr-2 h-4 w-4" />
-              <span>Excluir</span>
+            <DropdownMenuItem 
+              onClick={handleDelete}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash className="mr-2 h-4 w-4" />
+              Excluir
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
-    },
-  },
+    }
+  }
 ]

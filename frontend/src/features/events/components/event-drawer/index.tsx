@@ -1,7 +1,7 @@
 "use client"
 
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
-import { useDrawerStore } from "@/store/use-drawer-store"
+import { useDrawerStore } from "@/lib/stores/drawer-store"
 import { EventForm } from "./form"
 import type { GetEvents200EventsItem } from "@/lib/api/generated/model"
 

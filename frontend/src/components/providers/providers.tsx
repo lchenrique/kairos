@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ThemeProvider } from "./theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { Drawer } from "@/components/ui/drawer"
+import { Modal } from "../modal"
 
 const queryClient = new QueryClient()
 
@@ -18,6 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       >
         {children}
         <Drawer />
+        <Modal />
         <Toaster />
       </ThemeProvider>
     </QueryClientProvider>

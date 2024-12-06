@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { MemberListFilters } from "@/features/members/components/member-list/filters"
 import { MemberList } from "@/features/members/components/member-list"
 import { useGetMembers } from "@/lib/api/generated/members/members"
-import { useState } from "react"
-import { useDrawerStore } from "@/store/use-drawer-store"
+import { useState, useEffect } from "react"
 import { PlusIcon } from "lucide-react"
 import { Users, UserPlus, UserMinus, CalendarClock, TrendingUp as TrendingUpIcon, TrendingDown as TrendingDownIcon } from "lucide-react"
 import { motion } from "framer-motion"
@@ -14,6 +13,8 @@ import { MemberForm } from "@/features/members/components/member-form/form"
 import { PageHeader } from "@/components/shared/page-header"
 import { MemberStats } from "@/features/members/components/stats/member-stats"
 import { useSearchParams } from "next/navigation"
+import { GetMembersOrder, GetMembersSortBy } from "@/lib/api/generated/model"
+import { useDrawerStore } from "@/lib/stores/drawer-store"
 
 const container = {
   hidden: { opacity: 0 },
@@ -37,17 +38,49 @@ export default function MembersPage() {
   const { open } = useDrawerStore()
   const searchParams = useSearchParams()
   const limit = Number(searchParams.get('limit') ?? '10')
+  const sortBy = searchParams.get('sortBy') as GetMembersSortBy | null
+  const order = searchParams.get('order') as GetMembersOrder | null
 
-  const { data: membersResponse, isLoading } = useGetMembers({
+  console.log('Members Query Params:', {
+    page: Number(searchParams.get('page') ?? '1'),
+    limit,
+    search,
+    status,
+    sortBy,
+    order
+  })
+
+  const { 
+    data: membersResponse, 
+    isLoading, 
+    refetch 
+  } = useGetMembers({
     page: Number(searchParams.get('page') ?? '1'),
     limit,
     ...(search ? { search } : {}),
-    ...(status ? { status } : {})
+    ...(status ? { status } : {}),
+    ...(sortBy ? { sortBy } : {}),
+    ...(order ? { order } : {})
   }, {
     query: {
       refetchOnWindowFocus: false
     }
   })
+
+  // Adiciona efeito para refetch quando a view mudar
+  useEffect(() => {
+    // Reseta o limite para o padrão da view
+    const defaultLimit = view === 'grid' ? 12 : 10
+    
+    // Atualiza a URL com o novo limite
+    const newSearchParams = new URLSearchParams(searchParams.toString())
+    newSearchParams.set('limit', defaultLimit.toString())
+    newSearchParams.set('page', '1') // Reset para primeira página
+    window.history.replaceState(null, '', `?${newSearchParams.toString()}`)
+
+    // Força refetch
+    refetch()
+  }, [view])
 
   const handleNewMember = () => {
     open({
@@ -55,6 +88,19 @@ export default function MembersPage() {
       subtitle: "Preencha os dados do novo membro",
       content: <MemberForm />
     })
+  }
+
+  const handlePageChange = (page: number) => {
+    const newSearchParams = new URLSearchParams(searchParams.toString())
+    newSearchParams.set('page', page.toString())
+    window.history.pushState(null, '', `?${newSearchParams.toString()}`)
+  }
+
+  const handlePageSizeChange = (pageSize: number) => {
+    const newSearchParams = new URLSearchParams(searchParams.toString())
+    newSearchParams.set('limit', pageSize.toString())
+    newSearchParams.set('page', '1') // Reset to first page when changing page size
+    window.history.pushState(null, '', `?${newSearchParams.toString()}`)
   }
 
   return (
@@ -104,6 +150,8 @@ export default function MembersPage() {
                   total: membersResponse?.meta.totalItems ?? 0,
                   limit
                 }}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
               />
             </div>
           </CardContent>

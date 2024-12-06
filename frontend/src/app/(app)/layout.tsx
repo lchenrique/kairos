@@ -8,6 +8,10 @@ import { Input } from "@/components/ui/input"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/lib/stores/auth-store"
+import { Toaster } from "@/components/ui/toaster"
+import { Modal } from "@/components/modal"
+import { Drawer } from "@/components/drawer"
+import { useModalStore } from "@/lib/stores/modal-store"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
@@ -111,9 +115,10 @@ export default function AppLayout({
           </div>
         </div>
 
-        <main className="p-6">
+        <div className="flex-1 space-y-4 p-8 pt-6">
           {children}
-        </main>
+        </div>
+      
       </div>
     </div>
   )

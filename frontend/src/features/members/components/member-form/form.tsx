@@ -20,13 +20,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { MaskedInput } from "@/components/ui/masked-input"
 import { Loader2 } from "lucide-react"
 import type { GetMembers200DataItem, PostMembersBody } from "@/lib/api/generated/model"
-import { useDrawerStore } from "@/store/use-drawer-store"
+import { useDrawerStore } from "@/lib/stores/drawer-store"
 import { memberFormSchema } from "./schema"
 import { useCreateMember } from "../../hooks/use-create-member"
 import { useUpdateMember } from "../../hooks/use-update-member"
 import { CalendarDate, parseDate } from "@internationalized/date"
 import { useQueryClient } from "@tanstack/react-query"
-import { get } from "http"
 import { getGetMembersQueryKey } from "@/lib/api/generated/members/members"
 
 interface MemberFormProps {
@@ -59,27 +58,21 @@ export function MemberForm({ initialData, id }: MemberFormProps) {
     },
   })
 
-  const invalidateQueries = async () => {
-    await queryClient.invalidateQueries({ queryKey: getGetMembersQueryKey() })
-  }
-
   const onSubmit = async (values: PostMembersBody) => {
     try {
       if (initialData) {
         await updateMember.mutateAsync({
           id: initialData.id,
           data: values
-        },
-          {
-            onSuccess: invalidateQueries
-          })
+        })
       } else {
         await createMember.mutateAsync({
           data: values
-        }, {
-          onSuccess: invalidateQueries
         })
       }
+
+      await queryClient.invalidateQueries({ queryKey: getGetMembersQueryKey() })
+    
       closeDrawer()
     } catch {
       // Error já é tratado nos hooks

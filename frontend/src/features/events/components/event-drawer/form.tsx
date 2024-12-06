@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useDrawerStore } from "@/store/use-drawer-store"
+import { useDrawerStore } from "@/lib/stores/drawer-store"
 import { eventFormSchema } from "./schema"
 import type { GetEvents200EventsItem } from "@/lib/api/generated/model"
 import { useCreateEvent } from "../../hooks/use-create-event"

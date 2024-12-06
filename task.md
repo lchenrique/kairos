@@ -17,16 +17,8 @@
   - [x] Contatos
 - [x] Listagem com filtros
   - [x] Por status
-  - [x] Por grupo
-  - [x] Por data
-- [ ] Histórico de participação
-  - [ ] Eventos
-  - [ ] Grupos
-- [ ] Deleção com cascade
-- [ ] Ações em massa (UI implementada)
-  - [ ] Ativar/Desativar
-  - [ ] Adicionar/Remover de grupos
-  - [ ] Excluir
+  - [x] Por texto
+  - [x] Persistência via URL
 - [x] Interface implementada
   - [x] Visualizar detalhes
   - [x] Criar novo membro
@@ -34,7 +26,15 @@
   - [x] Menu de ações com ícones
   - [x] Visualização em tabela e grid
   - [x] Animações e transições
-- [ ] Aniversariantes
+  - [x] Hook de ações centralizado
+  - [x] Padrões de interação consistentes
+- [x] Ações em massa
+  - [x] Seleção múltipla
+  - [x] Ativar/desativar
+  - [x] Excluir
+- [ ] Ordenação nas colunas da tabela
+- [ ] Exportação para CSV
+- [ ] Aniversariantes (pós-MVP)
 
 ### 3. Grupos/Células 
 - [ ] Cadastro de grupos
@@ -49,46 +49,80 @@
   - [ ] Definição de líderes
   - [ ] Histórico de participação
   - [ ] Deleção com cascade
-- [ ] Relatórios
-  - [ ] Frequência
-  - [ ] Crescimento
 
 ### 4. Eventos 
-- [ ] Criação de eventos
-  - [ ] Título e descrição
-  - [ ] Data e hora
+- [ ] Cadastro de eventos
+  - [ ] Nome e descrição
+  - [ ] Data e horário
   - [ ] Local
-  - [ ] Tipo de evento
-- [ ] Check-in
+  - [ ] Tipo (culto, reunião, treinamento)
+- [ ] Check-in de participantes
   - [ ] QR Code
   - [ ] Lista manual
 - [ ] Relatórios
   - [ ] Presença
-  - [ ] Crescimento
+  - [ ] Estatísticas
 
-### 5. Dashboard
-- [x] Estatísticas gerais
-  - [x] Total de membros
-  - [x] Membros ativos/inativos
-  - [x] Grupos ativos
-- [ ] Gráficos
-  - [ ] Crescimento mensal
-  - [ ] Distribuição por status
-  - [ ] Frequência em eventos
-- [ ] Alertas
-  - [ ] Aniversariantes do mês
-  - [ ] Membros inativos
-  - [ ] Eventos próximos
+### 5. Financeiro 
+- [ ] Entradas
+  - [ ] Dízimos
+  - [ ] Ofertas
+  - [ ] Doações
+- [ ] Saídas
+  - [ ] Despesas fixas
+  - [ ] Despesas variáveis
+  - [ ] Investimentos
+- [ ] Relatórios
+  - [ ] Balanço
+  - [ ] Fluxo de caixa
+  - [ ] Gráficos
 
-### 6. Configurações
-- [x] Dados da igreja
-  - [x] Nome e CNPJ
-  - [x] Endereço
-  - [x] Contatos
-- [ ] Customização
-  - [ ] Logo
-  - [ ] Cores
-  - [ ] Idioma
+### 6. Comunicação 
+- [ ] Notificações
+  - [ ] Email
+  - [ ] SMS
+  - [ ] Push
+- [ ] Templates
+  - [ ] Aniversário
+  - [ ] Eventos
+  - [ ] Comunicados
+
+## Progresso Atual
+
+### Componentes de Membros
+- [x] Criação de formulário de membros
+- [x] Listagem de membros com grid e tabela
+- [x] Componente de cartão de membro
+- [x] Filtros de membros
+- [x] Paginação flexível
+- [x] Integração com backend para CRUD de membros
+- [x] Hook de ações centralizado
+- [x] Padrões de interação consistentes
+
+### Componentes de UI
+- [x] Grid genérico com paginação
+- [x] Componentes de card reutilizáveis
+- [x] Animações com Framer Motion
+- [x] Tema dark/light
+- [x] Componentes de formulário dinâmicos
+
+### Próximas Etapas
+- [ ] Implementar gestão de grupos/ministérios
+- [ ] Adicionar relatórios e estatísticas
+- [ ] Desenvolver sistema de eventos
+- [ ] Aprimorar autenticação e permissões
+- [ ] Otimizar performance e carregamento
+
+## Desafios Técnicos Resolvidos
+- Sincronização de estado com React Query
+- Renderização flexível de componentes
+- Gerenciamento de estado global
+- Tipagem segura com TypeScript
+
+## Melhorias Contínuas
+- Refatoração de componentes para maior reusabilidade
+- Otimização de performance
+- Testes unitários e de integração
 
 ## Infraestrutura
 
@@ -134,7 +168,7 @@
     - [x] Formulário de cadastro
     - [x] Formulário de edição
     - [x] Visualização de detalhes
-    - [ ] Deleção
+    - [x] Deleção
     - [ ] Ações em massa (UI implementada)
   - [ ] Grupos
     - [ ] Listagem com grid/tabela
@@ -148,9 +182,9 @@
     - [ ] Check-in de participantes
 - [x] Componentes reutilizáveis
   - [x] DataTable com seleção múltipla
-  - [x] Filtros dinâmicos
-  - [x] Cards de estatísticas
-  - [x] Formulários dinâmicos
+  - [x] Componentes de card reutilizáveis
+  - [x] Animações com Framer Motion
+  - [x] Tema dark/light
 - [x] UI/UX
   - [x] Design system consistente
   - [x] Feedback visual (loading/erro)
@@ -170,3 +204,112 @@
   - [ ] GitHub Actions
   - [ ] Deploy automático
   - [ ] Testes automáticos
+  - [ ] Monitoramento
+
+## Tarefas do Projeto Kairos
+
+## Em Andamento
+- [x] Setup inicial do projeto
+  - [x] Configuração do Next.js 14
+  - [x] Configuração do TypeScript
+  - [x] Configuração do TailwindCSS
+  - [x] Configuração do ESLint
+  - [x] Configuração do Prettier
+  - [x] Configuração do Jest
+  - [x] Configuração do Cypress
+
+- [x] Autenticação
+  - [x] Implementação do JWT
+  - [x] Proteção de rotas
+  - [x] Páginas de login/registro
+  - [x] Middleware de autenticação
+  - [x] Refresh token
+
+- [x] Layout Base
+  - [x] Sidebar responsiva
+  - [x] Header com perfil
+  - [x] Dark mode
+  - [x] Tema customizado
+  - [x] Animações suaves
+  - [x] Breadcrumbs
+
+- [x] Gerenciamento de Membros
+  - [x] CRUD completo
+  - [x] Listagem com grid/tabela
+  - [x] Filtros e ordenação
+  - [x] Paginação
+  - [x] Pesquisa
+  - [x] Upload de foto
+  - [x] Validação de formulários
+  - [x] Feedback visual (toasts)
+  - [x] Confirmação de ações
+  - [x] Drawer para edição/visualização
+  - [x] Card de membro com design moderno
+  - [x] Hook personalizado para ações do membro
+  - [x] Controle granular de estilos
+  - [x] Mix de estilos próprios e do design system
+
+## Próximos Passos
+- [ ] Gerenciamento de Grupos
+  - [ ] CRUD de grupos
+  - [ ] Associação de membros
+  - [ ] Hierarquia de grupos
+  - [ ] Permissões por grupo
+
+- [ ] Gerenciamento de Eventos
+  - [ ] Calendário de eventos
+  - [ ] Criação/edição de eventos
+  - [ ] Inscrição em eventos
+  - [ ] Lembretes e notificações
+  - [ ] Relatórios de presença
+
+- [ ] Financeiro
+  - [ ] Registro de dízimos/ofertas
+  - [ ] Controle de despesas
+  - [ ] Relatórios financeiros
+  - [ ] Gráficos e dashboards
+
+- [ ] Comunicação
+  - [ ] Sistema de mensagens
+  - [ ] Notificações push
+  - [ ] E-mails automáticos
+  - [ ] Anúncios internos
+
+- [ ] Relatórios e Analytics
+  - [ ] Dashboard geral
+  - [ ] Relatórios customizados
+  - [ ] Exportação de dados
+  - [ ] Gráficos e métricas
+
+## Melhorias Técnicas
+- [ ] Design System
+  - [x] Componentes base shadcn/ui
+  - [x] Estilos personalizados quando necessário
+  - [x] Controle granular de temas
+  - [ ] Documentação de componentes
+  - [ ] Guia de estilos
+  - [ ] Storybook
+
+- [ ] Testes
+  - [ ] Testes unitários
+  - [ ] Testes de integração
+  - [ ] Testes e2e
+  - [ ] Cobertura de testes
+
+- [ ] Performance
+  - [ ] Otimização de imagens
+  - [ ] Lazy loading
+  - [ ] Code splitting
+  - [ ] Caching
+
+- [ ] DevOps
+  - [ ] CI/CD
+  - [ ] Docker
+  - [ ] Monitoramento
+  - [ ] Logs
+
+- [ ] Segurança
+  - [ ] Audit de dependências
+  - [ ] Rate limiting
+  - [ ] CORS
+  - [ ] Sanitização de inputs

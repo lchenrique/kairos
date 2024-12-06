@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useDrawerStore } from "@/store/use-drawer-store"
+import { useDrawerStore } from "@/lib/stores/drawer-store"
 import { groupFormSchema } from "./schema"
 import type { GetGroups200GroupsItem } from "@/lib/api/generated/model"
 import { useCreateGroup } from "../../hooks/use-create-group"
