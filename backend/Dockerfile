@@ -15,4 +15,4 @@ RUN mkdir -p /app/data
 COPY --from=build /app /app
 ENV NODE_ENV=production
 EXPOSE 3333
-CMD ["pnpm", "--filter", "@kairos/backend", "start"]
+CMD ["node", "/app/backend/dist/server.js"]
