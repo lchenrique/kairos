@@ -15,4 +15,4 @@ RUN mkdir -p /app/data
 COPY --from=build /app /app
 ENV NODE_ENV=production
 EXPOSE 3333
-CMD ["sh", "-c", "pnpm --filter @kairos/backend migrate:deploy && pnpm --filter @kairos/backend start"]
+CMD ["pnpm", "--filter", "@kairos/backend", "start"]
