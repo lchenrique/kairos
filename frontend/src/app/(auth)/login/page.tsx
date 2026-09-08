@@ -283,6 +283,17 @@ function LoginPage() {
                 >
                   Esqueceu sua senha?
                 </Button>
+                <p className="text-center text-sm text-muted-foreground">
+                  Primeiro acesso?{" "}
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto p-0 font-medium text-primary"
+                    onClick={() => router.push("/setup")}
+                  >
+                    Crie sua Rede
+                  </Button>
+                </p>
               </CardFooter>
             </form>
           </Card>

@@ -8,7 +8,10 @@ let jwt: string | null = null
 
 async function readError(response: Response) {
   const body = await response.json().catch(() => ({})) as { message?: string; code?: string }
-  return new Error(body.message || body.code || `AUTH_CENTRAL_${response.status}`)
+  const error = new Error(body.message || body.code || `AUTH_CENTRAL_${response.status}`) as Error & { status?: number; code?: string }
+  error.status = response.status
+  error.code = body.code
+  return error
 }
 
 export function getAccessToken() { return jwt }

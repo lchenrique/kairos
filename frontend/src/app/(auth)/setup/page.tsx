@@ -11,7 +11,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -38,6 +38,7 @@ import {
   useGetAuthSetupStatus,
   usePostAuthSetup,
 } from "@/lib/api/generated/auth/auth";
+import { signInWithEmail, signUpWithEmail } from "@/lib/auth-central";
 import { useAuthStore } from "@/lib/stores/auth-store";
 
 const setupFormSchema = z
@@ -72,6 +73,7 @@ const benefits = [
 export default function SetupPage() {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
+  const [isRegistering, setIsRegistering] = useState(false);
   const status = useGetAuthSetupStatus({ query: { retry: 1 } });
   const form = useForm<SetupForm>({
     resolver: zodResolver(setupFormSchema),
@@ -121,16 +123,62 @@ export default function SetupPage() {
     },
   });
 
-  function onSubmit(values: SetupForm) {
-    setup.mutate({
-      data: {
-        organizationName: values.organizationName,
-        churchName: values.churchName,
-        adminName: values.adminName,
-        email: values.email,
-        password: values.password,
-      },
-    });
+  async function onSubmit(values: SetupForm) {
+    setIsRegistering(true);
+    try {
+      // The account and password are created by Auth Central. Kairos only
+      // creates the local organization/church membership after the JWT is in
+      // memory, so no local password is persisted or used for authentication.
+      try {
+        await signUpWithEmail(values.adminName, values.email, values.password);
+      } catch (error) {
+        // An existing Auth Central account may still finish first setup; the
+        // sign-in below remains the source of truth for the supplied password.
+        const status = (error as Error & { status?: number }).status;
+        if (
+          status !== 409 &&
+          !/already|exists|duplicate|cadastrad/i.test(
+            error instanceof Error ? error.message : "",
+          )
+        ) {
+          throw error;
+        }
+      }
+      await signInWithEmail(values.email, values.password);
+      await setup.mutateAsync({
+        data: {
+          organizationName: values.organizationName,
+          churchName: values.churchName,
+          adminName: values.adminName,
+          email: values.email,
+          password: values.password,
+        },
+      });
+    } catch (error) {
+      const apiError = error as ApiError;
+      const apiCode = apiError.response?.data?.code;
+      if (apiCode === "SETUP_ALREADY_COMPLETED") return;
+      if (
+        (apiError.response?.status === 409 && apiCode !== "INVALID_SETUP_NAME") ||
+        /already|exists|duplicate|cadastrad/i.test(
+          error instanceof Error ? error.message : "",
+        )
+      ) {
+        toast.error(
+          "Este e-mail já está cadastrado. Confira a senha ou entre pela tela de login.",
+        );
+      } else if (apiError.response?.status === 401) {
+        toast.error("A sessão de autenticação expirou. Tente novamente.");
+      } else {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Não foi possível concluir a configuração.",
+        );
+      }
+    } finally {
+      setIsRegistering(false);
+    }
   }
 
   if (status.isPending) {
@@ -386,9 +434,9 @@ export default function SetupPage() {
                   <Button
                     className="h-11 w-full"
                     type="submit"
-                    disabled={setup.isPending}
+                    disabled={setup.isPending || isRegistering}
                   >
-                    {setup.isPending ? (
+                    {setup.isPending || isRegistering ? (
                       <>
                         <Loader2
                           className="mr-2 h-4 w-4 animate-spin"

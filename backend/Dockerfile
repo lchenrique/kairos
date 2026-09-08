@@ -16,4 +16,4 @@ RUN mkdir -p /app/data
 COPY --from=build /app /app
 ENV NODE_ENV=production
 EXPOSE 3333
-CMD ["node", "/app/backend/dist/server.js"]
+CMD ["sh", "-c", "pnpm --filter @kairos/backend migrate:deploy && exec node /app/backend/dist/server.js"]

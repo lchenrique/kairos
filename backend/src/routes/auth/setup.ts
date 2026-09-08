@@ -1,8 +1,7 @@
 import { Prisma } from '@prisma/client'
-import bcrypt from 'bcrypt'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
+import { verifyAuthCentralJwt } from '../../lib/auth-central.js'
 import { prisma } from '../../lib/prisma.js'
-import { setSessionCookie } from '../../lib/session-cookie.js'
 import {
   type InitialSetupInput,
   UserRoleEnum,
@@ -53,12 +52,30 @@ export const setup: FastifyPluginAsyncZod = async (app) => {
         body: initialSetupSchema,
         response: {
           201: authResponseSchema,
+          401: errorResponseSchema,
           409: errorResponseSchema,
         },
       },
     },
     async (request, reply) => {
       const input = request.body as InitialSetupInput
+
+      const authorization = request.headers.authorization
+      const bearerToken = authorization?.startsWith('Bearer ')
+        ? authorization.slice('Bearer '.length).trim()
+        : ''
+      let claims: Awaited<ReturnType<typeof verifyAuthCentralJwt>>
+      try {
+        if (!bearerToken) throw new Error('MISSING_BEARER_TOKEN')
+        claims = await verifyAuthCentralJwt(bearerToken)
+      } catch (_error) {
+        return reply.status(401).send({
+          statusCode: 401,
+          error: 'Unauthorized',
+          code: 'AUTH_CENTRAL_SESSION_REQUIRED',
+          message: 'Crie ou acesse sua conta pelo Auth Central antes de configurar o Kairos.',
+        })
+      }
 
       if (!(await setupIsAvailable())) {
         return reply.status(409).send({
@@ -79,8 +96,6 @@ export const setup: FastifyPluginAsyncZod = async (app) => {
           message: 'Informe nomes válidos para a Rede e a igreja sede.',
         })
       }
-
-      const hashedPassword = await bcrypt.hash(input.password, 10)
 
       try {
         const created = await prisma.$transaction(async (tx) => {
@@ -106,9 +121,12 @@ export const setup: FastifyPluginAsyncZod = async (app) => {
           })
           const user = await tx.user.create({
             data: {
-              name: input.adminName,
-              email: input.email,
-              password: hashedPassword,
+              authCentralSubject: claims.sub,
+              name: claims.name?.trim() || input.adminName,
+              email: claims.email.trim().toLowerCase(),
+              // The password is owned by Auth Central. This legacy column is
+              // intentionally unusable for local authentication.
+              password: 'AUTH_CENTRAL_MANAGED',
               role: 'ADMIN',
             },
           })
@@ -126,16 +144,6 @@ export const setup: FastifyPluginAsyncZod = async (app) => {
 
           return { organization, user }
         })
-
-        const token = await app.jwt.sign({
-          sub: created.user.id,
-          name: created.user.name,
-          email: created.user.email,
-          role: 'ADMIN',
-          organizationId: created.organization.id,
-          sessionVersion: created.user.sessionVersion,
-        })
-        setSessionCookie(reply, token)
 
         return reply.status(201).send({
           user: {
