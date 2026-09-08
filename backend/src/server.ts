@@ -269,7 +269,7 @@ const writeSwaggerFile = () => {
 }
 
 export async function startServer() {
-  await app.listen({ port: env.PORT })
+  await app.listen({ port: env.PORT, host: '0.0.0.0' })
   await app.ready()
   writeSwaggerFile()
   app.log.info(`🚀 Server running at http://localhost:${env.PORT}`)
