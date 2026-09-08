@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim AS build
+FROM node:22-bookworm-slim AS build
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -13,7 +13,7 @@ ENV NEXT_PUBLIC_AUTH_CENTRAL_URL=$NEXT_PUBLIC_AUTH_CENTRAL_URL
 ENV NEXT_PUBLIC_AUTH_CENTRAL_PRODUCT_ID=$NEXT_PUBLIC_AUTH_CENTRAL_PRODUCT_ID
 RUN pnpm --filter @kairos/frontend build
 
-FROM node:20-bookworm-slim AS runtime
+FROM node:22-bookworm-slim AS runtime
 WORKDIR /app
 RUN corepack enable
 COPY --from=build /app /app
