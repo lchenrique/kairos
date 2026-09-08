@@ -28,9 +28,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePostAuthInvitesAccept } from "@/lib/api/generated/auth/auth";
+import { signInWithEmail, signUpWithEmail } from "@/lib/auth-central";
 
 const formSchema = z
   .object({
+    email: z.string().trim().email("Informe o e-mail do convite"),
     password: z.string().min(8, "Use pelo menos 8 caracteres"),
     confirmPassword: z.string().min(1, "Confirme sua senha"),
   })
@@ -46,7 +48,7 @@ function AcceptInviteContent() {
   const [completed, setCompleted] = useState(false);
   const form = useForm<AcceptInviteForm>({
     resolver: zodResolver(formSchema),
-    defaultValues: { password: "", confirmPassword: "" },
+    defaultValues: { email: "", password: "", confirmPassword: "" },
   });
   const acceptInvite = usePostAuthInvitesAccept({
     mutation: {
@@ -104,12 +106,53 @@ function AcceptInviteContent() {
             <Form {...form}>
               <form
                 className="space-y-5"
-                onSubmit={form.handleSubmit((data) =>
-                  acceptInvite.mutate({
-                    data: { token, password: data.password },
-                  }),
-                )}
+                onSubmit={form.handleSubmit(async (data) => {
+                  try {
+                    try {
+                      await signUpWithEmail(data.email.split("@")[0], data.email, data.password);
+                    } catch (error) {
+                      const status = (error as Error & { status?: number }).status;
+                      if (
+                        status !== 409 &&
+                        !/already|exists|duplicate|cadastrad/i.test(
+                          error instanceof Error ? error.message : "",
+                        )
+                      ) {
+                        throw error;
+                      }
+                    }
+                    await signInWithEmail(data.email, data.password);
+                    await acceptInvite.mutateAsync({
+                      data: { token, password: data.password },
+                    });
+                  } catch (error) {
+                    toast.error(
+                      error instanceof Error
+                        ? error.message
+                        : "Não foi possível ativar o convite.",
+                    );
+                  }
+                })}
               >
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>E-mail do convite</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          autoComplete="email"
+                          autoFocus
+                          placeholder="voce@igreja.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="password"
@@ -120,7 +163,6 @@ function AcceptInviteContent() {
                         <Input
                           type="password"
                           autoComplete="new-password"
-                          autoFocus
                           {...field}
                         />
                       </FormControl>
