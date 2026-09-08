@@ -9,8 +9,11 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Kairos",
-  description: "Sistema de Gestão para Igrejas",
+  title: {
+    default: "Kairos | cuidado que continua",
+    template: "%s | Kairos",
+  },
+  description: "Uma plataforma simples para cuidar melhor da sua comunidade.",
 }
 
 export default function RootLayout({

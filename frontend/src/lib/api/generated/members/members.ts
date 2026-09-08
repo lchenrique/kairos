@@ -29,6 +29,8 @@ import type {
   GetMembersId200,
   GetMembersId404,
   GetMembersId500,
+  GetMembersIdParticipation200Item,
+  GetMembersIdParticipation404,
   GetMembersParams,
   PostMembers201,
   PostMembers400,
@@ -768,3 +770,290 @@ export const useDeleteMembersId = <
 
   return useMutation(mutationOptions);
 };
+/**
+ * Histórico de participação do membro em eventos
+ */
+export const getMembersIdParticipation = (id: string, signal?: AbortSignal) => {
+  return customInstance<GetMembersIdParticipation200Item[]>({
+    url: `/members/${id}/participation`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetMembersIdParticipationQueryKey = (id: string) => {
+  return [`/members/${id}/participation`] as const;
+};
+
+export const getGetMembersIdParticipationInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof getMembersIdParticipation>>>,
+  TError = GetMembersIdParticipation404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getMembersIdParticipation>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetMembersIdParticipationQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMembersIdParticipation>>
+  > = ({ signal }) => getMembersIdParticipation(id, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseInfiniteQueryOptions<
+    Awaited<ReturnType<typeof getMembersIdParticipation>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetMembersIdParticipationInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMembersIdParticipation>>
+>;
+export type GetMembersIdParticipationInfiniteQueryError =
+  GetMembersIdParticipation404;
+
+export function useGetMembersIdParticipationInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getMembersIdParticipation>>>,
+  TError = GetMembersIdParticipation404,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getMembersIdParticipation>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMembersIdParticipation>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetMembersIdParticipationInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getMembersIdParticipation>>>,
+  TError = GetMembersIdParticipation404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getMembersIdParticipation>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMembersIdParticipation>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetMembersIdParticipationInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getMembersIdParticipation>>>,
+  TError = GetMembersIdParticipation404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getMembersIdParticipation>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+
+export function useGetMembersIdParticipationInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getMembersIdParticipation>>>,
+  TError = GetMembersIdParticipation404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getMembersIdParticipation>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+} {
+  const queryOptions = getGetMembersIdParticipationInfiniteQueryOptions(
+    id,
+    options,
+  );
+
+  const query = useInfiniteQuery(queryOptions) as UseInfiniteQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getGetMembersIdParticipationQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMembersIdParticipation>>,
+  TError = GetMembersIdParticipation404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMembersIdParticipation>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetMembersIdParticipationQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMembersIdParticipation>>
+  > = ({ signal }) => getMembersIdParticipation(id, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMembersIdParticipation>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetMembersIdParticipationQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMembersIdParticipation>>
+>;
+export type GetMembersIdParticipationQueryError = GetMembersIdParticipation404;
+
+export function useGetMembersIdParticipation<
+  TData = Awaited<ReturnType<typeof getMembersIdParticipation>>,
+  TError = GetMembersIdParticipation404,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMembersIdParticipation>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMembersIdParticipation>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetMembersIdParticipation<
+  TData = Awaited<ReturnType<typeof getMembersIdParticipation>>,
+  TError = GetMembersIdParticipation404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMembersIdParticipation>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMembersIdParticipation>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetMembersIdParticipation<
+  TData = Awaited<ReturnType<typeof getMembersIdParticipation>>,
+  TError = GetMembersIdParticipation404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMembersIdParticipation>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetMembersIdParticipation<
+  TData = Awaited<ReturnType<typeof getMembersIdParticipation>>,
+  TError = GetMembersIdParticipation404,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMembersIdParticipation>>,
+        TError,
+        TData
+      >
+    >;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetMembersIdParticipationQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}

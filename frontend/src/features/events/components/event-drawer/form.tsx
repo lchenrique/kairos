@@ -1,8 +1,9 @@
-"use client"
+"use client";
 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Button } from "@/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -10,84 +11,109 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { useDrawerStore } from "@/lib/stores/drawer-store"
-import { eventFormSchema } from "./schema"
-import type { GetEvents200EventsItem } from "@/lib/api/generated/model"
-import { useCreateEvent } from "../../hooks/use-create-event"
-import { useUpdateEvent } from "../../hooks/use-update-event"
-import type { z } from "zod"
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import type {
+  GetEvents200DataItem,
+  PostEventsBody,
+} from "@/lib/api/generated/model";
+import { useDrawerStore } from "@/lib/stores/drawer-store";
+import { useCreateEvent } from "../../hooks/use-create-event";
+import { useUpdateEvent } from "../../hooks/use-update-event";
+import { eventFormSchema } from "./schema";
 
 interface EventFormProps {
-  initialData?: GetEvents200EventsItem
-  id?: string
+  initialData?: GetEvents200DataItem;
+  id?: string;
 }
 
-type FormData = z.infer<typeof eventFormSchema>
+type FormData = z.infer<typeof eventFormSchema>;
 
 const eventTypes = [
-  { value: "WORSHIP", label: "Culto" },
-  { value: "PRAYER", label: "Oração" },
-  { value: "STUDY", label: "Estudo" },
-  { value: "FELLOWSHIP", label: "Comunhão" },
+  { value: "SERVICE", label: "Culto" },
+  { value: "CELL", label: "Célula" },
+  { value: "MINISTRY", label: "Ministério" },
   { value: "OTHER", label: "Outro" },
-]
+];
 
-const eventStatus = [
-  { value: "SCHEDULED", label: "Agendado" },
-  { value: "IN_PROGRESS", label: "Em andamento" },
-  { value: "COMPLETED", label: "Concluído" },
-  { value: "CANCELLED", label: "Cancelado" },
-]
+const toDateTimeInput = (date?: string | null) =>
+  date ? new Date(date).toISOString().slice(0, 16) : "";
+
+const toDateInput = (date?: string | null) =>
+  date ? new Date(date).toISOString().slice(0, 10) : "";
 
 export function EventForm({ initialData, id }: EventFormProps) {
-  const close = useDrawerStore((state) => state.close)
-  const { mutate: createEvent, isPending: isCreating } = useCreateEvent()
-  const { mutate: updateEvent, isPending: isUpdating } = useUpdateEvent(id ?? "")
-
+  const close = useDrawerStore((state) => state.close);
+  const { mutate: createEvent, isPending: isCreating } = useCreateEvent();
+  const { mutate: updateEvent, isPending: isUpdating } = useUpdateEvent(
+    id ?? "",
+  );
   const form = useForm<FormData>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
-      name: initialData?.name ?? "",
+      title: initialData?.title ?? "",
       description: initialData?.description ?? "",
       status: initialData?.status ?? "SCHEDULED",
-      startDate: initialData?.startDate ?? "",
-      endDate: initialData?.endDate ?? "",
+      startDate: toDateTimeInput(initialData?.startDate),
+      endDate: toDateTimeInput(initialData?.endDate),
       location: initialData?.location ?? "",
-      organizer: initialData?.organizer ?? "",
-      maxParticipants: initialData?.maxParticipants ?? undefined,
       type: initialData?.type ?? "OTHER",
-      notes: initialData?.notes ?? "",
+      participants:
+        initialData?.participants.map((participant) => participant.memberId) ??
+        [],
+      recurrenceRule: initialData?.recurrenceRule ?? null,
+      recurrenceEndDate: toDateInput(initialData?.recurrenceEndDate),
+      recurrenceExceptionsText:
+        initialData?.recurrenceExceptions
+          .map((exception) => toDateInput(exception))
+          .join("\n") ?? "",
+      reminderMinutes: initialData?.reminderMinutes ?? null,
     },
-  })
+  });
+  const recurrenceRule = form.watch("recurrenceRule");
 
-  const onSubmit = (data: FormData) => {
-    if (initialData) {
-      updateEvent(data)
-    } else {
-      createEvent(data)
-    }
-    close()
-  }
+  const onSubmit = (values: FormData) => {
+    const { recurrenceExceptionsText, ...fields } = values;
+    const recurrenceExceptions = recurrenceExceptionsText
+      ?.split(/[\n,]/)
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .map((value) => new Date(`${value}T00:00:00`).toISOString());
+
+    const data: PostEventsBody = {
+      ...fields,
+      description: values.description || null,
+      endDate: values.endDate || null,
+      location: values.location || null,
+      recurrenceEndDate:
+        values.recurrenceRule && values.recurrenceEndDate
+          ? new Date(`${values.recurrenceEndDate}T23:59:59.999`).toISOString()
+          : null,
+      recurrenceExceptions: values.recurrenceRule ? recurrenceExceptions : [],
+    };
+
+    if (initialData) updateEvent(data);
+    else createEvent({ data });
+    close();
+  };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="name"
+          name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nome</FormLabel>
+              <FormLabel>Título</FormLabel>
               <FormControl>
                 <Input placeholder="Nome do evento" {...field} />
               </FormControl>
@@ -95,7 +121,6 @@ export function EventForm({ initialData, id }: EventFormProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="description"
@@ -104,9 +129,10 @@ export function EventForm({ initialData, id }: EventFormProps) {
               <FormLabel>Descrição</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Descrição do evento"
+                  placeholder="O que sua equipe precisa saber?"
                   className="resize-none"
                   {...field}
+                  value={field.value ?? ""}
                 />
               </FormControl>
               <FormMessage />
@@ -114,20 +140,17 @@ export function EventForm({ initialData, id }: EventFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
             name="type"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Tipo</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione o tipo" />
+                      <SelectValue />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -142,43 +165,37 @@ export function EventForm({ initialData, id }: EventFormProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="status"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Status</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione o status" />
+                      <SelectValue />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {eventStatus.map((status) => (
-                      <SelectItem key={status.value} value={status.value}>
-                        {status.label}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="SCHEDULED">Agendado</SelectItem>
+                    <SelectItem value="IN_PROGRESS">Em andamento</SelectItem>
+                    <SelectItem value="COMPLETED">Concluído</SelectItem>
+                    <SelectItem value="CANCELLED">Cancelado</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
             name="startDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Data de início</FormLabel>
+                <FormLabel>Início</FormLabel>
                 <FormControl>
                   <Input type="datetime-local" {...field} />
                 </FormControl>
@@ -186,15 +203,18 @@ export function EventForm({ initialData, id }: EventFormProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="endDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Data de término</FormLabel>
+                <FormLabel>Fim</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -209,59 +229,10 @@ export function EventForm({ initialData, id }: EventFormProps) {
             <FormItem>
               <FormLabel>Local</FormLabel>
               <FormControl>
-                <Input placeholder="Local do evento" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="organizer"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Organizador</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nome do organizador" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="maxParticipants"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Máximo de participantes</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Ex: 100"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Observações</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Observações sobre o evento"
-                  className="resize-none"
+                <Input
+                  placeholder="Auditório, sala ou endereço"
                   {...field}
+                  value={field.value ?? ""}
                 />
               </FormControl>
               <FormMessage />
@@ -269,15 +240,111 @@ export function EventForm({ initialData, id }: EventFormProps) {
           )}
         />
 
-        <div className="flex justify-end gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="recurrenceRule"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Recorrência</FormLabel>
+                <Select
+                  value={field.value ?? "NONE"}
+                  onValueChange={(value) =>
+                    field.onChange(value === "NONE" ? null : value)
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="NONE">Não se repete</SelectItem>
+                    <SelectItem value="WEEKLY">Toda semana</SelectItem>
+                    <SelectItem value="MONTHLY">Todo mês</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="reminderMinutes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Lembrete</FormLabel>
+                <Select
+                  value={field.value ? String(field.value) : "NONE"}
+                  onValueChange={(value) =>
+                    field.onChange(value === "NONE" ? null : Number(value))
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="NONE">Sem lembrete</SelectItem>
+                    <SelectItem value="60">1 hora antes</SelectItem>
+                    <SelectItem value="1440">1 dia antes</SelectItem>
+                    <SelectItem value="10080">1 semana antes</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {recurrenceRule && (
+          <div className="space-y-4 rounded-xl border bg-muted/20 p-4">
+            <FormField
+              control={form.control}
+              name="recurrenceEndDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Repetir até</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="recurrenceExceptionsText"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Datas que não terão encontro</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={"2026-12-25\n2027-01-01"}
+                      className="min-h-20 resize-y font-mono text-sm"
+                      {...field}
+                    />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Use uma data por linha no formato AAAA-MM-DD.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
+        <div className="flex justify-end gap-3 pt-2">
           <Button type="button" variant="outline" onClick={close}>
             Cancelar
           </Button>
           <Button type="submit" disabled={isCreating || isUpdating}>
-            {initialData ? "Salvar" : "Criar"}
+            {initialData ? "Salvar alterações" : "Criar evento"}
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }

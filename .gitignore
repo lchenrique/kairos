@@ -1,2 +1,30 @@
 node_modules
+.pnpm-store
+backups/*.db
+backend/backups/*.db
 instructions.md
+
+# Variáveis e segredos locais
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+
+# Artefatos de build, teste e logs
+.next
+**/.next
+dist
+**/dist
+coverage
+**/coverage
+playwright-report
+test-results
+*.log
+
+# Bancos SQLite locais e arquivos auxiliares
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+!backend/prisma/migrations/**/*.sql

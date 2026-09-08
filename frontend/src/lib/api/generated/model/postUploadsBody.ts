@@ -3,5 +3,6 @@
  */
 
 export type PostUploadsBody = {
-  file?: unknown;
+  /** Arquivo de imagem em formato binário */
+  file?: string;
 };

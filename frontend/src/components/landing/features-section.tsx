@@ -17,7 +17,7 @@ const container = {
 
 export function FeaturesSection() {
   return (
-    <section className="relative py-24">
+    <section id="features" className="relative scroll-mt-20 py-24">
       {/* Background Elements */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
@@ -37,7 +37,7 @@ export function FeaturesSection() {
             Recursos para sua Igreja
           </h2>
           <p className="mx-auto max-w-[700px] text-muted-foreground">
-            Ferramentas poderosas para fortalecer o ministério e expandir o Reino de Deus através da tecnologia.
+            Tudo o que sua equipe precisa para organizar a rotina e cuidar melhor das pessoas.
           </p>
         </motion.div>
 
@@ -53,28 +53,28 @@ export function FeaturesSection() {
             icon="Users"
             title="Gestão de Membros"
             description="Cadastro completo de membros, visitantes e acompanhamento pastoral personalizado."
-            stats="+ 150 membros cadastrados este mês"
+            stats="Cadastro e histórico em um só lugar"
             color="blue"
           />
           <FeatureCard
             icon="Heart"
             title="Ministérios"
             description="Organize equipes, escalas e atividades dos ministérios com eficiência e clareza."
-            stats="12 ministérios ativos"
+            stats="Escalas e responsáveis organizados"
             color="purple"
           />
           <FeatureCard
             icon="Calendar"
             title="Eventos e Cultos"
             description="Agenda integrada de cultos, células e eventos especiais com controle de presença."
-            stats="48 eventos programados"
+            stats="Presença e calendário integrados"
             color="orange"
           />
           <FeatureCard
             icon="BarChart"
             title="Relatórios"
             description="Estatísticas detalhadas de crescimento, frequência e desempenho ministerial."
-            stats="95% de precisão nos dados"
+            stats="Visão clara para decidir"
             color="green"
           />
         </motion.div>

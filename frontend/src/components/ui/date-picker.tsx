@@ -50,7 +50,7 @@ export function DatePickerInput({ label, className, value, onChange }: DatePicke
               )}
             </DateInput>
           </Group>
-          <Button className="z-10 -me-px -ms-9 flex w-9 items-center justify-center rounded-e-lg text-muted-foreground/80 outline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none data-[focus-visible]:outline data-[focus-visible]:outline-2 data-[focus-visible]:outline-ring/70">
+                  <Button className="z-10 -me-px -ms-9 flex w-9 items-center justify-center rounded-e-lg text-muted-foreground/80 outline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none data-[focus-visible]:outline data-[focus-visible]:outline-2 data-[focus-visible]:outline-ring/70">
             <CalendarIcon size={16} strokeWidth={2} />
           </Button>
         </div>
@@ -65,14 +65,14 @@ export function DatePickerInput({ label, className, value, onChange }: DatePicke
             <header className="flex w-full items-center gap-1 pb-1">
               <Button
                 slot="previous"
-                className="flex size-9 items-center justify-center rounded-lg text-muted-foreground/80 outline-offset-2 transition-colors hover:bg-accent hover:text-foreground data-[focus-visible]:outline data-[focus-visible]:outline-2 data-[focus-visible]:outline-ring/70"
+                    className="flex size-9 items-center justify-center rounded-lg text-muted-foreground/80 outline-offset-2 transition-colors hover:bg-accent-hover hover:text-accent-hover-foreground data-[focus-visible]:outline data-[focus-visible]:outline-2 data-[focus-visible]:outline-ring/70"
               >
                 <ChevronLeft size={16} strokeWidth={2} />
               </Button>
               <Heading className="grow text-center text-sm font-medium" />
               <Button
                 slot="next"
-                className="flex size-9 items-center justify-center rounded-lg text-muted-foreground/80 outline-offset-2 transition-colors hover:bg-accent hover:text-foreground data-[focus-visible]:outline data-[focus-visible]:outline-2 data-[focus-visible]:outline-ring/70"
+                    className="flex size-9 items-center justify-center rounded-lg text-muted-foreground/80 outline-offset-2 transition-colors hover:bg-accent-hover hover:text-accent-hover-foreground data-[focus-visible]:outline data-[focus-visible]:outline-2 data-[focus-visible]:outline-ring/70"
               >
                 <ChevronRight size={16} strokeWidth={2} />
               </Button>
@@ -90,7 +90,7 @@ export function DatePickerInput({ label, className, value, onChange }: DatePicke
                   <CalendarCell
                     date={date}
                     className={cn(
-                      "relative flex size-9 items-center justify-center whitespace-nowrap rounded-lg border border-transparent p-0 text-sm font-normal text-foreground outline-offset-2 transition-colors data-[disabled]:pointer-events-none data-[unavailable]:pointer-events-none data-[focus-visible]:z-10 data-[hovered]:bg-accent data-[selected]:bg-primary data-[hovered]:text-foreground data-[selected]:text-primary-foreground data-[unavailable]:line-through data-[disabled]:opacity-30 data-[unavailable]:opacity-30 data-[focus-visible]:outline data-[focus-visible]:outline-2 data-[focus-visible]:outline-ring/70 data-[invalid]:data-[selected][&:not([data-hover])]:bg-destructive data-[invalid]:data-[selected][&:not([data-hover])]:text-destructive-foreground",
+                      "relative flex size-9 items-center justify-center whitespace-nowrap rounded-lg border border-transparent p-0 text-sm font-normal text-foreground outline-offset-2 transition-colors data-[disabled]:pointer-events-none data-[unavailable]:pointer-events-none data-[focus-visible]:z-10 data-[hovered]:bg-accent-hover data-[selected]:bg-primary data-[hovered]:text-accent-hover-foreground data-[selected]:text-primary-foreground data-[unavailable]:line-through data-[disabled]:opacity-30 data-[unavailable]:opacity-30 data-[focus-visible]:outline data-[focus-visible]:outline-2 data-[focus-visible]:outline-ring/70 data-[invalid]:data-[selected][&:not([data-hover])]:bg-destructive data-[invalid]:data-[selected][&:not([data-hover])]:text-destructive-foreground",
                       date.compare(now) === 0 &&
                         "after:pointer-events-none after:absolute after:bottom-1 after:start-1/2 after:z-10 after:size-[3px] after:-translate-x-1/2 after:rounded-full after:bg-primary data-[selected]:after:bg-background",
                     )}

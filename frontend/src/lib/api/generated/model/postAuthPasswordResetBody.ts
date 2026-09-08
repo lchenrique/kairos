@@ -3,7 +3,11 @@
  */
 
 export type PostAuthPasswordResetBody = {
-  /** @minLength 6 */
+  /** @minLength 8 */
   password: string;
+  /**
+   * @minLength 32
+   * @maxLength 128
+   */
   token: string;
 };

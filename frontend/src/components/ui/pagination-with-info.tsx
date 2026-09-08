@@ -69,7 +69,7 @@ export function PaginationWithInfo({
             value={pageSize.toString()} 
             onValueChange={handlePageSizeChange}
           >
-            <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="h-8 w-[70px]" aria-label="Quantidade de registros por página">
               <SelectValue placeholder={pageSize} />
             </SelectTrigger>
             <SelectContent side="top">

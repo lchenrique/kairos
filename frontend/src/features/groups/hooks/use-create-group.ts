@@ -1,15 +1,16 @@
 import { usePostGroups } from "@/lib/api/generated/groups/groups"
-import { useRouter } from "next/navigation"
+import { getGetGroupsQueryKey } from "@/lib/api/generated/groups/groups"
+import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 export function useCreateGroup() {
-  const router = useRouter()
+  const queryClient = useQueryClient()
 
   return usePostGroups({
     mutation: {
       onSuccess: () => {
         toast.success("Grupo criado com sucesso!")
-        router.refresh()
+        queryClient.invalidateQueries({ queryKey: getGetGroupsQueryKey() })
       },
       onError: () => {
         toast.error("Erro ao criar grupo")

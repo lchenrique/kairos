@@ -15,7 +15,7 @@ export function GridWithPagination<T>({
   return (
     <div className="space-y-6">
       <motion.div 
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
         initial="hidden"
         animate="visible"
         variants={{

@@ -6,10 +6,10 @@ import Link from "next/link"
 
 const navigation = {
   links: [
-    { name: 'Recursos', href: '/recursos' },
-    { name: 'Preços', href: '/precos' },
-    { name: 'Sobre', href: '/sobre' },
-    { name: 'Contato', href: '/contato' },
+    { name: 'Recursos', href: '#features' },
+    { name: 'Preços', href: '#pricing' },
+    { name: 'Sobre', href: '#about' },
+    { name: 'Contato', href: '#contact' },
   ],
   social: [
     {

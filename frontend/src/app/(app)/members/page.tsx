@@ -6,7 +6,7 @@ import { MemberListFilters } from "@/features/members/components/member-list/fil
 import { MemberList } from "@/features/members/components/member-list"
 import { useGetMembers } from "@/lib/api/generated/members/members"
 import { useState, useEffect } from "react"
-import { PlusIcon } from "lucide-react"
+import { Download, PlusIcon } from "lucide-react"
 import { Users, UserPlus, UserMinus, CalendarClock, TrendingUp as TrendingUpIcon, TrendingDown as TrendingDownIcon } from "lucide-react"
 import { motion } from "framer-motion"
 import { MemberForm } from "@/features/members/components/member-form/form"
@@ -15,6 +15,8 @@ import { MemberStats } from "@/features/members/components/stats/member-stats"
 import { useSearchParams } from "next/navigation"
 import { GetMembersOrder, GetMembersSortBy } from "@/lib/api/generated/model"
 import { useDrawerStore } from "@/lib/stores/drawer-store"
+import { downloadCsv } from "@/lib/utils/csv"
+import { MemberBirthdays } from "@/features/members/components/member-birthdays"
 
 const container = {
   hidden: { opacity: 0 },
@@ -41,15 +43,6 @@ export default function MembersPage() {
   const sortBy = searchParams.get('sortBy') as GetMembersSortBy | null
   const order = searchParams.get('order') as GetMembersOrder | null
 
-  console.log('Members Query Params:', {
-    page: Number(searchParams.get('page') ?? '1'),
-    limit,
-    search,
-    status,
-    sortBy,
-    order
-  })
-
   const { 
     data: membersResponse, 
     isLoading, 
@@ -66,6 +59,7 @@ export default function MembersPage() {
       refetchOnWindowFocus: false
     }
   })
+  const { data: exportResponse } = useGetMembers({ page: 1, limit: 100, ...(search ? { search } : {}), ...(status ? { status } : {}) }, { query: { refetchOnWindowFocus: false } })
 
   // Adiciona efeito para refetch quando a view mudar
   useEffect(() => {
@@ -80,7 +74,7 @@ export default function MembersPage() {
 
     // Força refetch
     refetch()
-  }, [view])
+  }, [view, refetch, searchParams])
 
   const handleNewMember = () => {
     open({
@@ -111,10 +105,11 @@ export default function MembersPage() {
       animate="show"
     >
       <motion.div 
-        className="flex items-center w-full"
+        className="flex w-full items-center"
         variants={item}
       >
-        <PageHeader title="Membros">
+        <PageHeader routeName="Cuidar" title="Membros" subtitle="Acompanhe pessoas, vínculos e próximos passos da comunidade." breadcrumb={[{ label: "Cuidar" }, { label: "Membros" }]} variant="compact">
+          <Button variant="outline" disabled={!exportResponse?.data.length} onClick={() => downloadCsv("kairos-membros.csv", (exportResponse?.data ?? []).map((member) => ({ Nome: member.name, Email: member.email ?? "", Telefone: member.phone ?? "", Status: member.status, Nascimento: member.birthDate ? new Date(member.birthDate).toLocaleDateString("pt-BR") : "" })))}><Download className="mr-2 h-4 w-4" aria-hidden="true" />Exportar CSV</Button>
           <Button onClick={handleNewMember}>
             <PlusIcon className="mr-2 h-4 w-4" />
             Novo Membro
@@ -123,23 +118,27 @@ export default function MembersPage() {
       </motion.div>
 
       <motion.div variants={item}>
+        <MemberBirthdays members={exportResponse?.data ?? []} />
+      </motion.div>
+
+      <motion.div variants={item}>
         <MemberStats  totalMembers={membersResponse?.meta.totalItems || 0} members={membersResponse?.data || []} />
       </motion.div>
 
       <motion.div variants={item}>
         <Card>
-          <CardHeader>
-            <CardTitle>Lista de Membros</CardTitle>
+          <CardHeader className="p-5 pb-3">
+            <CardTitle className="text-xl">Lista de Membros</CardTitle>
             <CardDescription>Gerencie os membros da sua igreja</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5 pb-5">
             <MemberListFilters 
               view={view} 
               onViewChange={setView}
               onSearch={setSearch}
               onStatusChange={(value) => setStatus(value as "ACTIVE" | "INACTIVE" | null)}
             />
-            <div className="mt-6">
+            <div className="mt-4">
               <MemberList 
                 members={membersResponse?.data ?? []} 
                 view={view} 

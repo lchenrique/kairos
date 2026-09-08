@@ -7,8 +7,8 @@ export const healthcheckResponseSchema = z.object({
   memory: z.object({
     rss: z.number(),
     heapTotal: z.number(),
-    heapUsed: z.number()
-  })
+    heapUsed: z.number(),
+  }),
 })
 
 export type HealthcheckResponse = z.infer<typeof healthcheckResponseSchema>
@@ -24,12 +24,12 @@ export const setupSchema = z.object({
     name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
     email: z.string().email('Email inválido'),
     password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-  })
+  }),
 })
 
 export const setupResponseSchema = z.object({
   success: z.boolean(),
-  message: z.string()
+  message: z.string(),
 })
 
 export type SetupInput = z.infer<typeof setupSchema>

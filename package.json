@@ -2,14 +2,18 @@
   "name": "kairos",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@11.15.1",
   "scripts": {
     "dev": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
     "dev:backend": "cd backend && pnpm run dev",
     "dev:frontend": "cd frontend && pnpm run dev",
-    "build": "pnpm --filter @kairos/backend build",
+    "build": "pnpm -r --if-present run build",
+    "typecheck": "pnpm --filter @kairos/frontend typecheck && pnpm --filter @kairos/backend build",
+    "test": "pnpm --filter @kairos/backend test",
+    "test:e2e": "playwright test",
     "start": "pnpm --filter @kairos/backend start",
     "format": "pnpm --filter @kairos/backend format",
-    "lint": "pnpm --filter @kairos/backend lint",
+    "lint": "pnpm -r --if-present run lint",
     "check": "pnpm --filter @kairos/backend check",
     "clean": "pnpm --filter @kairos/backend clean"
   },
@@ -18,6 +22,8 @@
     "pnpm": ">=8.0.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
     "concurrently": "^9.1.0"
   }
 }

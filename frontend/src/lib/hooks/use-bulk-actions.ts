@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { usePutMembersId, deleteMembers } from '@/lib/api/generated/members/members'
+import { usePutMembersId, deleteMembersId } from '@/lib/api/generated/members/members'
 import { toast } from 'sonner'
 import { getGetMembersQueryKey } from '@/lib/api/generated/members/members'
 
@@ -35,7 +35,7 @@ export function useBulkMemberActions() {
   const bulkDeleteMembers = useMutation({
     mutationFn: async (memberIds: string[]) => {
       const deletePromises = memberIds.map(id => 
-        deleteMembers(id)
+        deleteMembersId(id)
       )
       
       return Promise.all(deletePromises)

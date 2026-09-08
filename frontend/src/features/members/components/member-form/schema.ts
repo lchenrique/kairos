@@ -6,7 +6,7 @@ const dateSchema = z.string().refine((date) => {
   return !isNaN(parsedDate.getTime())
 }, {
   message: "Data inválida"
-}).nullable()
+}).nullable().optional()
 
 const birthDateSchema = dateSchema.refine((date) => {
   if (!date) return true
@@ -32,12 +32,12 @@ export const memberFormSchema = z.object({
   }),
   email: z.string().email({
     message: "Email inválido.",
-  }).nullable(),
-  phone: z.string().nullable(),
+  }).optional(),
+  phone: z.string().optional(),
   birthDate: birthDateSchema,
   status: z.enum(["ACTIVE", "INACTIVE"]).default("ACTIVE"),
   baptismDate: baptismDateSchema,
-  address: z.string().nullable(),
+  address: z.string().optional(),
   notes: z.string().optional(),
   image: z.string().optional(),
 })

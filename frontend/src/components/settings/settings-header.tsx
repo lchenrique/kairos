@@ -3,6 +3,7 @@
 import { Icon } from "@/components/ui/icon"
 import { Button } from "@/components/ui/button"
 import { StatsCards } from "@/components/shared/stats-cards"
+import type { StatsCardProps } from "@/components/shared/stats-cards"
 import { useFormContext } from "react-hook-form"
 import { toast } from "sonner"
 
@@ -12,11 +13,10 @@ export function SettingsHeader() {
   const handleSave = () => {
     form.handleSubmit((data) => {
       toast.success("Configurações salvas com sucesso!")
-      console.log(data)
     })()
   }
 
-  const stats = [
+  const stats: StatsCardProps[] = [
     {
       title: "Total de Configurações",
       value: 7,

@@ -1,228 +1,34 @@
 "use client"
 
-import Link from "next/link"
 import Image from "next/image"
+import Link from "next/link"
+import { motion } from "framer-motion"
+import { ArrowRight, Calendar, Check, Target, Users2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { motion, useScroll, useTransform } from "framer-motion"
-import { 
-  ArrowRight, 
-  PlayCircle, 
-  Users2, 
-  Calendar, 
-  ChevronDown, 
-  Target,
-  Heart,
-  BookOpen,
-  Home
-} from "lucide-react"
-import { useRef } from "react"
 
 export function HeroSection() {
-  const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"]
-  })
-  
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"])
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
-
   return (
-    <motion.section 
-      ref={ref}
-      className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden"
-    >
-      {/* Background Image with Parallax */}
-      <motion.div 
-        style={{ y }}
-        className="absolute inset-0 z-0"
-      >
-        <Image
-          src="https://images.unsplash.com/photo-1510590337019-5ef8d3d32116?auto=format&fit=crop&q=80"
-          alt="Igreja Background"
-          fill
-          className="object-cover brightness-[0.2]"
-          priority
-        />
-      </motion.div>
+    <section className="relative overflow-hidden bg-hero text-hero-foreground">
+      <div className="paper-grid pointer-events-none absolute inset-0 opacity-20" aria-hidden="true" />
+      <div className="pointer-events-none absolute -right-24 -top-32 h-96 w-96 rounded-full border-[48px] border-accent/25" aria-hidden="true" />
+      <div className="container relative grid min-h-[calc(100svh-4rem)] items-center gap-10 py-12 sm:py-14 lg:grid-cols-[0.95fr,1.05fr] lg:gap-12 lg:py-12 xl:py-14">
+        <motion.div className="max-w-2xl space-y-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+          <div className="space-y-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-hero-border/20 bg-hero-foreground/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-hero-foreground/80"><span className="h-1.5 w-1.5 rounded-full bg-hero-accent" aria-hidden="true" />Sistema de cuidado comunitário</span>
+            <h1 className="font-display text-4xl font-medium leading-[0.98] tracking-tight text-hero-foreground sm:text-5xl lg:text-6xl">Mais tempo para cuidar.<span className="mt-2 block text-hero-accent">Menos tempo procurando.</span></h1>
+            <p className="max-w-xl text-sm leading-6 text-hero-muted sm:text-base">Membros, grupos, encontros e decisões importantes em um só lugar, com clareza para quem conduz e acolhimento para quem participa.</p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row"><Button size="lg" className="group bg-hero-accent text-hero-accent-foreground hover:bg-hero-accent/90" asChild><Link href="/login">Conhecer o Kairos<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" /></Link></Button><Button size="lg" variant="outline" className="border-hero-border/25 bg-transparent text-hero-foreground hover:bg-hero-foreground/10 hover:text-hero-foreground" asChild><Link href="#features">Ver como funciona</Link></Button></div>
+          <div className="grid max-w-md grid-cols-3 gap-4 border-t border-hero-border/15 pt-6"><div><p className="font-display text-3xl font-medium">01</p><p className="mt-1 text-xs leading-5 text-hero-muted/75">Uma visão da semana</p></div><div><p className="font-display text-3xl font-medium">02</p><p className="mt-1 text-xs leading-5 text-hero-muted/75">Ações sem ruído</p></div><div><p className="font-display text-3xl font-medium">03</p><p className="mt-1 text-xs leading-5 text-hero-muted/75">Pessoas no centro</p></div></div>
+        </motion.div>
 
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background z-[1]" />
-
-      {/* Content */}
-      <div className="container relative z-10">
-        <div className="grid lg:grid-cols-[1fr,1.1fr] gap-16 items-center">
-          <motion.div 
-            className="space-y-10 text-center lg:text-left max-w-2xl mx-auto lg:mx-0"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="space-y-6">
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="inline-block"
-              >
-                <span className="px-4 py-1.5 rounded-full border border-primary/20 bg-primary/10 text-primary text-sm font-medium">
-                  Sistema de Gestão Ministerial
-                </span>
-              </motion.div>
-
-              <motion.h1 
-                className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl xl:text-7xl"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                Transforme a gestão da sua
-                <span className="block mt-3 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  Igreja Digital
-                </span>
-              </motion.h1>
-
-              <motion.p 
-                className="text-muted-foreground text-lg md:text-xl max-w-xl mx-auto lg:mx-0"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                Simplifique a administração da sua igreja com uma plataforma moderna
-                e intuitiva para gestão de membros, ministérios e eventos.
-              </motion.p>
-            </div>
-            
-            <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <Button size="lg" className="group" asChild>
-                <Link href="/login">
-                  Começar Agora
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="group">
-                <PlayCircle className="mr-2 h-4 w-4" />
-                Ver Demo
-              </Button>
-            </motion.div>
-
-            <motion.div
-              className="flex items-center gap-8 justify-center lg:justify-start text-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-            >
-              <div className="flex flex-col items-center gap-2">
-                <div className="text-3xl font-bold text-primary">1000+</div>
-                <div className="text-muted-foreground">Igrejas Ativas</div>
-              </div>
-              <div className="h-12 w-[1px] bg-border" />
-              <div className="flex flex-col items-center gap-2">
-                <div className="text-3xl font-bold text-primary">50k+</div>
-                <div className="text-muted-foreground">Membros</div>
-              </div>
-              <div className="h-12 w-[1px] bg-border" />
-              <div className="flex flex-col items-center gap-2">
-                <div className="text-3xl font-bold text-primary">99%</div>
-                <div className="text-muted-foreground">Satisfação</div>
-              </div>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            className="relative lg:ml-auto hidden lg:block w-full max-w-5xl"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-          >
-            <div className="relative aspect-[16/9] rounded-xl border shadow-2xl bg-primary">
-              <Image
-                src="/dashboard-exemple.png"
-                alt="Dashboard Preview"
-                fill
-                className="object-contain rounded-xl"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent rounded-xl" />
-            </div>
-              
-            {/* Floating Cards */}
-            <motion.div 
-              className="absolute -right-10 top-12 p-4 rounded-xl bg-card border shadow-lg"
-              initial={{ x: 100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.8 }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Users2 className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Novos Membros</div>
-                  <div className="text-2xl font-bold text-primary">+28%</div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div 
-              className="absolute -left-10 top-12 p-4 rounded-xl bg-card border shadow-lg"
-              initial={{ x: -100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 1 }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Eventos do Mês</div>
-                  <div className="text-2xl font-bold text-primary">48</div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div 
-              className="absolute left-1/2 -translate-x-1/2 -bottom-6 p-4 rounded-xl bg-card border shadow-lg"
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 1.2 }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Target className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Meta Mensal</div>
-                  <div className="text-2xl font-bold text-primary">95%</div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
+        <motion.div className="relative lg:ml-auto lg:w-full lg:max-w-xl" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6, delay: 0.12 }}>
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-hero-border/20 bg-background p-2 shadow-2xl shadow-black/25 sm:p-3"><div className="flex items-center justify-between border-b border-border/70 px-3 pb-3 pt-1"><div className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-accent" /><span className="h-2.5 w-2.5 rounded-full bg-primary/40" /><span className="h-2.5 w-2.5 rounded-full bg-foreground/15" /></div><span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">kairos / visão geral</span></div><div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-muted"><Image src="/dashboard-exemple.png" alt="Prévia do painel Kairos" fill className="object-cover object-left-top" priority /></div></div>
+          <div className="absolute -left-4 top-16 hidden items-center gap-3 rounded-2xl border border-background/15 bg-card p-3 text-card-foreground shadow-xl sm:flex xl:-left-10"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><Users2 className="h-5 w-5" aria-hidden="true" /></div><div><p className="text-xs text-muted-foreground">Pessoas acompanhadas</p><p className="font-display text-2xl font-semibold">+28%</p></div></div>
+          <div className="absolute -right-4 bottom-10 hidden items-center gap-3 rounded-2xl border border-background/15 bg-card p-3 text-card-foreground shadow-xl sm:flex xl:-right-10"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent-foreground"><Calendar className="h-5 w-5" aria-hidden="true" /></div><div><p className="text-xs text-muted-foreground">Próximo encontro</p><p className="font-display text-lg font-semibold">Domingo · 10h</p></div></div>
+          <div className="absolute -bottom-5 left-1/2 hidden -translate-x-1/2 items-center gap-2 rounded-full border border-background/15 bg-card px-4 py-2 text-card-foreground shadow-xl sm:flex"><Check className="h-4 w-4 text-primary" aria-hidden="true" /><span className="text-xs font-semibold">Tudo que importa, em ritmo</span><Target className="h-4 w-4 text-accent" aria-hidden="true" /></div>
+        </motion.div>
       </div>
-
-      {/* Scroll Indicator */}
-      <motion.div 
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 cursor-pointer z-50"
-        initial={{ y: 0 }}
-        animate={{ y: 10 }}
-        transition={{ repeat: Infinity, repeatType: "reverse", duration: 1 }}
-        onClick={() => {
-          window.scrollTo({
-            top: window.innerHeight,
-            behavior: 'smooth'
-          })
-        }}
-      >
-        <div className="p-4 hover:opacity-70 transition-opacity">
-          <ChevronDown className="h-6 w-6 text-muted-foreground" />
-        </div>
-      </motion.div>
-    </motion.section>
+    </section>
   )
 }

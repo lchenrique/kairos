@@ -10,6 +10,7 @@ import type {
 import type {
   DeleteUploadsPublicId204,
   PostUploads200,
+  PostUploads400,
   PostUploadsBody,
 } from ".././model";
 import { customInstance } from "../../axios-instance";
@@ -36,7 +37,7 @@ export const postUploads = (
 };
 
 export const getPostUploadsMutationOptions = <
-  TError = unknown,
+  TError = PostUploads400,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -69,9 +70,12 @@ export type PostUploadsMutationResult = NonNullable<
   Awaited<ReturnType<typeof postUploads>>
 >;
 export type PostUploadsMutationBody = PostUploadsBody;
-export type PostUploadsMutationError = unknown;
+export type PostUploadsMutationError = PostUploads400;
 
-export const usePostUploads = <TError = unknown, TContext = unknown>(options?: {
+export const usePostUploads = <
+  TError = PostUploads400,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postUploads>>,
     TError,

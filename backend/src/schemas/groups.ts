@@ -22,13 +22,13 @@ export const groupMemberSchema = z.object({
   memberId: z.string(),
   role: GroupMemberRoleEnum,
   joinedAt: z.date(),
-  updatedAt: z.date()
+  updatedAt: z.date(),
 })
 
 // Schema de adição de membro ao grupo
 export const addGroupMemberSchema = z.object({
   memberId: z.string(),
-  role: GroupMemberRoleEnum.default('MEMBER')
+  role: GroupMemberRoleEnum.default('MEMBER'),
 })
 
 // Schema base do grupo
@@ -43,7 +43,7 @@ export const groupSchema = z.object({
   location: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  members: z.array(groupMemberSchema)
+  members: z.array(groupMemberSchema),
 })
 
 const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/
@@ -61,20 +61,25 @@ const baseGroupSchema = z.object({
 })
 
 // Validações comuns
-const validateGroupTimes = (data: any) => {
+const validateGroupTimes = (data: { startTime?: string; endTime?: string }) => {
   // Se tiver horário de início, deve ter horário de término
   if (data.startTime && !data.endTime) return false
   if (!data.startTime && data.endTime) return false
-  
+
   // Se tiver horário, o início deve ser antes do fim
   if (data.startTime && data.endTime) {
     return data.startTime < data.endTime
   }
-  
+
   return true
 }
 
-const validateGroupLocation = (data: any) => {
+const validateGroupLocation = (data: {
+  startTime?: string
+  endTime?: string
+  meetingDay?: string
+  location?: string
+}) => {
   // Se tiver horário, deve ter dia e local
   if (data.startTime || data.endTime) {
     return !!data.meetingDay && !!data.location
@@ -83,22 +88,23 @@ const validateGroupLocation = (data: any) => {
 }
 
 // Schema de criação
-export const createGroupSchema = baseGroupSchema.refine(
-  validateGroupTimes,
-  { message: "Horário de início deve ser anterior ao horário de término" }
-).refine(
-  validateGroupLocation,
-  { message: "Para definir horários, informe também o dia e o local da reunião" }
-)
+export const createGroupSchema = baseGroupSchema
+  .refine(validateGroupTimes, {
+    message: 'Horário de início deve ser anterior ao horário de término',
+  })
+  .refine(validateGroupLocation, {
+    message: 'Para definir horários, informe também o dia e o local da reunião',
+  })
 
 // Schema de atualização (todos os campos são opcionais)
-export const updateGroupSchema = baseGroupSchema.partial().refine(
-  validateGroupTimes,
-  { message: "Horário de início deve ser anterior ao horário de término" }
-).refine(
-  validateGroupLocation,
-  { message: "Para definir horários, informe também o dia e o local da reunião" }
-)
+export const updateGroupSchema = baseGroupSchema
+  .partial()
+  .refine(validateGroupTimes, {
+    message: 'Horário de início deve ser anterior ao horário de término',
+  })
+  .refine(validateGroupLocation, {
+    message: 'Para definir horários, informe também o dia e o local da reunião',
+  })
 
 // Schema de listagem
 export const listGroupsQuerySchema = z.object({
@@ -107,7 +113,7 @@ export const listGroupsQuerySchema = z.object({
   search: z.string().optional(),
   type: GroupTypeEnum.optional(),
   sortBy: GroupSortByEnum.default('name'),
-  order: OrderEnum.default('asc')
+  order: OrderEnum.default('asc'),
 })
 
 // Schema de resposta paginada
@@ -119,13 +125,13 @@ export const paginatedGroupsSchema = z.object({
     totalItems: z.number(),
     totalPages: z.number(),
     hasNextPage: z.boolean(),
-    hasPreviousPage: z.boolean()
-  })
+    hasPreviousPage: z.boolean(),
+  }),
 })
 
 // Schema de parâmetros
 export const getGroupParamsSchema = z.object({
-  id: z.string()
+  id: z.string(),
 })
 
 // Tipos gerados dos schemas

@@ -40,6 +40,12 @@ Kairos is a comprehensive church management system designed to streamline admini
 - Attendance tracking
 - Check-in system
 - Participant listing
+- Monthly calendar with recurring events
+
+### Finance & access
+- Income/expense ledger with balance summary
+- Role-based access for staff profiles
+- Mobile-first community portal
 
 ## 🛠 Tech Stack
 
@@ -58,6 +64,8 @@ Kairos is a comprehensive church management system designed to streamline admini
 
 ## 📦 Installation
 
+Requirements: Node.js 20 LTS and pnpm 11.15.1. You can enable the package manager declared by the project with `corepack enable`.
+
 1. Clone the repository
 ```bash
 git clone https://github.com/lchenrique/kairos.git
@@ -66,44 +74,69 @@ cd kairos
 
 2. Install dependencies
 ```bash
-# Backend
-cd backend
-npm install
-
-# Frontend
-cd ../frontend
-npm install
+# Dependências do monorepo
+pnpm install
 ```
 
 3. Setup environment variables
 ```bash
 # Backend
-cp .env.example .env
-# Edit .env with your configurations
+cp backend/.env.example backend/.env
+# Frontend
+cp frontend/.env.example frontend/.env.local
+# Edit the copied files with your local configurations
 ```
+
+Member photos are optional in local development. Configure all three `CLOUDINARY_*` variables from `backend/.env.example` to enable upload; without them, member records still work but image upload returns a documented 503.
 
 4. Run migrations
 ```bash
-cd backend
-npx prisma migrate dev
+pnpm --filter @kairos/backend migrate:deploy
 ```
 
 5. Start the development servers
 ```bash
-# Backend
-npm run dev
-
-# Frontend (in another terminal)
-cd ../frontend
-npm run dev
+pnpm dev
 ```
+
+Development uses `http://localhost:3001` for the frontend and `http://localhost:3333` for the API. To start them separately, run `pnpm dev:backend` and `pnpm dev:frontend` in different terminals. Turbopack is optional through `pnpm --filter @kairos/frontend dev:turbo`.
+
+6. Validate the release flow
+```bash
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+The E2E command uses ports 3012 and 3341 and resets only `backend/prisma/e2e.db`.
+
+### Docker
+
+For a local production-like run in Bash, define the public URLs, a strong `JWT_SECRET`, and the Hostinger SMTP password before starting the services:
+
+```bash
+FRONTEND_URL="http://localhost:3000" NEXT_PUBLIC_API_URL="http://localhost:3333" JWT_SECRET="use-ao-menos-32-caracteres-aleatorios" SMTP_PASSWORD="senha-da-caixa" docker compose up --build
+```
+
+In PowerShell:
+
+```powershell
+$env:JWT_SECRET = "use-ao-menos-32-caracteres-aleatorios"
+$env:SMTP_PASSWORD = "senha-da-caixa"
+$env:FRONTEND_URL = "http://localhost:3000"
+$env:NEXT_PUBLIC_API_URL = "http://localhost:3333"
+docker compose up --build
+```
+
+The frontend is available at `http://localhost:3000` and the API/docs at `http://localhost:3333/docs`.
 
 ## 🔮 Roadmap
 
-- [ ] Dashboard implementation
-- [ ] Advanced reporting system
-- [ ] Docker containerization
-- [ ] CI/CD pipeline
+- [x] Dashboard implementation
+- [x] Groups and events CRUD (core)
+- [x] Advanced reporting system (overview and attendance)
+- [x] Docker containerization
+- [x] CI validation pipeline
+- [ ] Automated staging/production deployment
 - [ ] Monitoring system
 
 ## 📄 License
@@ -151,6 +184,12 @@ Kairos é um sistema abrangente de gestão para igrejas, projetado para simplifi
 - Controle de presença
 - Sistema de check-in
 - Listagem de participantes
+- Calendário mensal com recorrência
+
+### Financeiro e acesso
+- Livro de entradas e saídas com resumo de saldo
+- Permissões por perfil de equipe
+- Portal responsivo para a comunidade
 
 ## 🛠 Stack Tecnológica
 
@@ -162,12 +201,14 @@ Kairos é um sistema abrangente de gestão para igrejas, projetado para simplifi
 - **Testes**: Cobertura completa para funcionalidades principais
 
 ### Frontend
-- **Framework**: Next.js 15
+- **Framework**: Next.js 14
 - **Linguagem**: TypeScript
 - **Estilização**: Tailwind CSS
 - **Componentes UI**: shadcn/ui
 
 ## 📦 Instalação
+
+Pré-requisitos: Node.js 20 LTS e pnpm 11.15.1. Ative o gerenciador declarado pelo projeto com `corepack enable`.
 
 1. Clone o repositório
 ```bash
@@ -177,44 +218,87 @@ cd kairos
 
 2. Instale as dependências
 ```bash
-# Backend
-cd backend
-npm install
-
-# Frontend
-cd ../frontend
-npm install
+# Dependências do monorepo
+pnpm install
 ```
 
 3. Configure as variáveis de ambiente
 ```bash
 # Backend
-cp .env.example .env
-# Edite o arquivo .env com suas configurações
+cp backend/.env.example backend/.env
+# Frontend
+cp frontend/.env.example frontend/.env.local
+# Edite os arquivos copiados com suas configurações locais
 ```
+
+Fotos de membros são opcionais no ambiente local. Configure as três variáveis `CLOUDINARY_*` de `backend/.env.example` para habilitar o envio; sem elas, o cadastro continua funcionando e apenas o upload de imagem retorna um erro 503 documentado.
 
 4. Execute as migrações
 ```bash
-cd backend
-npx prisma migrate dev
+pnpm --filter @kairos/backend migrate:deploy
 ```
 
 5. Inicie os servidores de desenvolvimento
 ```bash
-# Backend
-npm run dev
-
-# Frontend (em outro terminal)
-cd ../frontend
-npm run dev
+pnpm dev
 ```
+
+O desenvolvimento usa `http://localhost:3001` para o frontend e `http://localhost:3333` para a API. Para iniciar separadamente, execute `pnpm dev:backend` e `pnpm dev:frontend` em terminais diferentes. O Turbopack é opcional com `pnpm --filter @kairos/frontend dev:turbo`.
+
+6. Valide o fluxo de lançamento
+```bash
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+O E2E usa as portas 3012 e 3341 e recria somente `backend/prisma/e2e.db`.
+
+### Dados de demonstração e testes
+
+Para preencher o ambiente local com uma igreja, membros, grupos, eventos e lançamentos financeiros:
+
+```bash
+pnpm --filter @kairos/backend seed
+```
+
+O seed é idempotente, cria o acesso administrativo local `admin@kairos.local` com a senha `Kairos@2026!` e é bloqueado quando `NODE_ENV=production`. Instalações reais devem usar `/setup`, sem seed.
+
+Para executar os testes de API com segurança:
+
+```bash
+pnpm test
+```
+
+A suíte sobe uma API isolada na porta `3335` e usa `backend/prisma/test.db`; ela não apaga a base de desenvolvimento.
+
+### Docker
+
+Para executar uma versão semelhante à produção em Bash, defina as URLs públicas, um segredo JWT forte e a senha SMTP da Hostinger:
+
+```bash
+FRONTEND_URL="http://localhost:3000" NEXT_PUBLIC_API_URL="http://localhost:3333" JWT_SECRET="use-ao-menos-32-caracteres-aleatorios" SMTP_PASSWORD="senha-da-caixa" docker compose up --build
+```
+
+No PowerShell:
+
+```powershell
+$env:JWT_SECRET = "use-ao-menos-32-caracteres-aleatorios"
+$env:SMTP_PASSWORD = "senha-da-caixa"
+$env:FRONTEND_URL = "http://localhost:3000"
+$env:NEXT_PUBLIC_API_URL = "http://localhost:3333"
+docker compose up --build
+```
+
+O frontend fica em `http://localhost:3000` e a API/documentação em `http://localhost:3333/docs`.
 
 ## 🔮 Roadmap
 
-- [ ] Implementação do Dashboard
-- [ ] Sistema avançado de relatórios
-- [ ] Containerização com Docker
-- [ ] Pipeline de CI/CD
+- [x] Implementação do Dashboard
+- [x] CRUD base de grupos e eventos
+- [x] Sistema de relatórios e presença
+- [x] Containerização com Docker
+- [x] Pipeline de validação em CI
+- [ ] Deploy automatizado em staging/produção
 - [ ] Sistema de monitoramento
 
 ## 📄 Licença

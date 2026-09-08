@@ -12,7 +12,7 @@ import type { GetMembers200DataItem } from "@/lib/api/generated/model"
 
 type ViewType = 'grid' | 'table'
 
-interface ViewListProps<T> {
+interface ViewListProps<T extends { id: string }> {
   data: T[]
   columns?: any[]
   view: ViewType
@@ -28,7 +28,7 @@ interface ViewListProps<T> {
   onPageSizeChange?: (pageSize: number) => void
 }
 
-export function ViewList<T>({
+export function ViewList<T extends { id: string }>({
   data, 
   columns, 
   view, 
@@ -46,7 +46,7 @@ export function ViewList<T>({
   if (isLoading) {
     if (view === 'grid') {
       return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: adjustedPageSize }).map((_, i) => (
             <div 
               key={i}
@@ -54,19 +54,15 @@ export function ViewList<T>({
                 relative 
                 group 
                 transform 
-                transition-all 
-                duration-500 
-                hover:scale-105
+                transition-transform
+                duration-200
               "
             >
               <div 
                 className="
                   absolute 
                   -inset-0.5 
-                  bg-gradient-to-r 
-                  from-primary/10 
-                  via-primary/5 
-                  to-primary/10 
+                  bg-primary/10
                   rounded-xl 
                   opacity-50 
                   blur-xl 
@@ -77,24 +73,22 @@ export function ViewList<T>({
               <Card 
                 className="
                   relative 
-                  bg-gray-50 
-                  dark:bg-gray-900 
+                  bg-card
                   rounded-xl 
                   overflow-hidden 
                   border 
-                  border-gray-100 
-                  dark:border-gray-800
+                  border-border/80
                   shadow-sm 
                   shadow-primary/10
                   animate-pulse
-                  h-[280px]
+                  h-[220px]
                 "
               >
                 <div className="relative z-10">
                   <CardHeader className="pb-2 flex flex-row items-center space-x-4">
                     <div className="
-                      w-16 h-16 
-                      bg-gray-200 dark:bg-gray-700
+                      h-12 w-12
+                      bg-muted
                       rounded-full 
                       border-2 
                       border-primary/20 
@@ -103,21 +97,21 @@ export function ViewList<T>({
                       ring-offset-2
                     " />
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                      <div className="h-4 rounded bg-muted w-3/4" />
+                      <div className="h-3 rounded bg-muted w-1/2" />
                     </div>
                   </CardHeader>
                   <CardContent className="pt-2 pb-4 space-y-2 text-sm">
                     <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+                      <div className="h-3 rounded bg-muted" />
+                      <div className="h-3 w-5/6 rounded bg-muted" />
+                      <div className="h-3 w-2/3 rounded bg-muted" />
                     </div>
                   </CardContent>
-                  <CardFooter className="pt-2 border-t border-gray-100 dark:border-gray-700">
+                  <CardFooter className="border-t border-border/70 pt-2">
                     <div className="flex justify-between items-center w-full">
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
+                      <div className="h-3 w-1/2 rounded bg-muted" />
+                      <div className="h-3 w-1/4 rounded bg-muted" />
                     </div>
                   </CardFooter>
                 </div>
@@ -142,18 +136,16 @@ export function ViewList<T>({
                   border-b 
                   last:border-b-0 
                   space-x-4
-                  bg-gray-50 
-                  dark:bg-gray-900 
-                  border-gray-100 
-                  dark:border-gray-800
+                  bg-card
+                  border-border/80
                 "
               >
-                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full" />
+                <div className="h-10 w-10 rounded-full bg-muted" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                  <div className="h-4 w-3/4 rounded bg-muted" />
+                  <div className="h-3 w-1/2 rounded bg-muted" />
                 </div>
-                <div className="w-20 h-6 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-6 w-20 rounded bg-muted" />
               </div>
             ))}
           </div>
@@ -193,19 +185,17 @@ export function ViewList<T>({
           damping: 10 
         }}
       >
-        <DataTableWithPagination 
-          columns={columns} 
-          data={data} 
-          meta={meta}
-          onPageChange={onPageChange}
-          onPageSizeChange={onPageSizeChange}
-        />
+          <DataTableWithPagination
+            columns={columns ?? []}
+            data={data}
+            meta={meta}
+          />
       </motion.div>
     )
   }
 
   return (
-    <div className="space-y-6">
+      <div className="space-y-5">
       {renderContent()}
       {meta && (
         <PaginationWithInfo

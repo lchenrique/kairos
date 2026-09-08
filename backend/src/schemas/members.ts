@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { groupSchema } from './groups'
+import { groupSchema } from './groups.js'
 
 // Enums
 export const MemberStatusEnum = z.enum(['ACTIVE', 'INACTIVE'])
@@ -20,15 +20,27 @@ export const memberSchema = z.object({
   image: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  groups: z.array(z.object({
-    id: z.string(),
-    name: z.string()
-  }))
+  groups: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+    }),
+  ),
+})
+
+export const memberParticipationSchema = z.object({
+  eventId: z.string(),
+  title: z.string(),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date().nullable(),
+  status: z.enum(['CONFIRMED', 'PENDING', 'CANCELLED']),
+  lastUpdatedAt: z.coerce.date().nullable(),
+  changes: z.number().int(),
 })
 
 // Schema de parâmetros
 export const getMemberParamsSchema = z.object({
-  id: z.string().min(1)
+  id: z.string().min(1),
 })
 
 // Schema de criação
@@ -37,14 +49,24 @@ export const createMemberSchema = z.object({
   email: z.string().email().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
-  birthDate: z.string().optional().transform(val => val ? new Date(val) : null),
-  baptismDate: z.string().optional().transform(val => val ? new Date(val) : null),
+  birthDate: z
+    .string()
+    .optional()
+    .transform((val) => (val ? new Date(val) : null)),
+  baptismDate: z
+    .string()
+    .optional()
+    .transform((val) => (val ? new Date(val) : null)),
   status: MemberStatusEnum.default('ACTIVE'),
   notes: z.string().optional(),
   image: z.string().optional(),
-  groups: z.array(z.object({
-    id: z.string()
-  })).optional()
+  groups: z
+    .array(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .optional(),
 })
 
 // Schema de atualização
@@ -57,7 +79,7 @@ export const listMembersQuerySchema = z.object({
   search: z.string().optional(),
   status: MemberStatusEnum.optional(),
   sortBy: MemberSortByEnum.default('name'),
-  order: OrderEnum.default('asc')
+  order: OrderEnum.default('asc'),
 })
 
 // Schema de resposta paginada
@@ -69,8 +91,8 @@ export const paginatedMembersSchema = z.object({
     totalItems: z.number(),
     totalPages: z.number(),
     hasNextPage: z.boolean(),
-    hasPreviousPage: z.boolean()
-  })
+    hasPreviousPage: z.boolean(),
+  }),
 })
 
 // Tipos gerados dos schemas

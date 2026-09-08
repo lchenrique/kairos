@@ -2,6 +2,7 @@
 
 import { ViewList } from "@/components/ui/view-list"
 import { columns } from "./columns"
+import { MemberCard } from "../member-card"
 import type { GetMembers200DataItem, GetMembers200DataItem as Member } from "@/lib/api/generated/model/getMembers200DataItem"
 
 interface MemberListProps {

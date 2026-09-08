@@ -31,26 +31,26 @@ export function NavItem({
 }: NavItemProps) {
   const NavButton = (
     <Button
-      variant={isActive ? "secondary" : "ghost"}
+      variant="ghost"
       className={cn(
-        "w-full justify-start relative group overflow-hidden",
-        isActive && "bg-gradient-to-r from-primary/20 to-transparent",
-        isCollapsed && "justify-center"
+        "group relative h-11 w-full justify-start gap-3 overflow-hidden rounded-xl px-3 text-sidebar-muted hover:bg-white/[0.07] hover:text-sidebar-foreground",
+        isActive && "bg-primary text-primary-foreground shadow-md shadow-black/20 hover:bg-primary/90 hover:text-primary-foreground",
+        isCollapsed && "justify-center px-0"
       )}
+      aria-label={isCollapsed ? title : undefined}
+      aria-current={isActive ? "page" : undefined}
       asChild
     >
       <Link href={href}>
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <motion.div
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           className={cn(
-            "relative z-10 p-1 rounded-lg transition-colors", 
-            isCollapsed ? "mr-0" : "mr-2",
-            isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+            "relative z-10 flex shrink-0 items-center justify-center transition-colors",
+            isActive ? "text-primary-foreground" : "text-sidebar-muted group-hover:text-sidebar-foreground"
           )}
         >
-          <Icon className="h-4 w-4" />
+          <Icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2.25 : 1.8} aria-hidden="true" />
         </motion.div>
         <AnimatePresence mode="wait">
           {!isCollapsed && (
@@ -60,7 +60,7 @@ export function NavItem({
               exit={{ opacity: 0, width: 0 }}
               className={cn(
                 "font-medium transition-colors",
-                isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                isActive ? "text-primary-foreground" : "text-sidebar-muted group-hover:text-sidebar-foreground"
               )}
             >
               {title}
@@ -70,7 +70,7 @@ export function NavItem({
         {isActive && (
           <motion.div
             layoutId="active-nav"
-            className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+            className="absolute left-0 top-2 h-7 w-1 rounded-r-full bg-accent"
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           />
         )}
@@ -90,7 +90,7 @@ export function NavItem({
             <TooltipTrigger asChild>
               {NavButton}
             </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={20} className="bg-card/80 backdrop-blur-lg">
+            <TooltipContent side="right" sideOffset={16} className="border-sidebar-border bg-sidebar text-sidebar-foreground">
               {title}
             </TooltipContent>
           </Tooltip>

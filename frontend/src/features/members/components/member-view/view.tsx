@@ -8,6 +8,7 @@ import { CalendarIcon, HomeIcon, MailIcon, PhoneIcon, UserIcon } from "lucide-re
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { MemberParticipation } from "../member-participation"
 
 interface MemberViewProps {
   member: GetMembers200DataItem
@@ -97,9 +98,10 @@ export function MemberView({ member }: MemberViewProps) {
       </div>
 
       <Tabs defaultValue="info" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="info">Informações</TabsTrigger>
           <TabsTrigger value="church">Igreja</TabsTrigger>
+          <TabsTrigger value="participation">Presença</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info" className="space-y-4 mt-6">
@@ -145,6 +147,9 @@ export function MemberView({ member }: MemberViewProps) {
               value={member.baptismDate ? formatDate(member.baptismDate) : 'Não informada'}
             />
           </motion.div>
+        </TabsContent>
+        <TabsContent value="participation" className="mt-6">
+          <MemberParticipation member={member} />
         </TabsContent>
       </Tabs>
     </div>

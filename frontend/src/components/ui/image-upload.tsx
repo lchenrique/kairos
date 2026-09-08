@@ -1,10 +1,23 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Camera, ImagePlus, Trash2 } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { cn } from "@/lib/utils"
+import { isAxiosError } from "axios"
+import { Camera, ImagePlus, Loader2, Trash2 } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { customInstance } from "@/lib/api/axios-instance"
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
 
 interface ImageUploadProps {
   value?: string
@@ -14,40 +27,68 @@ interface ImageUploadProps {
   disabled?: boolean
 }
 
+interface UploadResponse {
+  url: string
+  publicId: string
+}
+
+function getErrorMessage(error: unknown) {
+  if (isAxiosError<{ message?: string }>(error)) {
+    return error.response?.data?.message ?? "Não foi possível enviar a imagem."
+  }
+
+  return "Não foi possível enviar a imagem."
+}
+
+function getCloudinaryPublicId(value: string) {
+  try {
+    const imageUrl = new URL(value)
+    if (imageUrl.hostname !== "res.cloudinary.com") return null
+
+    const segments = imageUrl.pathname.split("/").filter(Boolean)
+    const kairosIndex = segments.indexOf("kairos")
+    if (kairosIndex === -1) return null
+
+    return segments
+      .slice(kairosIndex)
+      .map(decodeURIComponent)
+      .join("/")
+      .replace(/\.[a-zA-Z0-9]+$/, "")
+  } catch {
+    return null
+  }
+}
+
 export function ImageUpload({
   value,
   onChange,
   onRemove,
   onImageRemoved,
-  disabled
+  disabled,
 }: ImageUploadProps) {
   const [isUsingCamera, setIsUsingCamera] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const isBusy = disabled || isUploading
 
   useEffect(() => {
     if (isUsingCamera && !stream) {
-      navigator.mediaDevices.getUserMedia({ 
-        video: {
-          facingMode: "user",
-          deviceId: { ideal: "default" }
-        } 
-      })
-      .then((mediaStream) => {
-        setStream(mediaStream)
-      })
-      .catch((error) => {
-        console.error("Error accessing camera:", error)
-        setIsUsingCamera(false)
-      })
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: "user" } })
+        .then(setStream)
+        .catch(() => {
+          setError("Não foi possível acessar a câmera deste dispositivo.")
+          setIsUsingCamera(false)
+        })
     }
 
     return () => {
       if (stream) {
-        stream.getTracks().forEach(track => track.stop())
-        setStream(null)
+        stream.getTracks().forEach((track) => track.stop())
       }
     }
   }, [isUsingCamera, stream])
@@ -55,119 +96,158 @@ export function ImageUpload({
   useEffect(() => {
     if (stream && videoRef.current) {
       videoRef.current.srcObject = stream
-      videoRef.current.play()
-        .catch(err => console.error("Error playing video:", err))
+      videoRef.current.play().catch(() => {
+        setError("Não foi possível iniciar a visualização da câmera.")
+      })
     }
   }, [stream])
 
-  const startCamera = () => {
-    setIsUsingCamera(true)
-  }
-
   const stopCamera = () => {
+    stream?.getTracks().forEach((track) => track.stop())
+    setStream(null)
     setIsUsingCamera(false)
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop())
-      setStream(null)
-    }
   }
 
-  const optimizeImage = (canvas: HTMLCanvasElement, quality = 0.8): string => {
-    const MAX_WIDTH = 800
-    const MAX_HEIGHT = 800
-    
+  const optimizeImage = (canvas: HTMLCanvasElement, quality = 0.82) => {
+    const maxDimension = 800
     let width = canvas.width
     let height = canvas.height
 
-    if (width > MAX_WIDTH) {
-      height = Math.round((height * MAX_WIDTH) / width)
-      width = MAX_WIDTH
+    if (width > maxDimension) {
+      height = Math.round((height * maxDimension) / width)
+      width = maxDimension
     }
 
-    if (height > MAX_HEIGHT) {
-      width = Math.round((width * MAX_HEIGHT) / height)
-      height = MAX_HEIGHT
+    if (height > maxDimension) {
+      width = Math.round((width * maxDimension) / height)
+      height = maxDimension
     }
 
-    const tempCanvas = document.createElement("canvas")
-    tempCanvas.width = width
-    tempCanvas.height = height
+    const optimizedCanvas = document.createElement("canvas")
+    optimizedCanvas.width = width
+    optimizedCanvas.height = height
+    const context = optimizedCanvas.getContext("2d")
 
-    const ctx = tempCanvas.getContext("2d")
-    if (!ctx) return canvas.toDataURL("image/jpeg", quality)
-
-    ctx.drawImage(canvas, 0, 0, width, height)
-    return tempCanvas.toDataURL("image/jpeg", quality)
+    if (!context) return canvas.toDataURL("image/jpeg", quality)
+    context.drawImage(canvas, 0, 0, width, height)
+    return optimizedCanvas.toDataURL("image/jpeg", quality)
   }
 
-  const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current
-      const canvas = canvasRef.current
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      
-      const context = canvas.getContext("2d")
-      if (context) {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height)
-        const optimizedImage = optimizeImage(canvas)
-        onChange(optimizedImage)
-        stopCamera()
-      }
+  const uploadImage = async (dataUrl: string) => {
+    setIsUploading(true)
+    setError(null)
+
+    try {
+      const blob = await fetch(dataUrl).then((response) => response.blob())
+      const formData = new FormData()
+      formData.append("file", blob, `member-${Date.now()}.jpg`)
+
+      const uploaded = await customInstance<UploadResponse>({
+        url: "/uploads",
+        method: "POST",
+        data: formData,
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+
+      onChange(uploaded.url)
+    } catch (uploadError) {
+      setError(getErrorMessage(uploadError))
+    } finally {
+      setIsUploading(false)
     }
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const capturePhoto = async () => {
+    if (!videoRef.current || !canvasRef.current) return
+
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const context = canvas.getContext("2d")
+
+    if (!context) {
+      setError("Não foi possível processar a foto capturada.")
+      return
+    }
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height)
+    stopCamera()
+    await uploadImage(optimizeImage(canvas))
+  }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ""
     if (!file) return
 
-    if (typeof window === "undefined") return
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setError("Escolha uma imagem JPG, PNG ou WebP.")
+      return
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      setError("A imagem deve ter no máximo 5 MB.")
+      return
+    }
 
     const reader = new FileReader()
-    reader.onloadend = () => {
-      if (!reader.result) return
-
-      const img = document.createElement("img")
-      img.onload = () => {
+    reader.onerror = () => setError("Não foi possível ler a imagem selecionada.")
+    reader.onload = () => {
+      const image = document.createElement("img")
+      image.onerror = () => setError("O arquivo selecionado não é uma imagem válida.")
+      image.onload = () => {
         const canvas = document.createElement("canvas")
-        canvas.width = img.width
-        canvas.height = img.height
-        
-        const ctx = canvas.getContext("2d")
-        if (ctx) {
-          ctx.drawImage(img, 0, 0)
-          const optimizedImage = optimizeImage(canvas)
-          onChange(optimizedImage)
+        canvas.width = image.naturalWidth
+        canvas.height = image.naturalHeight
+        const context = canvas.getContext("2d")
+        if (!context) {
+          setError("Não foi possível processar a imagem selecionada.")
+          return
         }
+
+        context.drawImage(image, 0, 0)
+        void uploadImage(optimizeImage(canvas))
       }
-      img.src = reader.result as string
+      image.src = String(reader.result)
     }
     reader.readAsDataURL(file)
   }
 
-  const handleRemove = () => {
-    if (value && value.includes("cloudinary")) {
-      const matches = value.match(/kairos\/members\/[^.]+/)
-      if (matches) {
-        const publicId = matches[0]
+  const handleRemove = async () => {
+    if (!value) return
+
+    const publicId = getCloudinaryPublicId(value)
+    setError(null)
+    setIsUploading(true)
+
+    try {
+      if (publicId) {
+        await customInstance<void>({
+          url: `/uploads/${encodeURIComponent(publicId)}`,
+          method: "DELETE",
+        })
         onImageRemoved?.(publicId)
       }
+      onRemove()
+    } catch (removeError) {
+      setError(getErrorMessage(removeError))
+    } finally {
+      setIsUploading(false)
     }
-    onRemove()
   }
 
   return (
-    <div className="space-y-4 w-full">
-      <div className="flex items-center justify-center w-full">
-        <div className="relative w-40 h-40">
+    <div className="w-full space-y-4">
+      <div className="flex w-full items-center justify-center">
+        <div className="relative h-40 w-40">
           {value ? (
             <>
-              <div className="relative w-40 h-40 rounded-full overflow-hidden">
+              <div className="relative h-40 w-40 overflow-hidden rounded-full border bg-muted">
                 <Image
                   fill
-                  style={{ objectFit: "cover" }}
-                  className="rounded-full"
-                  alt="Avatar"
+                  className="rounded-full object-cover"
+                  alt="Foto do membro"
                   src={value}
                 />
               </div>
@@ -176,84 +256,113 @@ export function ImageUpload({
                 variant="destructive"
                 size="icon"
                 className="absolute -bottom-2 -right-2"
-                onClick={handleRemove}
-                disabled={disabled}
+                onClick={() => void handleRemove()}
+                disabled={isBusy}
+                aria-label="Remover foto do membro"
               >
-                <Trash2 className="h-4 w-4" />
+                {isUploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
               </Button>
             </>
           ) : (
-            <div className={cn(
-              "w-40 h-40 rounded-full bg-muted flex flex-col items-center justify-center gap-2 cursor-pointer hover:opacity-75 transition",
-              disabled && "opacity-50 cursor-not-allowed hover:opacity-50"
-            )}>
-              <ImagePlus className="h-10 w-10 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
-                Upload
+            <Button
+              type="button"
+              variant="outline"
+              className="h-40 w-40 flex-col rounded-full text-muted-foreground"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isBusy}
+            >
+              {isUploading ? (
+                <Loader2 className="h-10 w-10 animate-spin" />
+              ) : (
+                <ImagePlus className="h-10 w-10" />
+              )}
+              <span className="mt-2 text-xs">
+                {isUploading ? "Enviando..." : "Adicionar foto"}
               </span>
-            </div>
+            </Button>
           )}
         </div>
       </div>
 
       {!value && (
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-3">
           <Button
             type="button"
             variant="outline"
             onClick={() => fileInputRef.current?.click()}
-            disabled={disabled}
+            disabled={isBusy}
           >
-            <ImagePlus className="h-4 w-4 mr-2" />
-            Upload
+            <ImagePlus className="mr-2 h-4 w-4" />
+            Escolher imagem
           </Button>
           <Button
             type="button"
             variant="outline"
-            onClick={startCamera}
-            disabled={disabled}
+            onClick={() => {
+              setError(null)
+              setIsUsingCamera(true)
+            }}
+            disabled={isBusy}
           >
-            <Camera className="h-4 w-4 mr-2" />
-            Câmera
+            <Camera className="mr-2 h-4 w-4" />
+            Usar câmera
           </Button>
         </div>
       )}
 
       <input
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         onChange={handleFileUpload}
         ref={fileInputRef}
         className="hidden"
-        disabled={disabled}
+        disabled={isBusy}
       />
 
-      {isUsingCamera && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50">
-          <div className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg">
-            <div className="flex flex-col items-center gap-4">
-              <video
-                ref={videoRef}
-                className="rounded-lg"
-                width="100%"
-                height="auto"
-                autoPlay
-                playsInline
-                muted
-              />
-              <canvas ref={canvasRef} className="hidden" />
-              <div className="flex gap-4">
-                <Button onClick={capturePhoto} disabled={!stream}>
-                  Tirar Foto
-                </Button>
-                <Button variant="outline" onClick={stopCamera}>
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <p className="text-center text-xs text-muted-foreground">
+        JPG, PNG ou WebP, com até 5 MB.
+      </p>
+      {error && (
+        <p className="text-center text-sm text-destructive" role="alert">
+          {error}
+        </p>
       )}
+
+      <Dialog
+        open={isUsingCamera}
+        onOpenChange={(open) => {
+          if (!open) stopCamera()
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Fotografar membro</DialogTitle>
+            <DialogDescription>
+              Posicione o rosto no centro e confirme quando a imagem estiver nítida.
+            </DialogDescription>
+          </DialogHeader>
+          <video
+            ref={videoRef}
+            className="aspect-video w-full rounded-lg bg-muted object-cover"
+            autoPlay
+            playsInline
+            muted
+          />
+          <canvas ref={canvasRef} className="hidden" />
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={stopCamera}>
+              Cancelar
+            </Button>
+            <Button type="button" onClick={() => void capturePhoto()} disabled={!stream}>
+              Tirar foto
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

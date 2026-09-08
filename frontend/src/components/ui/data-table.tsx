@@ -42,7 +42,7 @@ import { useBulkMemberActions } from '@/lib/hooks/use-bulk-actions'
 import { useModalStore } from '@/lib/stores/modal-store'
 import { motion } from "framer-motion"
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { id: string }, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   pageSize?: number
@@ -50,7 +50,7 @@ interface DataTableProps<TData, TValue> {
   initialSorting?: SortingState
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends { id: string }, TValue>({
   columns,
   data,
   pageSize = 10,
@@ -93,12 +93,6 @@ export function DataTable<TData, TValue>({
         pageSize,
       },
     },
-  })
-
-  console.log('DataTable render:', {
-    dataLength: data.length,
-    columns: columns.length,
-    rows: table.getRowModel().rows.length
   })
 
   return (
@@ -192,7 +186,7 @@ export function DataTable<TData, TValue>({
                             aria-label="Select all"
                             className="translate-y-[2px]"
                           />
-                        ) : (
+                        ) : header.column.getCanSort() ? (
                           <Button
                             variant="ghost"
                             className="-ml-4 h-8 data-[sorting=true]:font-bold"
@@ -209,6 +203,11 @@ export function DataTable<TData, TValue>({
                               </span>
                             )}
                           </Button>
+                        ) : (
+                          flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          ) ?? (header.id === "actions" ? <span className="sr-only">Ações</span> : null)
                         )}
                       </>
                     )}
@@ -247,7 +246,6 @@ export function DataTable<TData, TValue>({
                         }
                       }
                     }}
-                    as={TableRow}
                     className="hover:bg-muted/30"
                     data-state={row.getIsSelected() && "selected"}
                   >

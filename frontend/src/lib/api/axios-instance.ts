@@ -1,53 +1,55 @@
-import axios from 'axios'
+import axios from "axios";
+import { useAuthStore } from "@/lib/stores/auth-store";
+import { useChurchStore } from "@/lib/stores/church-store";
+import { getAccessToken } from "@/lib/auth-central";
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
+    "X-Kairos-Client": "web",
   },
-  withCredentials: true // Importante para enviar cookies
-})
-
-function getToken() {
-  try {
-    return document.cookie
-      .split('; ')
-      .find(row => row.startsWith('token='))
-      ?.split('=')[1]
-  } catch {
-    return null
-  }
-}
+  withCredentials: true,
+});
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = getToken()
-    console.log('Token na requisição:', !!token)
-    
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    const token = getAccessToken();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    const churchId = useChurchStore.getState().activeChurchId;
+    if (churchId && config.url !== "/system/context") {
+      config.headers["X-Church-Id"] = churchId;
     }
-    return config
+    return config;
   },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
+  (error) => Promise.reject(error),
+);
 
 axiosInstance.interceptors.response.use(
-  (response) => {
-    console.log('Resposta bem sucedida:', response.config.url)
-    return response.data
-  },
+  (response) => response.data,
   (error) => {
-    console.error('Erro na requisição:', {
-      url: error.config?.url,
-      status: error.response?.status,
-      message: error.response?.data?.message
-    })
-    return Promise.reject(error)
-  }
-)
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      const auth = useAuthStore.getState();
+      auth.logout();
+      const publicPaths = [
+        "/login",
+        "/setup",
+        "/forgot-password",
+        "/reset-password",
+        "/accept-invite",
+      ];
+      const isPublic = publicPaths.some(
+        (path) =>
+          window.location.pathname === path ||
+          window.location.pathname.startsWith(`${path}/`),
+      );
+      if (!auth.isSigningOut && !isPublic) {
+        window.location.assign("/login?session=expired");
+      }
+    }
+    return Promise.reject(error);
+  },
+);
 
 export const customInstance = <T>({
   url,
@@ -55,12 +57,11 @@ export const customInstance = <T>({
   params,
   data,
   ...rest
-}: Parameters<typeof axiosInstance.request>[0]) => {
-  return axiosInstance.request<any, T>({
+}: Parameters<typeof axiosInstance.request>[0]) =>
+  axiosInstance.request<unknown, T>({
     url,
     method,
     params,
     data,
     ...rest,
-  })
-}
+  });

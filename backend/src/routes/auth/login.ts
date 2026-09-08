@@ -1,62 +1,23 @@
-import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
-import { prisma } from '../../lib/prisma'
-import bcrypt from 'bcrypt'
-import { type LoginInput, loginSchema, authResponseSchema, errorResponseSchema } from '../../schemas/auth'
+import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
+import { errorResponseSchema, loginSchema } from '../../schemas/auth.js'
 
 export const login: FastifyPluginAsyncZod = async (app) => {
-  app.post('/', {
-    schema: {
-      tags: ['auth'],
-      description: 'Autentica um usuário',
-      body: loginSchema,
-      response: {
-        200: authResponseSchema,
-        401: errorResponseSchema,
-        500: errorResponseSchema
-      }
-    }
-  }, async (request, reply) => {
-    const { email, password } = request.body as LoginInput
-
-    const user = await prisma.user.findUnique({
-      where: { email }
-    })
-
-    if (!user) {
-      return reply.status(401).send({
-        statusCode: 401,
-        error: 'Unauthorized',
-        code: 'INVALID_CREDENTIALS',
-        message: 'Credenciais inválidas'
-      })
-    }
-
-    const validPassword = await bcrypt.compare(password, user.password)
-
-    if (!validPassword) {
-      return reply.status(401).send({
-        statusCode: 401,
-        error: 'Unauthorized',
-        code: 'INVALID_CREDENTIALS',
-        message: 'Credenciais inválidas'
-      })
-    }
-
-    const token = await app.jwt.sign({ 
-      sub: user.id,
-      name: user.name,
-      email: user.email
-    })
-
-    return {
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt
-      }
-    }
-  })
+  app.post(
+    '/',
+    {
+      schema: {
+        tags: ['auth'],
+        description: 'Desativado: a autenticação é feita pela Auth Central.',
+        body: loginSchema,
+        response: { 410: errorResponseSchema },
+      },
+    },
+    async (_request, reply) =>
+      reply.status(410).send({
+        statusCode: 410,
+        error: 'Gone',
+        code: 'AUTH_CENTRAL_REQUIRED',
+        message: 'Use a Auth Central para entrar.',
+      }),
+  )
 }

@@ -4,48 +4,72 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 98%;
-    --card-foreground: 240 10% 3.9%;
+    --background: 42 30% 96%;
+    --foreground: 209 56% 17%;
+    --card: 0 0% 100%;
+    --card-foreground: 209 56% 17%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 263.4 70% 50.4%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
-    --destructive: 0 84.2% 75.2%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 262.1 83.3% 57.8%;
-    --radius: 0.5rem;
+    --popover-foreground: 209 56% 17%;
+    --primary: 181 72% 22%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 145 25% 91%;
+    --secondary-foreground: 209 56% 17%;
+    --muted: 45 17% 91%;
+    --muted-foreground: 203 15% 37%;
+    --accent: 11 70% 62%;
+    --accent-foreground: 14 55% 15%;
+    --accent-hover: 11 70% 48%;
+    --accent-hover-foreground: 0 0% 100%;
+    --destructive: 4 74% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 45 14% 84%;
+    --input: 45 14% 78%;
+    --ring: 181 72% 22%;
+    --hero-background: 209 56% 17%;
+    --hero-foreground: 42 30% 96%;
+    --hero-muted: 42 22% 82%;
+    --hero-border: 42 30% 96%;
+    --hero-accent: 11 78% 70%;
+    --hero-accent-foreground: 14 55% 15%;
+    --radius: 1rem;
+    --sidebar-background: 209 56% 17%;
+    --sidebar-foreground: 42 30% 96%;
+    --sidebar-muted: 207 24% 67%;
+    --sidebar-border: 207 34% 27%;
   }
 
   .dark {
-    --background: 233 27% 13%;
-    --foreground: 210 20% 98%;
-    --card: 233 27% 18%;
-    --card-foreground: 210 20% 98%;
-    --popover: 233 27% 18%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 263.4 70% 50.4%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 233 27% 23%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 233 27% 23%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 233 27% 23%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 72.8% 65.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 233 27% 23%;
-    --input: 233 27% 23%;
-    --ring: 263.4 70% 50.4%;
+    --background: 209 47% 9%;
+    --foreground: 42 30% 96%;
+    --card: 205 42% 14%;
+    --card-foreground: 42 30% 96%;
+    --popover: 205 42% 14%;
+    --popover-foreground: 42 30% 96%;
+    --primary: 168 48% 60%;
+    --primary-foreground: 209 56% 11%;
+    --secondary: 192 28% 22%;
+    --secondary-foreground: 42 30% 96%;
+    --muted: 205 33% 18%;
+    --muted-foreground: 204 18% 72%;
+    --accent: 15 79% 68%;
+    --accent-foreground: 14 55% 15%;
+    --accent-hover: 15 79% 45%;
+    --accent-hover-foreground: 0 0% 100%;
+    --destructive: 4 78% 64%;
+    --destructive-foreground: 209 56% 11%;
+    --border: 198 26% 27%;
+    --input: 198 26% 31%;
+    --ring: 168 48% 60%;
+    --hero-background: 209 47% 7%;
+    --hero-foreground: 42 30% 96%;
+    --hero-muted: 204 18% 78%;
+    --hero-border: 204 24% 76%;
+    --hero-accent: 15 82% 72%;
+    --hero-accent-foreground: 14 55% 15%;
+    --sidebar-background: 205 48% 8%;
+    --sidebar-foreground: 42 30% 96%;
+    --sidebar-muted: 201 17% 65%;
+    --sidebar-border: 201 30% 22%;
   }
 }
 
@@ -54,6 +78,102 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    background-image: radial-gradient(circle at 1px 1px, hsl(var(--foreground) / 0.035) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+
+  ::selection {
+    background: hsl(var(--accent) / 0.28);
+    color: hsl(var(--foreground));
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: -0.025em;
+  }
+
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    touch-action: manipulation;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .font-display {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .sidebar-surface {
+    background: hsl(var(--sidebar-background));
+    color: hsl(var(--sidebar-foreground));
+  }
+
+  .paper-grid {
+    background-image: linear-gradient(hsl(var(--foreground) / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.035) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+}
+
+@keyframes kairos-page-item-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Rotas sem stagger próprio seguem a mesma cascata visual do dashboard. */
+.page-stagger > * > * {
+  animation: kairos-page-item-enter 320ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.page-stagger > * > :nth-child(1) { animation-delay: 0ms; }
+.page-stagger > * > :nth-child(2) { animation-delay: 70ms; }
+.page-stagger > * > :nth-child(3) { animation-delay: 140ms; }
+.page-stagger > * > :nth-child(4) { animation-delay: 210ms; }
+.page-stagger > * > :nth-child(5) { animation-delay: 280ms; }
+.page-stagger > * > :nth-child(6) { animation-delay: 350ms; }
+.page-stagger > * > :nth-child(7) { animation-delay: 420ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-stagger > * > * {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  html:has(.login-shell),
+  body:has(.login-shell) {
+    overflow: hidden;
   }
 }

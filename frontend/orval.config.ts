@@ -10,6 +10,7 @@ export default defineConfig({
       mode: "tags-split",
       target: "./src/lib/api/generated",
       schemas: "./src/lib/api/generated/model",
+      clean: true,
       client: "react-query",
       override: {
         mutator: {

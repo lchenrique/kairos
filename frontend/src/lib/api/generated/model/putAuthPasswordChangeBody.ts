@@ -5,6 +5,6 @@
 export type PutAuthPasswordChangeBody = {
   /** @minLength 6 */
   currentPassword: string;
-  /** @minLength 6 */
+  /** @minLength 8 */
   newPassword: string;
 };

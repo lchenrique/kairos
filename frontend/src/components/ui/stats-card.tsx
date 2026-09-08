@@ -12,29 +12,27 @@ interface StatsCardProps {
 
 export function StatsCard({ title, value, icon: Icon, description, trend }: StatsCardProps) {
   return (
-    <Card className="relative overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-        <CardTitle className="text-sm font-medium">
+    <Card className="group relative overflow-hidden border-border/70 bg-card/90">
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 p-4 pb-2">
+        <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           {title}
         </CardTitle>
-        <div className="bg-primary/10 p-2 rounded-full">
-          <Icon className="h-4 w-4 text-primary" />
+        <div className="rounded-lg border border-primary/15 bg-primary/10 p-2 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+          <Icon className="h-3.5 w-3.5" aria-hidden="true" />
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <div className="flex items-center text-sm text-muted-foreground">
+      <CardContent className="px-4 pb-4 pt-0">
+        <div className="font-display text-3xl font-semibold tracking-tight">{value}</div>
+        <div className="mt-1.5 flex items-center text-xs text-muted-foreground">
           {trend === "up" && (
-            <TrendingUpIcon className="mr-1 h-4 w-4 text-emerald-500" />
+            <TrendingUpIcon aria-hidden="true" className="mr-1 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           )}
           {trend === "down" && (
-            <TrendingDownIcon className="mr-1 h-4 w-4 text-rose-500" />
+            <TrendingDownIcon aria-hidden="true" className="mr-1 h-4 w-4 text-rose-600 dark:text-rose-400" />
           )}
           {description}
         </div>
-        <div 
-          className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/80 to-transparent"
-        />
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-primary/15 transition-colors group-hover:bg-accent" />
       </CardContent>
     </Card>
   )

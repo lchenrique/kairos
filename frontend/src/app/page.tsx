@@ -4,7 +4,10 @@ import { HeroSection } from "@/components/landing/hero-section"
 import { FeaturesSection } from "@/components/landing/features-section"
 import { AdditionalFeatures } from "@/components/landing/additional-features"
 import { CTASection } from "@/components/landing/cta-section"
-import { Church, Github, Sun, Moon } from "lucide-react"
+import { AboutSection } from "@/components/landing/about-section"
+import { ContactSection } from "@/components/landing/contact-section"
+import { PricingSection } from "@/components/landing/pricing-section"
+import { Church, Sun, Moon } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
@@ -20,29 +23,23 @@ export default function LandingPage() {
     setMounted(true)
   }, [])
 
-  if (!mounted) {
-    return null
-  }
-
   return (
     <div className="flex min-h-screen flex-col">
       <motion.header 
-        className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm"
+        className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         <div className="container flex h-16 items-center justify-between">
           <motion.div 
-            className="flex items-center gap-2"
+            className="flex items-center gap-3"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Church className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
-              Kairos
-            </h1>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground"><Church className="h-5 w-5" aria-hidden="true" /></div>
+            <div><h1 className="font-display text-2xl font-semibold tracking-tight">KAIROS</h1><p className="-mt-1 text-[9px] uppercase tracking-[0.18em] text-muted-foreground">Ritmo da comunidade</p></div>
           </motion.div>
 
           <motion.div 
@@ -60,25 +57,25 @@ export default function LandingPage() {
             >
               <Link 
                 href="#features" 
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 Recursos
               </Link>
               <Link 
                 href="#pricing" 
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 Preços
               </Link>
               <Link 
                 href="#about" 
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 Sobre
               </Link>
               <Link 
                 href="#contact" 
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 Contato
               </Link>
@@ -87,18 +84,13 @@ export default function LandingPage() {
             <Button 
               variant="ghost" 
               size="icon"
+              disabled={!mounted}
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="relative"
             >
               <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               <span className="sr-only">Alternar tema</span>
-            </Button>
-            <Button variant="outline" size="sm" asChild className="hidden sm:flex">
-              <Link href="https://github.com">
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
-              </Link>
             </Button>
             <Button size="sm" asChild>
               <Link href="/login">Entrar</Link>
@@ -113,8 +105,11 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
           <FeaturesSection />
         </div>
+        <AboutSection />
         <AdditionalFeatures />
+        <PricingSection />
         <CTASection />
+        <ContactSection />
       </main>
 
       <Footer />

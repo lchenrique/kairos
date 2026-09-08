@@ -1,202 +1,120 @@
 "use client"
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal, Clock, MapPin, User } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import type { GetGroups200GroupsItem } from '@/lib/api/generated/model'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
-import { motion, AnimatePresence } from "framer-motion"
-import { useDrawerStore } from "@/lib/stores/drawer-store"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { CalendarDays, Clock3, MapPin, MoreHorizontal, Pencil, Trash2, UsersRound } from "lucide-react"
 import { useState } from "react"
-import { useListGroups } from "../../hooks/use-list-groups"
-import { GroupCard } from "../group-card"
-import { GroupForm } from "../group-drawer/form"
-import { BulkActions } from "@/components/shared/bulk-actions"
+import type { GetGroups200DataItem } from "@/lib/api/generated/model"
+import { useDeleteGroup } from "../../hooks/use-delete-group"
 
-export function GroupListTable() {
-  const { data, isLoading } = useListGroups()
-  const groups = data?.groups
-  const open = useDrawerStore((state) => state.open)
+interface GroupListTableProps {
+  groups: GetGroups200DataItem[]
+  isLoading?: boolean
+  view: "grid" | "table"
+  onView: (group: GetGroups200DataItem) => void
+  onEdit: (group: GetGroups200DataItem) => void
+  canManage: boolean
+}
+
+const typeLabels: Record<GetGroups200DataItem["type"], string> = {
+  CELL: "Célula",
+  MINISTRY: "Ministério",
+  DEPARTMENT: "Departamento",
+  OTHER: "Outro",
+}
+
+function GroupRowActions({ group, onView, onEdit, canManage }: { group: GetGroups200DataItem; onView: () => void; onEdit: () => void; canManage: boolean }) {
+  const { mutate: deleteGroup, isPending } = useDeleteGroup(group.id)
+
+  const handleDelete = () => {
+    if (window.confirm(`Excluir o grupo “${group.name}”?`)) deleteGroup()
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={`Ações de ${group.name}`}>
+          <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={onView}>Ver detalhes</DropdownMenuItem>
+        {canManage && (
+          <>
+            <DropdownMenuItem onClick={onEdit}><Pencil className="mr-2 h-4 w-4" aria-hidden="true" />Editar</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem disabled={isPending} onClick={handleDelete} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />Excluir</DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+function GroupMeta({ group, showMemberCount }: { group: GetGroups200DataItem; showMemberCount: boolean }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+      {group.meetingDay && <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-4 w-4" aria-hidden="true" />{group.meetingDay}</span>}
+      {group.startTime && <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4" aria-hidden="true" />{group.startTime}{group.endTime ? `–${group.endTime}` : ""}</span>}
+      {group.location && <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" aria-hidden="true" />{group.location}</span>}
+      {showMemberCount && <span className="inline-flex items-center gap-1.5"><UsersRound className="h-4 w-4" aria-hidden="true" />{group.members.length}</span>}
+    </div>
+  )
+}
+
+export function GroupListTable({ groups, isLoading, view, onView, onEdit, canManage }: GroupListTableProps) {
   const [selectedGroups, setSelectedGroups] = useState<string[]>([])
-
-  const handleViewProfile = (group: GetGroups200GroupsItem) => {
-    open({
-      title: "Detalhes do Grupo",
-      subtitle: group.name,
-      content: (
-        <GroupCard
-          group={group}
-          onEdit={() => handleEdit(group)}
-        />
-      ),
-    })
-  }
-
-  const handleEdit = (group: GetGroups200GroupsItem) => {
-    open({
-      title: "Editar Grupo",
-      content: <GroupForm initialData={group} />,
-    })
-  }
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked && groups) {
-      setSelectedGroups(groups.map((group) => group.id))
-    } else {
-      setSelectedGroups([])
-    }
-  }
-
-  const handleSelect = (checked: boolean, groupId: string) => {
-    if (checked) {
-      setSelectedGroups((prev) => [...prev, groupId])
-    } else {
-      setSelectedGroups((prev) => prev.filter((id) => id !== groupId))
-    }
-  }
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex items-center space-x-4">
-            <Skeleton className="h-12 w-12" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[200px]" />
-            </div>
-          </div>
+      <div className={view === "grid" ? "grid gap-4 sm:grid-cols-2 xl:grid-cols-3" : "space-y-3"}>
+        {Array.from({ length: view === "grid" ? 6 : 5 }).map((_, index) => (
+          <Card key={index} className="overflow-hidden"><CardHeader className="space-y-3"><Skeleton className="h-5 w-2/3" /><Skeleton className="h-4 w-1/2" /></CardHeader><CardContent><Skeleton className="h-4 w-full" /></CardContent></Card>
         ))}
       </div>
     )
   }
 
-  return (
-    <div className="space-y-4">
-      {selectedGroups.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-        >
-          <BulkActions
-            selectedCount={selectedGroups.length}
-            onClear={() => setSelectedGroups([])}
-          />
-        </motion.div>
-      )}
+  if (!groups.length) {
+    return <Card className="border-dashed"><CardContent className="flex flex-col items-center justify-center py-16 text-center"><UsersRound className="mb-4 h-10 w-10 text-muted-foreground/50" aria-hidden="true" /><CardTitle className="text-lg">Nenhum grupo encontrado</CardTitle><p className="mt-2 text-sm text-muted-foreground">Ajuste os filtros ou crie o primeiro grupo da sua igreja.</p></CardContent></Card>
+  }
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]">
-                <Checkbox
-                  checked={groups?.length === selectedGroups.length}
-                  onCheckedChange={handleSelectAll}
-                />
-              </TableHead>
-              <TableHead>Grupo</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Reunião</TableHead>
-              <TableHead>Líder</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <AnimatePresence mode="popLayout">
-              {groups?.map((group) => (
-                <motion.tr
-                  key={group.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="group"
-                >
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedGroups.includes(group.id)}
-                      onCheckedChange={(checked) => handleSelect(checked, group.id)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{group.name}</div>
-                      {group.description && (
-                        <div className="text-sm text-muted-foreground">
-                          {group.description}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={group.status === "ACTIVE" ? "default" : "secondary"}>
-                      {group.status === "ACTIVE" ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {group.meetingDay && (
-                        <div className="flex items-center gap-1 text-sm">
-                          <Clock className="h-4 w-4" />
-                          {group.meetingDay}
-                          {group.meetingTime && ` às ${group.meetingTime}`}
-                        </div>
-                      )}
-                      {group.meetingLocation && (
-                        <div className="flex items-center gap-1 text-sm">
-                          <MapPin className="h-4 w-4" />
-                          {group.meetingLocation}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {group.leader && (
-                      <div className="flex items-center gap-1 text-sm">
-                        <User className="h-4 w-4" />
-                        {group.leader}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleViewProfile(group)}>
-                          Ver detalhes
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(group)}>
-                          Editar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          </TableBody>
-        </Table>
+  if (view === "grid") {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {groups.map((group) => (
+          <Card key={group.id} className="group relative overflow-hidden transition-shadow hover:shadow-md">
+            <CardHeader className="pb-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><CardTitle className="truncate text-lg">{group.name}</CardTitle><p className="mt-1 text-xs text-muted-foreground">{typeLabels[group.type]}</p></div><GroupRowActions group={group} onView={() => onView(group)} onEdit={() => onEdit(group)} canManage={canManage} /></div></CardHeader>
+            <CardContent className="space-y-4"><p className="line-clamp-2 min-h-10 text-sm text-muted-foreground">{group.description || "Sem descrição cadastrada."}</p><GroupMeta group={group} showMemberCount={canManage} /><Button variant="secondary" className="w-full" onClick={() => onView(group)}>Ver detalhes</Button></CardContent>
+          </Card>
+        ))}
       </div>
+    )
+  }
+
+  const allSelected = groups.length > 0 && selectedGroups.length === groups.length
+
+  return (
+    <div className="overflow-x-auto rounded-xl border bg-card">
+      <Table>
+        <TableHeader><TableRow className="bg-muted/30"><TableHead className="w-12"><Checkbox checked={allSelected} onCheckedChange={(checked) => setSelectedGroups(checked ? groups.map((group) => group.id) : [])} aria-label="Selecionar todos os grupos" /></TableHead><TableHead>Grupo</TableHead><TableHead>Tipo</TableHead><TableHead>Encontro</TableHead><TableHead className="w-16"><span className="sr-only">Ações</span></TableHead></TableRow></TableHeader>
+        <TableBody>
+          {groups.map((group) => (
+            <TableRow key={group.id} className="group">
+              <TableCell><Checkbox checked={selectedGroups.includes(group.id)} onCheckedChange={(checked) => setSelectedGroups((current) => checked ? [...current, group.id] : current.filter((id) => id !== group.id))} aria-label={`Selecionar ${group.name}`} /></TableCell>
+              <TableCell><button type="button" className="text-left" onClick={() => onView(group)}><span className="font-medium transition-colors group-hover:text-primary">{group.name}</span><span className="mt-1 block max-w-[280px] truncate text-xs text-muted-foreground">{group.description || "Sem descrição"}</span></button></TableCell>
+              <TableCell><Badge variant="secondary">{typeLabels[group.type]}</Badge></TableCell>
+              <TableCell><GroupMeta group={group} showMemberCount={canManage} /></TableCell>
+              <TableCell><GroupRowActions group={group} onView={() => onView(group)} onEdit={() => onEdit(group)} canManage={canManage} /></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   )
 }

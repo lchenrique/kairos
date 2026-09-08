@@ -1,44 +1,36 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import { setAuthCookie, removeAuthCookie } from '@/lib/utils/cookies'
+import { create } from "zustand";
+import { useChurchStore } from "@/lib/stores/church-store";
+import type { AppRole } from "@/lib/permissions";
 
 interface User {
-  id: string
-  name: string
-  email: string
+  id: string;
+  name: string;
+  email: string;
+  role: AppRole;
 }
 
 interface AuthState {
-  user: User | null
-  token: string | null
-  isAuthenticated: boolean
-  login: (user: User, token: string) => void
-  logout: () => void
+  user: User | null;
+  isAuthenticated: boolean;
+  isSigningOut: boolean;
+  login: (user: User) => void;
+  beginSignOut: () => void;
+  logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
-  persist(
     (set) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
-      login: (user, token) => {
-        console.log('Login chamado com token:', !!token)
-        setAuthCookie(token)
-        set({ user, token, isAuthenticated: true })
+      isSigningOut: false,
+      login: (user) => {
+        useChurchStore.getState().clearActiveChurch();
+        set({ user, isAuthenticated: true, isSigningOut: false });
       },
+      beginSignOut: () => set({ isSigningOut: true }),
       logout: () => {
-        console.log('Logout chamado')
-        removeAuthCookie()
-        set({ user: null, token: null, isAuthenticated: false })
+        useChurchStore.getState().clearActiveChurch();
+        set({ user: null, isAuthenticated: false });
       },
     }),
-    {
-      name: 'auth-storage',
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated
-      })
-    }
-  )
-)
+);

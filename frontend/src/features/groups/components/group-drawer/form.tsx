@@ -22,13 +22,13 @@ import {
 } from "@/components/ui/select"
 import { useDrawerStore } from "@/lib/stores/drawer-store"
 import { groupFormSchema } from "./schema"
-import type { GetGroups200GroupsItem } from "@/lib/api/generated/model"
+import type { GetGroups200DataItem } from "@/lib/api/generated/model"
 import { useCreateGroup } from "../../hooks/use-create-group"
 import { useUpdateGroup } from "../../hooks/use-update-group"
 import type { z } from "zod"
 
 interface GroupFormProps {
-  initialData?: GetGroups200GroupsItem
+  initialData?: GetGroups200DataItem
   id?: string
 }
 
@@ -36,29 +36,42 @@ type FormData = z.infer<typeof groupFormSchema>
 
 export function GroupForm({ initialData, id }: GroupFormProps) {
   const close = useDrawerStore((state) => state.close)
-  const { mutate: createGroup, isPending: isCreating } = useCreateGroup()
-  const { mutate: updateGroup, isPending: isUpdating } = useUpdateGroup(id ?? "")
+  const { mutateAsync: createGroup, isPending: isCreating } = useCreateGroup()
+  const { mutateAsync: updateGroup, isPending: isUpdating } = useUpdateGroup(id ?? "")
 
   const form = useForm<FormData>({
     resolver: zodResolver(groupFormSchema),
     defaultValues: {
       name: initialData?.name ?? "",
       description: initialData?.description ?? "",
-      status: initialData?.status ?? "ACTIVE",
+      type: initialData?.type ?? "CELL",
       meetingDay: initialData?.meetingDay ?? "",
-      meetingTime: initialData?.meetingTime ?? "",
-      meetingLocation: initialData?.meetingLocation ?? "",
-      leader: initialData?.leader ?? "",
+      startTime: initialData?.startTime ?? "",
+      endTime: initialData?.endTime ?? "",
+      location: initialData?.location ?? "",
     },
   })
 
-  const onSubmit = (data: FormData) => {
-    if (initialData) {
-      updateGroup(data)
-    } else {
-      createGroup(data)
+  const onSubmit = async (data: FormData) => {
+    const normalizedData = {
+      ...data,
+      description: data.description || undefined,
+      meetingDay: data.meetingDay || undefined,
+      startTime: data.startTime || undefined,
+      endTime: data.endTime || undefined,
+      location: data.location || undefined,
     }
-    close()
+
+    try {
+      if (initialData) {
+        await updateGroup(normalizedData)
+      } else {
+        await createGroup({ data: normalizedData })
+      }
+      close()
+    } catch {
+      // O hook mantém o formulário aberto e apresenta o erro ao usuário.
+    }
   }
 
   return (
@@ -98,22 +111,24 @@ export function GroupForm({ initialData, id }: GroupFormProps) {
 
         <FormField
           control={form.control}
-          name="status"
+          name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Status</FormLabel>
+              <FormLabel>Tipo de grupo</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value}
+                value={field.value}
               >
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o status" />
+                  <SelectTrigger aria-label="Tipo de grupo">
+                    <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="ACTIVE">Ativo</SelectItem>
-                  <SelectItem value="INACTIVE">Inativo</SelectItem>
+                  <SelectItem value="CELL">Célula</SelectItem>
+                  <SelectItem value="MINISTRY">Ministério</SelectItem>
+                  <SelectItem value="DEPARTMENT">Departamento</SelectItem>
+                  <SelectItem value="OTHER">Outro</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -137,12 +152,12 @@ export function GroupForm({ initialData, id }: GroupFormProps) {
 
         <FormField
           control={form.control}
-          name="meetingTime"
+          name="startTime"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Horário da reunião</FormLabel>
+              <FormLabel>Início</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: 19:30" {...field} />
+                <Input type="time" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -151,26 +166,26 @@ export function GroupForm({ initialData, id }: GroupFormProps) {
 
         <FormField
           control={form.control}
-          name="meetingLocation"
+          name="endTime"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Local da reunião</FormLabel>
+              <FormLabel>Fim</FormLabel>
+              <FormControl>
+                <Input type="time" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Local</FormLabel>
               <FormControl>
                 <Input placeholder="Ex: Sala 101" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="leader"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Líder</FormLabel>
-              <FormControl>
-                <Input placeholder="Nome do líder" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

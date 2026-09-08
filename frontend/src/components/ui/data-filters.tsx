@@ -61,13 +61,13 @@ export function DataFilters({
   onClearFilters,
 }: DataFiltersProps) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-lg border p-4 bg-gradient-to-br from-card/50 via-card/30 to-transparent backdrop-blur-sm">
+    <div className="flex flex-col gap-4 rounded-2xl border border-border/80 bg-card/80 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
       <div className="flex gap-2 flex-1 items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <Input
             placeholder={searchPlaceholder}
-            className="pl-9 bg-background/50 h-10"
+            className="h-10 border-border/70 bg-background/60 pl-9"
             value={values.search || ""}
             onChange={(e) => onSearch(e.target.value)}
           />
@@ -76,7 +76,7 @@ export function DataFilters({
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="h-10 w-10">
-              <SlidersHorizontal className="h-4 w-4" />
+              <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-[400px] sm:w-[540px]">

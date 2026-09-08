@@ -33,49 +33,48 @@
   - [x] Ativar/desativar
   - [x] Excluir
 - [ ] Ordenação nas colunas da tabela
-- [ ] Exportação para CSV
-- [ ] Aniversariantes (pós-MVP)
+- [x] Exportação para CSV
+- [x] Aniversariantes (próximos 30 dias)
 
 ### 3. Grupos/Células 
-- [ ] Cadastro de grupos
-  - [ ] Nome e descrição
-  - [ ] Tipo (célula, ministério, curso)
-  - [ ] Local e horário
-  - [ ] Validação de conflitos
-    - [ ] Prevenção de sobreposição
-    - [ ] Múltiplos grupos em salas diferentes
-    - [ ] Validação de formato (HH:mm)
-- [ ] Associação de membros
-  - [ ] Definição de líderes
+- [x] Cadastro de grupos
+  - [x] Nome e descrição
+  - [x] Tipo (célula, ministério, departamento e outros)
+  - [x] Local e horário
+  - [x] Validação de conflitos e formato (HH:mm)
+- [x] CRUD integrado à API
+- [x] Associação de membros na interface
+  - [x] Associação e deleção em cascade na API
+  - [x] Definição de líderes na interface
   - [ ] Histórico de participação
-  - [ ] Deleção com cascade
 
 ### 4. Eventos 
-- [ ] Cadastro de eventos
-  - [ ] Nome e descrição
-  - [ ] Data e horário
-  - [ ] Local
-  - [ ] Tipo (culto, reunião, treinamento)
-- [ ] Check-in de participantes
-  - [ ] QR Code
-  - [ ] Lista manual
-- [ ] Relatórios
-  - [ ] Presença
-  - [ ] Estatísticas
+- [x] Cadastro de eventos
+  - [x] Nome e descrição
+  - [x] Data e horário
+  - [x] Local e tipo
+  - [x] Filtros, tabela/grid e CRUD integrado à API
+- [x] Check-in/presença de participantes
+  - [x] QR Code com rota de check-in autenticada
+  - [x] Endpoints de lista manual/status na API
+  - [x] Interface de check-in manual/status
+- [x] Relatórios
+  - [x] Presença
+  - [x] Estatísticas
 
 ### 5. Financeiro 
-- [ ] Entradas
-  - [ ] Dízimos
-  - [ ] Ofertas
-  - [ ] Doações
-- [ ] Saídas
-  - [ ] Despesas fixas
-  - [ ] Despesas variáveis
-  - [ ] Investimentos
-- [ ] Relatórios
-  - [ ] Balanço
-  - [ ] Fluxo de caixa
-  - [ ] Gráficos
+- [x] Entradas
+  - [x] Dízimos
+  - [x] Ofertas
+  - [x] Doações
+- [x] Saídas
+  - [x] Despesas fixas
+  - [x] Despesas variáveis
+  - [x] Investimentos
+- [x] Relatórios
+  - [x] Balanço
+  - [x] Fluxo de caixa
+  - [x] Gráficos
 
 ### 6. Comunicação 
 - [ ] Notificações
@@ -107,11 +106,32 @@
 - [x] Componentes de formulário dinâmicos
 
 ### Próximas Etapas
-- [ ] Implementar gestão de grupos/ministérios
-- [ ] Adicionar relatórios e estatísticas
-- [ ] Desenvolver sistema de eventos
+- [ ] Integrar os indicadores de relatórios ao dashboard principal
+- [ ] Adicionar ordenação de colunas no módulo de membros
 - [ ] Aprimorar autenticação e permissões
 - [ ] Otimizar performance e carregamento
+- [ ] Criar notificações por e-mail/WhatsApp (fora desta rodada)
+- [ ] Migrar SQLite para PostgreSQL em staging
+
+## Progresso desta sessão (03/09/2026)
+
+- [x] Padronização do workspace em pnpm (`pnpm-workspace.yaml`, lockfile único e `packageManager` declarado).
+- [x] Shell responsivo com sidebar desktop/mobile, header acessível, navegação para grupos, eventos e configurações.
+- [x] Tokens visuais refeitos com roxo como primária, dourado como destaque e suporte a dark mode/reduced motion.
+- [x] Dashboard redesenhado com indicadores, gráfico de crescimento, próximos eventos e atalhos.
+- [x] Módulo de grupos com listagem, filtros, tabela/grid, criação, edição, exclusão e validação.
+- [x] Módulo de eventos habilitado no backend e implementado no frontend com CRUD, filtros e participantes via API.
+- [x] Página de configurações da igreja integrada ao backend.
+- [x] Upload multipart configurado com limite de 5 MB.
+- [x] Painel de membros/líderes em grupos, presença manual e QR Code nos eventos.
+- [x] Endpoint de relatórios reais (`/reports/overview`) e página de indicadores.
+- [x] Exportação CSV, aniversariantes, Docker, CI e hardening básico (Helmet, rate limit, CORS e MIME).
+- [x] Calendário mensal com eventos recorrentes e lembretes configuráveis.
+- [x] Histórico de presença por membro.
+- [x] Financeiro com entradas, saídas, saldo e API protegida por perfil.
+- [x] Perfis de acesso e gestão da equipe (administrador, pastor, líder, secretário e usuário).
+- [x] Portal responsivo e endpoint de saúde/backup operacional.
+- [x] Validações executadas: frontend lint/typecheck/build, backend lint/build e 28 testes de API.
 
 ## Desafios Técnicos Resolvidos
 - Sincronização de estado com React Query
@@ -127,9 +147,9 @@
 ## Infraestrutura
 
 ### 1. Backend
-- [x] Node.js com Express
+- [x] Node.js com Fastify
 - [x] TypeScript
-- [x] PostgreSQL
+- [x] SQLite (Prisma)
 - [x] Prisma ORM
 - [x] JWT Authentication
 - [x] API Documentation
@@ -146,9 +166,9 @@
   - [x] Grupos
     - [x] CRUD completo
     - [x] Associação de membros
-  - [ ] Eventos (não testado)
-    - [ ] CRUD
-    - [ ] Check-in
+  - [x] Eventos (CRUD e participantes cobertos)
+    - [x] CRUD automatizado
+    - [x] Check-in/status de participante automatizado
 - [ ] Testes
   - [ ] Unitários
   - [ ] E2E
@@ -169,17 +189,18 @@
     - [x] Formulário de edição
     - [x] Visualização de detalhes
     - [x] Deleção
-    - [ ] Ações em massa (UI implementada)
-  - [ ] Grupos
-    - [ ] Listagem com grid/tabela
-    - [ ] Filtros e busca
-    - [ ] Formulário de cadastro/edição
-    - [ ] Associação de membros
-  - [ ] Eventos
-    - [ ] Listagem com grid/tabela
-    - [ ] Filtros e busca
-    - [ ] Formulário de cadastro/edição
-    - [ ] Check-in de participantes
+    - [x] Ações em massa
+  - [x] Grupos (base do módulo)
+    - [x] Listagem com grid/tabela
+    - [x] Filtros e busca
+    - [x] Formulário de cadastro/edição
+    - [x] Associação de membros e definição de líderes
+  - [x] Eventos (base do módulo)
+    - [x] Listagem com grid/tabela
+    - [x] Filtros e busca
+    - [x] Formulário de cadastro/edição
+    - [x] Check-in manual e status de participantes
+- [x] Configurações da igreja
 - [x] Componentes reutilizáveis
   - [x] DataTable com seleção múltipla
   - [x] Componentes de card reutilizáveis
@@ -196,11 +217,11 @@
   - [ ] E2E
 
 ### 3. DevOps
-- [ ] Docker
+- [x] Docker
   - [ ] Backend
   - [ ] Frontend
   - [ ] Banco de dados
-- [ ] CI/CD
+- [x] CI/CD
   - [ ] GitHub Actions
   - [ ] Deploy automático
   - [ ] Testes automáticos
@@ -250,24 +271,24 @@
   - [x] Mix de estilos próprios e do design system
 
 ## Próximos Passos
-- [ ] Gerenciamento de Grupos
-  - [ ] CRUD de grupos
-  - [ ] Associação de membros
+- [x] Gerenciamento de Grupos (base concluída)
+  - [x] CRUD de grupos
+  - [x] Associação de membros e definição de líderes
   - [ ] Hierarquia de grupos
   - [ ] Permissões por grupo
 
-- [ ] Gerenciamento de Eventos
-  - [ ] Calendário de eventos
-  - [ ] Criação/edição de eventos
-  - [ ] Inscrição em eventos
-  - [ ] Lembretes e notificações
-  - [ ] Relatórios de presença
+- [x] Gerenciamento de Eventos (CRUD concluído)
+  - [x] Calendário de eventos
+  - [x] Criação/edição de eventos
+  - [x] Inscrição/check-in manual em eventos
+  - [x] Lembretes configuráveis (notificações ficam para depois)
+  - [x] Relatórios de presença
 
-- [ ] Financeiro
-  - [ ] Registro de dízimos/ofertas
-  - [ ] Controle de despesas
-  - [ ] Relatórios financeiros
-  - [ ] Gráficos e dashboards
+- [x] Financeiro
+  - [x] Registro de dízimos/ofertas
+  - [x] Controle de despesas
+  - [x] Relatórios financeiros
+  - [x] Gráficos e dashboards
 
 - [ ] Comunicação
   - [ ] Sistema de mensagens
@@ -276,10 +297,10 @@
   - [ ] Anúncios internos
 
 - [ ] Relatórios e Analytics
-  - [ ] Dashboard geral
+  - [x] Dashboard geral
   - [ ] Relatórios customizados
-  - [ ] Exportação de dados
-  - [ ] Gráficos e métricas
+  - [x] Exportação de dados
+  - [x] Gráficos e métricas
 
 ## Melhorias Técnicas
 - [ ] Design System
@@ -303,13 +324,13 @@
   - [ ] Caching
 
 - [ ] DevOps
-  - [ ] CI/CD
-  - [ ] Docker
-  - [ ] Monitoramento
-  - [ ] Logs
+  - [x] CI/CD
+  - [x] Docker
+  - [x] Monitoramento básico (healthcheck)
+  - [x] Logs estruturados
 
 - [ ] Segurança
   - [ ] Audit de dependências
-  - [ ] Rate limiting
-  - [ ] CORS
-  - [ ] Sanitização de inputs
+  - [x] Rate limiting
+  - [x] CORS restritivo por ambiente
+  - [x] Validação de upload e inputs com Zod

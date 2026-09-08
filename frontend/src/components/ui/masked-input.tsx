@@ -11,12 +11,14 @@ export interface MaskedInputProps
 }
 
 const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
-  ({ className, mask, onChange, ...props }, ref) => {
+  ({ className, mask, onChange, value, ...props }, ref) => {
     return (
       <div className="relative group">
         <IMaskInput
           mask={mask}
           unmask={true}
+          value={typeof value === "string" ? value : undefined}
+          inputRef={ref}
           onAccept={(value) => onChange(value)}
           className={cn(
             "flex h-10 w-full rounded-md px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground outline-transparent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",

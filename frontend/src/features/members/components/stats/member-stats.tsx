@@ -1,7 +1,7 @@
 'use client'
 
 import { StatsCard } from "@/components/ui/stats-card"
-import { Member } from "@/lib/api/generated/members/members"
+import type { GetMembers200DataItem as Member } from "@/lib/api/generated/model"
 import { UsersIcon, UserIcon, ShieldIcon, UserMinusIcon, TrendingUpIcon, TrendingDownIcon, UserPlusIcon, CalendarClockIcon } from "lucide-react"
 
 interface MemberStatsProps {
@@ -12,7 +12,7 @@ interface MemberStatsProps {
 export function MemberStats({ members, totalMembers }: MemberStatsProps) {
   const activeMembers = members.filter(member => member.status === 'ACTIVE').length
   const inactiveMembers = members.filter(member => member.status === 'INACTIVE').length
-  const leaders = members.filter(member => member.groups.some(group => group.role === 'LEADER')).length
+  const leaders = members.filter(member => member.groups.length > 0).length
 
   // Calcula as porcentagens
   const activeMembersPercentage = totalMembers > 0 ? ((activeMembers / totalMembers) * 100).toFixed(1) : "0.0"
@@ -51,7 +51,7 @@ export function MemberStats({ members, totalMembers }: MemberStatsProps) {
   ] as const
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
         <StatsCard key={stat.title} {...stat} />
       ))}

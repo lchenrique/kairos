@@ -4,73 +4,170 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
-// Configurações da igreja (uma única entrada)
+// Rede responsável por uma ou mais igrejas/unidades.
+model Organization {
+  id        String             @id @default(cuid())
+  name      String
+  slug      String             @unique
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  churches  Church[]
+  users     OrganizationUser[]
+  invites   UserInvite[]
+}
+
+// Igreja, sede, congregação, campo ou campus pertencente a uma Rede.
 model Church {
-  id          String   @id @default("default")
-  name        String
-  address     String?
-  phone       String?
-  email       String?
-  logo        String?
-  theme       String?  @default("light") // light, dark
-  timezone    String?  @default("America/Sao_Paulo")
-  dateFormat  String?  @default("DD/MM/YYYY")
-  timeFormat  String?  @default("HH:mm")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String         @id @default(cuid())
+  organizationId String         @default("legacy-organization")
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  name           String
+  slug           String         @default("sede")
+  isHeadquarters Boolean        @default(false)
+  status         String         @default("ACTIVE")
+  address        String?
+  phone          String?
+  email          String?
+  logo           String?
+  theme          String?        @default("light") // light, dark
+  timezone       String?        @default("America/Sao_Paulo")
+  dateFormat     String?        @default("DD/MM/YYYY")
+  timeFormat     String?        @default("HH:mm")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  users          ChurchUser[]
+  members        Member[]
+  groups         Group[]
+  events         Event[]
+  financeEntries FinanceEntry[]
+  settings       Setting[]
+  invites        UserInvite[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId, status])
 }
 
 // Usuários do sistema (admin, líderes)
 model User {
-  id                 String    @id @default(cuid())
-  name               String
-  email              String    @unique
-  password           String
-  role               String    @default("USER")
-  resetToken         String?   @unique
+  id                  String             @id @default(cuid())
+  authCentralSubject  String?            @unique
+  name                String
+  email               String             @unique
+  password            String
+  role                String             @default("USER")
+  sessionVersion      Int                @default(0)
+  resetToken          String?            @unique
   resetTokenExpiresAt DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  organizations       OrganizationUser[]
+  churches            ChurchUser[]
+  sentInvites         UserInvite[]       @relation("InvitedBy")
+}
+
+// Papel do usuário na Rede. O JWT sempre fica vinculado a uma destas associações.
+model OrganizationUser {
+  id              String       @id @default(cuid())
+  organizationId  String
+  userId          String
+  role            String       @default("USER")
+  status          String       @default("ACTIVE")
+  suspendedAt     DateTime?
+  suspendedById   String?
+  defaultChurchId String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId, status])
+}
+
+// Convite auditável para entrada de uma pessoa na equipe.
+model UserInvite {
+  id             String       @id @default(cuid())
+  organizationId String
+  churchId       String
+  invitedById    String
+  name           String
+  email          String
+  role           String       @default("USER")
+  tokenHash      String       @unique
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  church         Church       @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  invitedBy      User         @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, email])
+  @@index([expiresAt])
+}
+
+// Escopo e papel local do usuário em uma igreja/unidade.
+model ChurchUser {
+  id        String   @id @default(cuid())
+  churchId  String
+  userId    String
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  church    Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([churchId, userId])
+  @@index([userId])
 }
 
 // Membros da igreja
 model Member {
-  id           String             @id @default(cuid())
-  name         String
-  email        String?
-  phone        String?
-  address      String?
-  birthDate    DateTime?
-  baptismDate  DateTime?
-  status       String             @default("ACTIVE")
-  profession   String?
-  maritalStatus String?           @default("SINGLE")
-  notes        String?
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  image        String?
-  events       EventParticipant[]
-  groups       MemberGroup[]
+  id                String              @id @default(cuid())
+  churchId          String              @default("default")
+  church            Church              @relation(fields: [churchId], references: [id], onDelete: Restrict)
+  name              String
+  email             String?
+  phone             String?
+  address           String?
+  birthDate         DateTime?
+  baptismDate       DateTime?
+  status            String              @default("ACTIVE")
+  profession        String?
+  maritalStatus     String?             @default("SINGLE")
+  notes             String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  image             String?
+  events            EventParticipant[]
+  groups            MemberGroup[]
+  attendanceHistory AttendanceHistory[]
+
+  @@index([churchId, status])
 }
 
 // Grupos da igreja (células, ministérios, etc)
 model Group {
   id          String        @id @default(cuid())
+  churchId    String        @default("default")
+  church      Church        @relation(fields: [churchId], references: [id], onDelete: Restrict)
   name        String
   description String?
-  type        String        // CELL, MINISTRY, DEPARTMENT, etc
+  type        String // CELL, MINISTRY, DEPARTMENT, etc
   meetingDay  String?
-  startTime   String?      // Hora de início (HH:mm)
-  endTime     String?      // Hora de término (HH:mm)
+  startTime   String? // Hora de início (HH:mm)
+  endTime     String? // Hora de término (HH:mm)
   location    String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   members     MemberGroup[]
 
-  @@unique([meetingDay, startTime, endTime, location])
+  @@unique([churchId, meetingDay, startTime, endTime, location])
+  @@index([churchId, type])
 }
 
 // Relacionamento many-to-many entre membros e grupos
@@ -89,17 +186,27 @@ model MemberGroup {
 
 // Eventos
 model Event {
-  id           String             @id @default(cuid())
-  title        String
-  description  String?
-  startDate    DateTime
-  endDate      DateTime?
-  location     String?
-  type         String             @default("OTHER") // SERVICE, CELL, MINISTRY, OTHER
-  status       String             @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  participants EventParticipant[]
+  id                   String              @id @default(cuid())
+  churchId             String              @default("default")
+  church               Church              @relation(fields: [churchId], references: [id], onDelete: Restrict)
+  title                String
+  description          String?
+  startDate            DateTime
+  endDate              DateTime?
+  location             String?
+  type                 String              @default("OTHER") // SERVICE, CELL, MINISTRY, OTHER
+  status               String              @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+  recurrenceRule       String? // WEEKLY, MONTHLY
+  recurrenceEndDate    DateTime?
+  recurrenceExceptions String              @default("[]") // JSON com datas ISO ignoradas na série
+  reminderMinutes      Int? // Lembrete futuro em minutos antes do evento
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  participants         EventParticipant[]
+  attendanceHistory    AttendanceHistory[]
+
+  @@index([churchId, startDate])
+  @@index([churchId, status])
 }
 
 // Participação em Eventos
@@ -115,12 +222,57 @@ model EventParticipant {
   @@unique([eventId, memberId])
 }
 
+// Histórico imutável das alterações de presença
+model AttendanceHistory {
+  id         String   @id @default(cuid())
+  eventId    String
+  memberId   String
+  status     String
+  recordedAt DateTime @default(now())
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  member     Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, memberId])
+  @@index([memberId, recordedAt])
+}
+
+// Lançamentos financeiros em centavos para evitar problemas de arredondamento
+model FinanceEntry {
+  id            String    @id @default(cuid())
+  churchId      String    @default("default")
+  church        Church    @relation(fields: [churchId], references: [id], onDelete: Restrict)
+  type          String // INCOME, EXPENSE
+  category      String
+  description   String
+  amountCents   Int
+  occurredAt    DateTime  @default(now())
+  paymentMethod String?
+  notes         String?
+  createdById   String?
+  createdByName String?
+  updatedById   String?
+  updatedByName String?
+  deletedAt     DateTime?
+  deletedById   String?
+  deletedByName String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([churchId, type, occurredAt])
+  @@index([churchId, category])
+  @@index([churchId, deletedAt])
+}
+
 // Configurações do sistema
 model Setting {
   id          String   @id @default(cuid())
-  key         String   @unique
+  churchId    String   @default("default")
+  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  key         String
   value       String
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([churchId, key])
 }

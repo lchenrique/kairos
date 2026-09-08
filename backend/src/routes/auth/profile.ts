@@ -1,35 +1,40 @@
-import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
-import { prisma } from '../../lib/prisma'
-import { errorResponseSchema, userResponseSchema } from '../../schemas/auth'
+import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
+import { prisma } from '../../lib/prisma.js'
+import { UserRoleEnum, errorResponseSchema, userResponseSchema } from '../../schemas/auth.js'
 
 export const profile: FastifyPluginAsyncZod = async (app) => {
-  app.get('/', {
-    onRequest: [app.authenticate],
-    schema: {
-      tags: ['auth'],
-      description: 'Obtém o perfil do usuário autenticado',
-      response: {
-        200: userResponseSchema,
-        401: errorResponseSchema,
-        500: errorResponseSchema
+  app.get(
+    '/',
+    {
+      onRequest: [app.authenticate],
+      schema: {
+        tags: ['auth'],
+        description: 'Obtém o perfil do usuário autenticado',
+        response: {
+          200: userResponseSchema,
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+        security: [{ bearerAuth: [] }],
       },
-      security: [{ bearerAuth: [] }]
-    }
-  }, async (request) => {
-    const { sub: userId } = request.user
+    },
+    async (request) => {
+      const { sub: userId } = request.user
 
-    const user = await prisma.user.findUniqueOrThrow({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    })
+      const user = await prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })
 
-    return user
-  })
+      return { ...user, role: UserRoleEnum.parse(request.user.role) }
+    },
+  )
 }

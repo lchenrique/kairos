@@ -30,7 +30,7 @@ export function PageSizeSelector() {
         value={currentSize.toString()}
         onValueChange={handlePageSizeChange}
       >
-        <SelectTrigger className="h-8 w-[70px]">
+        <SelectTrigger className="h-8 w-[70px]" aria-label="Quantidade de membros por página">
           <SelectValue placeholder="10" />
         </SelectTrigger>
         <SelectContent side="top">

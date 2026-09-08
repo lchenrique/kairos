@@ -65,13 +65,13 @@ export function CTASection() {
                 transition={{ delay: 0.2 }}
               >
                 <Button size="lg" asChild className="group">
-                  <Link href="/signup">
+                  <Link href="/login">
                     Começar Gratuitamente
                     <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
-                  <Link href="/contact">Falar com Consultor</Link>
+                  <Link href="#contact">Falar com a equipe</Link>
                 </Button>
               </motion.div>
             </div>
@@ -129,9 +129,9 @@ export function CTASection() {
                 <div className="relative border bg-card/50 rounded-2xl p-10">
                   <blockquote className="text-center">
                     <p className="text-xl font-medium leading-8 text-card-foreground sm:text-2xl sm:leading-9">
-                      "O Kairos revolucionou a forma como gerenciamos nossa igreja. 
+                      &quot;O Kairos revolucionou a forma como gerenciamos nossa igreja.
                       <span className="block mt-2">
-                        Agora temos mais tempo para focar no que realmente importa: as pessoas."
+                        Agora temos mais tempo para focar no que realmente importa: as pessoas.&quot;
                       </span>
                     </p>
                   </blockquote>

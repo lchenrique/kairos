@@ -4,7 +4,7 @@ import { ColumnDef, SortingState } from "@tanstack/react-table"
 import { DataTable } from "./data-table"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 
-interface DataTableWithPaginationProps<TData, TValue> {
+interface DataTableWithPaginationProps<TData extends { id: string }, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   meta?: {
@@ -15,7 +15,7 @@ interface DataTableWithPaginationProps<TData, TValue> {
   }
 }
 
-export function DataTableWithPagination<TData, TValue>({
+export function DataTableWithPagination<TData extends { id: string }, TValue>({
   columns,
   data,
   meta,
@@ -69,12 +69,6 @@ export function DataTableWithPagination<TData, TValue>({
   }
 
   const tableMeta = meta || defaultMeta
-
-  console.log('DataTableWithPagination render:', {
-    dataLength: data.length,
-    columns: columns.length,
-    meta: tableMeta
-  })
 
   return (
     <div className="space-y-4">

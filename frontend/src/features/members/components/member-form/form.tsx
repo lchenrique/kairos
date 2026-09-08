@@ -41,16 +41,14 @@ export function MemberForm({ initialData, id }: MemberFormProps) {
   const createMember = useCreateMember()
   const updateMember = useUpdateMember()
 
-  console.log(initialData)
-
   const form = useForm<PostMembersBody>({
     resolver: zodResolver(memberFormSchema),
     defaultValues: {
       name: initialData?.name,
-      email: initialData?.email ?? "",
-      phone: initialData?.phone ?? "",
+      email: initialData?.email ?? undefined,
+      phone: initialData?.phone ?? undefined,
       status: initialData?.status ?? "ACTIVE",
-      address: initialData?.address ?? "",
+      address: initialData?.address ?? undefined,
       notes: initialData?.notes ?? "",
       image: initialData?.image ?? "",
       birthDate: initialData?.birthDate ?? "",
@@ -94,6 +92,7 @@ export function MemberForm({ initialData, id }: MemberFormProps) {
                   value={field.value ?? undefined}
                   onChange={field.onChange}
                   onRemove={() => field.onChange(null)}
+                  disabled={isLoading}
                 />
               </FormControl>
               <FormMessage />

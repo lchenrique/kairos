@@ -53,7 +53,7 @@ export function MemberListFilters({
           />
         </div>
         <Select defaultValue="all" onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px]" aria-label="Filtrar membros por status">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -69,15 +69,19 @@ export function MemberListFilters({
           variant={view === "table" ? "default" : "outline"}
           size="icon"
           onClick={() => onViewChange("table")}
+          aria-label="Visualizar membros em tabela"
+          aria-pressed={view === "table"}
         >
-          <LayoutListIcon className="h-4 w-4" />
+          <LayoutListIcon className="h-4 w-4" aria-hidden="true" />
         </Button>
         <Button
           variant={view === "grid" ? "default" : "outline"}
           size="icon"
           onClick={() => onViewChange("grid")}
+          aria-label="Visualizar membros em grade"
+          aria-pressed={view === "grid"}
         >
-          <LayoutGridIcon className="h-4 w-4" />
+          <LayoutGridIcon className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
     </div>

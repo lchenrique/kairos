@@ -26,6 +26,25 @@ import { MemberForm } from "../member-form/form"
 import { MemberView } from "../member-view/view"
 import { useMemberActions } from "@/features/members/hooks/use-member-actions"
 
+function MemberActionsCell({ member }: { member: Member }) {
+  const { handleDelete, handleEdit, handleView } = useMemberActions(member)
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={`Ações de ${member.name}`}>
+          <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={handleView}><Eye className="mr-2 h-4 w-4" aria-hidden="true" />Visualizar</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleEdit}><Pencil className="mr-2 h-4 w-4" aria-hidden="true" />Editar</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive"><Trash className="mr-2 h-4 w-4" aria-hidden="true" />Excluir</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 export const columns: ColumnDef<Member>[] = [
   {
     id: "select",
@@ -123,34 +142,7 @@ export const columns: ColumnDef<Member>[] = [
     id: "actions",
     cell: ({ row }) => {
       const member = row.original
-      const { handleDelete, handleEdit, handleView } = useMemberActions(member)
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleView}>
-              <Eye className="mr-2 h-4 w-4" />
-              Visualizar
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleEdit}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={handleDelete}
-              className="text-destructive focus:text-destructive"
-            >
-              <Trash className="mr-2 h-4 w-4" />
-              Excluir
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
+      return <MemberActionsCell member={member} />
     }
   }
 ]

@@ -88,7 +88,7 @@ export function AdditionalFeatures() {
                 <h3 className="font-semibold">Células e Pequenos Grupos</h3>
               </div>
               <p className="mt-3 text-muted-foreground flex-1">
-                Sistema inteligente para gestão de células, com relatórios de crescimento e acompanhamento pastoral.
+                Organização simples para gestão de células, com relatórios de crescimento e acompanhamento pastoral.
               </p>
               <div className="mt-4 flex items-center justify-between">
                 <div className="flex items-center gap-4 text-sm">
@@ -147,7 +147,7 @@ export function AdditionalFeatures() {
           transition={{ delay: 0.2 }}
         >
           <Button asChild className="group">
-            <Link href="/signup">
+            <Link href="/login">
               Começar Agora
               <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>

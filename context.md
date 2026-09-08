@@ -1,160 +1,62 @@
-# Kairos - Contexto do Desenvolvimento
+# Kairos — Contexto do Desenvolvimento
 
-## Última Sessão (07/12/2023)
+## Última atualização (03/09/2026)
 
-### Estado Atual do Backend
+O Kairos é um monorepo em **pnpm** para gestão de igrejas, com backend Fastify/TypeScript/Prisma e frontend Next.js 14 + App Router. O banco configurado é SQLite (`backend/prisma/dev.db`), adequado para desenvolvimento e MVP local. O contrato OpenAPI é a fonte do cliente React Query gerado em `frontend/src/lib/api/generated`.
 
-#### Implementado e Testado 
+## Estado atual
 
-##### Autenticação e Setup
-- Sistema de autenticação completo com JWT
-- Proteção de rotas implementada
-- Setup inicial com dados da igreja
-- Recuperação de senha funcionando
-- Testes de API passando
+### Backend
 
-##### Gestão de Membros
-- CRUD completo implementado
-- Dados pessoais e contatos
-- Filtros por status e texto
-- Testes de API passando
-  - Criação
-  - Listagem e filtros
-  - Atualização
-  - Deleção
+- Autenticação JWT, membros e grupos com CRUD, paginação e filtros.
+- Eventos habilitados no servidor (`/events`) com CRUD, participantes e atualização de status.
+- Configurações da igreja em `/system/church`.
+- Upload de imagens via multipart/Cloudinary com limite de 5 MB.
+- Swagger gerado em `backend/swagger.json`.
+- Schemas Zod validam enums e datas; o Prisma permanece compatível com SQLite usando strings para campos enumerados.
 
-##### Grupos e Células
-- Cadastro completo com validações
-- Sistema de agendamento
-- Associação de membros
-- Testes de API passando
-  - CRUD completo
-  - Associação de membros
+### Frontend
 
-#### Em Desenvolvimento 
+- Shell responsivo: sidebar desktop/mobile, header sticky, tema claro/escuro e navegação protegida.
+- Design system baseado em shadcn/ui, Tailwind e tokens roxos com destaque dourado.
+- Dashboard redesenhado com KPIs, gráfico de crescimento, próximos eventos, aniversariantes e atalhos.
+- Membros: CRUD, filtros, busca persistida na URL, tabela/grid, drawers, ações em massa e feedback de loading/erro.
+- Grupos: listagem em tabela/grid, filtros, paginação, criação/edição/exclusão e validação de horários/conflitos.
+- Eventos: listagem em tabela/grid, filtros por tipo/status, paginação e CRUD integrado à API.
+- Presença: painel por evento para adicionar/remover participantes e atualizar status em tempo real.
+- QR Code: cada evento gera um QR apontando para sua rota autenticada de check-in no celular.
+- Relatórios: endpoint `/reports/overview` com KPIs reais de membros, grupos, eventos e presença.
+- Membros: exportação CSV e lista de aniversariantes dos próximos 30 dias.
+- Configurações: formulário funcional para identidade, tema, fuso e formatos de data/hora.
+- Calendário: visão mensal responsiva com expansão de eventos semanais/mensais e lembretes registrados.
+- Financeiro: lançamentos em centavos, resumo de entradas/saídas/saldo e controles por perfil.
+- Permissões: papéis ADMIN, PASTOR, LEADER, SECRETARY e USER aplicados no backend e no menu.
+- Portal: página mobile-first com próximos encontros e atalhos para check-in.
+- Operação: `/health`, script de backup SQLite, Docker healthcheck e documentação de migração para PostgreSQL.
 
-##### Eventos
-- API implementada mas não testada
-- Funcionalidades planejadas:
-  - Criação de eventos
-  - Controle de presença
-  - Check-in de participantes
-  - Tipos de evento configuráveis
+## Decisões técnicas
 
-### Estado Atual do Frontend
+1. **pnpm** é o gerenciador oficial: já existiam workspace e lockfile, e ele evita múltiplos lockfiles no monorepo.
+2. **shadcn/ui** é a base obrigatória dos componentes de interface; customizações preservam seus tokens e primitives.
+3. **React Query + Orval** mantêm cache e cliente tipado sincronizados com o Swagger.
+4. **SQLite** fica como banco padrão do MVP; uma migração para PostgreSQL pode ser feita depois sem alterar os contratos da API.
+5. Animações usam Framer Motion com suporte a `prefers-reduced-motion`.
 
-#### Implementado 
+## Validação executada
 
-##### Arquitetura
-- Next.js 14 com App Router
-- TypeScript strict mode
-- TanStack Query para data fetching
-- Zustand para gerenciamento de estado
-- Shadcn/ui para componentes base
-- Framer Motion para animações
+- `pnpm --filter @kairos/frontend lint`
+- `pnpm --filter @kairos/frontend typecheck`
+- `pnpm --filter @kairos/frontend build`
+- `pnpm --filter @kairos/backend lint`
+- `pnpm --filter @kairos/backend build`
+- `pnpm --filter @kairos/backend exec jest --runInBand` (28 testes)
 
-##### Módulo de Membros
-- Interface completa
-  - Listagem em grid e tabela
-  - Formulários de criação/edição
-  - Visualização detalhada
-  - Menu de ações com ícones
-- Hook de ações centralizado (useMemberActions)
-  - Visualização em drawer
-  - Edição em drawer
-  - Confirmação de deleção
-- Padrões de interação consistentes
-  - Ações explícitas via menu dropdown
-  - Feedback visual claro
-  - Animações suaves
-- Componentes reutilizáveis
-  - MemberCard com design moderno
-  - MemberForm com validação
-  - MemberView para detalhes
-- Integração com API
-  - CRUD completo
-  - Invalidação de queries
-  - Tratamento de erros
-- Filtros e Busca
-  - Por status
-  - Por texto
-  - Persistência via URL
-- Ações em Massa
-  - Seleção múltipla
-  - Ativar/desativar membros
-  - Excluir membros
+Todos os comandos acima passam. O build informa apenas que os dados do Browserslist estão antigos; isso não bloqueia o MVP.
 
-##### Sistema de UI
-- Stores para gerenciamento de estado
-  - Modal store com confirmações
-  - Drawer store para forms/detalhes
-- Tema customizado
-  - Cores primárias/secundárias
-  - Dark mode implementado
-  - Tipografia consistente
-- Componentes base estilizados
-  - Inputs e forms
-  - Buttons e badges
-  - Cards e tables
-  - Dropdowns e menus
+## Próximos passos prioritários
 
-#### Em Desenvolvimento
-
-##### Módulo de Membros
-- Ordenação nas colunas da tabela
-- Exportação para CSV
-- Aniversariantes (pós-MVP)
-
-##### Módulo de Grupos
-- Interface planejada
-- Componentes base definidos
-- Integrações pendentes
-
-##### Sistema de Eventos
-- Wireframes iniciais
-- Definição de fluxos
-- Componentes pendentes
-
-### Próximos Passos
-
-1. Módulo de Membros
-   - Implementar ordenação nas colunas
-   - Adicionar exportação CSV
-   - Finalizar MVP do módulo
-
-2. Módulo de Grupos
-   - Implementar interface
-   - Criar hooks de ação
-   - Integrar com API
-
-3. Sistema de Eventos
-   - Desenvolver componentes
-   - Implementar check-in
-   - Criar relatórios
-
-4. Melhorias Gerais
-   - Expandir testes
-   - Documentar componentes
-   - Otimizar performance
-
-### Decisões Técnicas
-
-1. **Arquitetura**
-   - Componentes modulares
-   - Hooks customizados
-   - Stores centralizadas
-
-2. **UI/UX**
-   - Design system consistente
-   - Animações suaves
-   - Feedback claro
-
-3. **Performance**
-   - Code splitting
-   - Lazy loading
-   - Caching otimizado
-
-4. **Manutenibilidade**
-   - Código tipado
-   - Padrões consistentes
-   - Documentação clara
+1. Integrar os indicadores de `/reports/overview` ao dashboard principal.
+2. Criar notificações por e-mail/WhatsApp (mantidas fora desta rodada).
+3. Migrar SQLite para PostgreSQL em staging e automatizar backups externos.
+4. Adicionar ordenação de colunas e exportação por filtros avançados.
+5. Cobrir frontend com testes E2E e revisar permissões por perfil.

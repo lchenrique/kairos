@@ -29,6 +29,7 @@ import type {
   GetGroups401,
   GetGroups500,
   GetGroupsId200,
+  GetGroupsId404,
   GetGroupsParams,
   PostGroups201,
   PostGroups400,
@@ -390,7 +391,7 @@ export const getGetGroupsIdQueryKey = (id: string) => {
 
 export const getGetGroupsIdInfiniteQueryOptions = <
   TData = InfiniteData<Awaited<ReturnType<typeof getGroupsId>>>,
-  TError = unknown,
+  TError = GetGroupsId404,
 >(
   id: string,
   options?: {
@@ -426,11 +427,11 @@ export const getGetGroupsIdInfiniteQueryOptions = <
 export type GetGroupsIdInfiniteQueryResult = NonNullable<
   Awaited<ReturnType<typeof getGroupsId>>
 >;
-export type GetGroupsIdInfiniteQueryError = unknown;
+export type GetGroupsIdInfiniteQueryError = GetGroupsId404;
 
 export function useGetGroupsIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getGroupsId>>>,
-  TError = unknown,
+  TError = GetGroupsId404,
 >(
   id: string,
   options: {
@@ -455,7 +456,7 @@ export function useGetGroupsIdInfinite<
 };
 export function useGetGroupsIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getGroupsId>>>,
-  TError = unknown,
+  TError = GetGroupsId404,
 >(
   id: string,
   options?: {
@@ -480,7 +481,7 @@ export function useGetGroupsIdInfinite<
 };
 export function useGetGroupsIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getGroupsId>>>,
-  TError = unknown,
+  TError = GetGroupsId404,
 >(
   id: string,
   options?: {
@@ -498,7 +499,7 @@ export function useGetGroupsIdInfinite<
 
 export function useGetGroupsIdInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getGroupsId>>>,
-  TError = unknown,
+  TError = GetGroupsId404,
 >(
   id: string,
   options?: {
@@ -527,7 +528,7 @@ export function useGetGroupsIdInfinite<
 
 export const getGetGroupsIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getGroupsId>>,
-  TError = unknown,
+  TError = GetGroupsId404,
 >(
   id: string,
   options?: {
@@ -559,11 +560,11 @@ export const getGetGroupsIdQueryOptions = <
 export type GetGroupsIdQueryResult = NonNullable<
   Awaited<ReturnType<typeof getGroupsId>>
 >;
-export type GetGroupsIdQueryError = unknown;
+export type GetGroupsIdQueryError = GetGroupsId404;
 
 export function useGetGroupsId<
   TData = Awaited<ReturnType<typeof getGroupsId>>,
-  TError = unknown,
+  TError = GetGroupsId404,
 >(
   id: string,
   options: {
@@ -584,7 +585,7 @@ export function useGetGroupsId<
 };
 export function useGetGroupsId<
   TData = Awaited<ReturnType<typeof getGroupsId>>,
-  TError = unknown,
+  TError = GetGroupsId404,
 >(
   id: string,
   options?: {
@@ -603,7 +604,7 @@ export function useGetGroupsId<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
 export function useGetGroupsId<
   TData = Awaited<ReturnType<typeof getGroupsId>>,
-  TError = unknown,
+  TError = GetGroupsId404,
 >(
   id: string,
   options?: {
@@ -615,7 +616,7 @@ export function useGetGroupsId<
 
 export function useGetGroupsId<
   TData = Awaited<ReturnType<typeof getGroupsId>>,
-  TError = unknown,
+  TError = GetGroupsId404,
 >(
   id: string,
   options?: {

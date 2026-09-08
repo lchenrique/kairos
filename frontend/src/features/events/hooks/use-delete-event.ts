@@ -1,19 +1,22 @@
 import { useDeleteEventsId } from "@/lib/api/generated/events/events"
-import { useRouter } from "next/navigation"
+import { getGetEventsQueryKey } from "@/lib/api/generated/events/events"
+import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 export function useDeleteEvent(id: string) {
-  const router = useRouter()
+  const queryClient = useQueryClient()
 
-  return useDeleteEventsId(id, {
+  const mutation = useDeleteEventsId({
     mutation: {
       onSuccess: () => {
         toast.success("Evento excluído com sucesso!")
-        router.refresh()
+        queryClient.invalidateQueries({ queryKey: getGetEventsQueryKey() })
       },
       onError: () => {
         toast.error("Erro ao excluir evento")
       },
     },
   })
+
+  return { ...mutation, mutate: () => mutation.mutate({ id }) }
 }

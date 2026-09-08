@@ -6,6 +6,8 @@
  * Erro padrão da API
  */
 export type DeleteGroupsIdMembersMemberId401 = {
+  /** Código estável do erro */
+  code?: string;
   /** Tipo do erro */
   error: string;
   /** Mensagem de erro */

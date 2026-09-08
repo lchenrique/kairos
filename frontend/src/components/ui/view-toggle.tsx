@@ -26,8 +26,10 @@ export function ViewToggle({ view, onChange, className }: ViewToggleProps) {
               size="icon"
               className="h-8 w-8"
               onClick={() => onChange("grid")}
+              aria-label="Visualização em grade"
+              aria-pressed={view === "grid"}
             >
-              <Grid2X2 className="h-4 w-4" />
+              <Grid2X2 className="h-4 w-4" aria-hidden="true" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">
@@ -42,8 +44,10 @@ export function ViewToggle({ view, onChange, className }: ViewToggleProps) {
               size="icon"
               className="h-8 w-8"
               onClick={() => onChange("table")}
+              aria-label="Visualização em tabela"
+              aria-pressed={view === "table"}
             >
-              <List className="h-4 w-4" />
+              <List className="h-4 w-4" aria-hidden="true" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">
