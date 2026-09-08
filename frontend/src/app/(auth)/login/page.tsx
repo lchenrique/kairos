@@ -9,7 +9,7 @@ import { z } from "zod";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { getAuthProfile, useGetAuthSetupStatus } from "@/lib/api/generated/auth/auth";
+import { getAuthProfile } from "@/lib/api/generated/auth/auth";
 import { signInWithEmail } from "@/lib/auth-central";
 import {
   Card,
@@ -32,7 +32,7 @@ import {
   ArrowRight,
   Check,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const loginSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -73,13 +73,6 @@ function LoginPage() {
   const router = useRouter();
   const { login } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
-  const setupStatus = useGetAuthSetupStatus({ query: { retry: 1 } });
-
-  useEffect(() => {
-    if (setupStatus.data?.available) {
-      router.replace("/setup");
-    }
-  }, [router, setupStatus.data]);
 
   const [isPending, setIsPending] = useState(false);
   const loginMutation = async (data: LoginForm) => {
@@ -284,14 +277,14 @@ function LoginPage() {
                   Esqueceu sua senha?
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
-                  Primeiro acesso?{" "}
+                  Ainda não tem uma conta?{" "}
                   <Button
                     type="button"
                     variant="link"
                     className="h-auto p-0 font-medium text-primary"
-                    onClick={() => router.push("/setup")}
+                    onClick={() => router.push("/cadastro")}
                   >
-                    Crie sua Rede
+                    Cadastre-se
                   </Button>
                 </p>
               </CardFooter>

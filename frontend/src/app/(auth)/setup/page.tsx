@@ -11,7 +11,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -87,15 +87,6 @@ export default function SetupPage() {
     },
   });
 
-  useEffect(() => {
-    if (status.data && !status.data.available) {
-      toast.info(
-        "A configuração inicial já foi concluída. Entre com sua conta.",
-      );
-      router.replace("/login");
-    }
-  }, [router, status.data]);
-
   const setup = usePostAuthSetup({
     mutation: {
       onSuccess: (data) => {
@@ -107,10 +98,10 @@ export default function SetupPage() {
         const apiError = error as ApiError;
         if (
           apiError.response?.status === 409 ||
-          apiError.response?.data?.code === "SETUP_ALREADY_COMPLETED"
+          apiError.response?.data?.code === "ACCOUNT_ALREADY_REGISTERED"
         ) {
           toast.info(
-            "A configuração inicial já foi concluída. Entre com sua conta.",
+            "Esta conta já está cadastrada. Entre com sua conta existente.",
           );
           router.replace("/login");
           return;
@@ -157,7 +148,7 @@ export default function SetupPage() {
     } catch (error) {
       const apiError = error as ApiError;
       const apiCode = apiError.response?.data?.code;
-      if (apiCode === "SETUP_ALREADY_COMPLETED") return;
+      if (apiCode === "ACCOUNT_ALREADY_REGISTERED") return;
       if (
         (apiError.response?.status === 409 && apiCode !== "INVALID_SETUP_NAME") ||
         /already|exists|duplicate|cadastrad/i.test(
@@ -207,7 +198,7 @@ export default function SetupPage() {
       <main className="flex min-h-dvh items-center justify-center px-4">
         <Alert className="max-w-lg border-destructive/40" variant="destructive">
           <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-          <AlertTitle>Não foi possível verificar a instalação</AlertTitle>
+          <AlertTitle>Não foi possível verificar o cadastro</AlertTitle>
           <AlertDescription className="mt-2 space-y-4">
             <p>Confirme se o backend está em execução e tente novamente.</p>
             <Button
@@ -248,7 +239,7 @@ export default function SetupPage() {
           </div>
           <div className="max-w-lg space-y-5">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-hero-accent">
-              Primeiro acesso
+              Cadastro SaaS
             </p>
             <h1 className="font-display text-5xl font-medium leading-[1.02] tracking-tight xl:text-6xl">
               Sua Rede começa organizada desde o primeiro dia.
@@ -295,8 +286,10 @@ export default function SetupPage() {
                   <Network className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl">Configure sua Rede</CardTitle>
-                  <CardDescription>Leva menos de dois minutos.</CardDescription>
+                  <CardTitle className="text-xl">Crie sua conta</CardTitle>
+                  <CardDescription>
+                    Cadastre-se e configure sua Rede em menos de dois minutos.
+                  </CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -442,11 +435,11 @@ export default function SetupPage() {
                           className="mr-2 h-4 w-4 animate-spin"
                           aria-hidden="true"
                         />
-                        Criando sua Rede...
+                        Criando sua conta...
                       </>
                     ) : (
                       <>
-                        Criar Rede e entrar
+                        Criar conta e entrar
                         <ArrowRight
                           className="ml-2 h-4 w-4"
                           aria-hidden="true"
@@ -455,8 +448,8 @@ export default function SetupPage() {
                     )}
                   </Button>
                   <p className="text-center text-xs leading-5 text-muted-foreground">
-                    Esta configuração só pode ser feita uma vez nesta
-                    instalação.
+                    Cada conta pode criar sua própria Rede. O login fica no
+                    Auth Central.
                   </p>
                 </form>
               </Form>

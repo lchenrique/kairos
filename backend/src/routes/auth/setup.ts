@@ -21,26 +21,17 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, '')
 }
 
-async function setupIsAvailable() {
-  const [organizations, users] = await prisma.$transaction([
-    prisma.organization.count(),
-    prisma.user.count(),
-  ])
-
-  return organizations === 0 && users === 0
-}
-
 export const setup: FastifyPluginAsyncZod = async (app) => {
   app.get(
     '/status',
     {
       schema: {
         tags: ['auth'],
-        description: 'Informa se a configuração inicial está disponível',
+        description: 'Informa se o cadastro de uma nova Rede está disponível',
         response: { 200: setupStatusSchema },
       },
     },
-    async () => ({ available: await setupIsAvailable() }),
+    async () => ({ available: true }),
   )
 
   app.post(
@@ -48,7 +39,7 @@ export const setup: FastifyPluginAsyncZod = async (app) => {
     {
       schema: {
         tags: ['auth'],
-        description: 'Cria a primeira Rede, igreja sede e conta administradora',
+        description: 'Cria uma Rede, igreja sede e conta administradora',
         body: initialSetupSchema,
         response: {
           201: authResponseSchema,
@@ -77,12 +68,22 @@ export const setup: FastifyPluginAsyncZod = async (app) => {
         })
       }
 
-      if (!(await setupIsAvailable())) {
+      const adminEmail = claims.email.trim().toLowerCase()
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { authCentralSubject: claims.sub },
+            { email: adminEmail },
+          ],
+        },
+        select: { id: true },
+      })
+      if (existingUser) {
         return reply.status(409).send({
           statusCode: 409,
           error: 'Conflict',
-          code: 'SETUP_ALREADY_COMPLETED',
-          message: 'A configuração inicial já foi concluída. Entre com uma conta existente.',
+          code: 'ACCOUNT_ALREADY_REGISTERED',
+          message: 'Esta conta já possui um cadastro no Kairos. Entre com sua conta existente.',
         })
       }
 
@@ -99,12 +100,6 @@ export const setup: FastifyPluginAsyncZod = async (app) => {
 
       try {
         const created = await prisma.$transaction(async (tx) => {
-          const existingOrganization = await tx.organization.count()
-          const existingUser = await tx.user.count()
-          if (existingOrganization > 0 || existingUser > 0) {
-            throw new Error('SETUP_ALREADY_COMPLETED')
-          }
-
           const organization = await tx.organization.create({
             data: { name: input.organizationName, slug: organizationSlug },
           })
@@ -123,7 +118,7 @@ export const setup: FastifyPluginAsyncZod = async (app) => {
             data: {
               authCentralSubject: claims.sub,
               name: claims.name?.trim() || input.adminName,
-              email: claims.email.trim().toLowerCase(),
+              email: adminEmail,
               // The password is owned by Auth Central. This legacy column is
               // intentionally unusable for local authentication.
               password: 'AUTH_CENTRAL_MANAGED',
@@ -157,14 +152,13 @@ export const setup: FastifyPluginAsyncZod = async (app) => {
         })
       } catch (error) {
         if (
-          (error instanceof Error && error.message === 'SETUP_ALREADY_COMPLETED') ||
           (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002')
         ) {
           return reply.status(409).send({
             statusCode: 409,
             error: 'Conflict',
-            code: 'SETUP_ALREADY_COMPLETED',
-            message: 'A configuração inicial já foi concluída. Entre com uma conta existente.',
+            code: 'ACCOUNT_ALREADY_REGISTERED',
+            message: 'Esta conta já possui um cadastro no Kairos. Entre com sua conta existente.',
           })
         }
         throw error
