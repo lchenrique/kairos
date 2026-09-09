@@ -12,25 +12,18 @@ import { cn } from "@/lib/utils"
 const plans = [
   {
     name: "Essencial",
-    description: "Ideal para igrejas e células que querem organizar membros e presença.",
-    price: "R$ 0",
-    period: "para sempre grátis",
-    features: ["Membros e famílias", "Agenda de cultos e eventos", "Check-in básico por lista", "Até 3 líderes na equipe"],
-  },
-  {
-    name: "Comunidade Pro",
-    description: "Para congregações em crescimento que exigem relatórios e QR check-in.",
-    price: "R$ 129",
+    description: "Para uma igreja que quer trocar planilhas por uma rotina simples e organizada.",
+    price: "R$ 49",
     period: "por mês",
-    features: ["Tudo do Essencial", "QR Code Check-in em tempo real", "Células e pequenos grupos ilimitados", "Relatórios e inteligência de frequência", "Gestão financeira de dízimos/ofertas", "Até 15 líderes com permissões"],
-    popular: true,
+    features: ["1 igreja", "Membros, grupos e eventos", "Presença e calendário", "Equipe com permissões"],
   },
   {
-    name: "Rede & Sedes",
-    description: "Para ministérios com sede e múltiplas congregações conectadas.",
-    price: "Sob consulta",
-    period: "plano personalizado",
-    features: ["Tudo do Comunidade Pro", "Gestão multi-unidades e campus", "Painel executivo da presidência", "Suporte prioritário via WhatsApp", "Migração assistida de dados"],
+    name: "Comunidade",
+    description: "Para redes, sedes e congregações que precisam enxergar tudo sem misturar dados.",
+    price: "R$ 99",
+    period: "por mês",
+    features: ["Tudo do Essencial", "Igrejas e unidades ilimitadas", "Visão consolidada da rede", "Relatórios e financeiro", "Permissões por unidade"],
+    popular: true,
   },
 ]
 
@@ -46,17 +39,17 @@ export function PricingSection() {
         >
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
 
-            Planos Transparentes
+            Dois planos. Sem versão gratuita.
           </span>
           <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
             Escolha o ritmo ideal da sua comunidade
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Comece sem custo e evolua conforme o ministério cresce. Cancele quando quiser.
+            Crie sua conta, conheça o produto e ative a comunidade quando estiver pronto para usar dados reais.
           </p>
         </motion.div>
 
-        <div className="grid gap-6 lg:grid-cols-3 items-stretch max-w-6xl mx-auto">
+        <div className="grid gap-6 lg:grid-cols-2 items-stretch max-w-4xl mx-auto">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
@@ -76,7 +69,7 @@ export function PricingSection() {
               >
                 {plan.popular && (
                   <Badge className="absolute -top-3 right-6 rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-primary-foreground shadow-md shadow-primary/25">
-                    Comunidade Pro
+                    Para redes e sedes
                   </Badge>
                 )}
 
@@ -122,8 +115,8 @@ export function PricingSection() {
                         : "bg-muted text-foreground hover:bg-muted/80 border border-border/60",
                     )}
                   >
-                    <Link href={plan.name === "Rede & Sedes" ? "#contact" : "/cadastro"}>
-                      {plan.name === "Rede & Sedes" ? "Falar com Consultor" : "Começar Agora"}
+                    <Link href="/cadastro">
+                      Criar conta
                     </Link>
                   </Button>
                 </CardFooter>

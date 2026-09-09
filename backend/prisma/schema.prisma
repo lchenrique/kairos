@@ -17,6 +17,7 @@ model Organization {
   churches  Church[]
   users     OrganizationUser[]
   invites   UserInvite[]
+  subscription Subscription?
 }
 
 // Igreja, sede, congregação, campo ou campus pertencente a uma Rede.
@@ -66,6 +67,44 @@ model User {
   organizations       OrganizationUser[]
   churches            ChurchUser[]
   sentInvites         UserInvite[]       @relation("InvitedBy")
+  billingIntents      BillingIntent[]
+}
+
+// Assinatura vinculada à organização. O provedor de pagamentos é a fonte de
+// verdade para a cobrança; estes campos mantêm os direitos de uso no Kairos.
+model Subscription {
+  id                     String       @id @default(cuid())
+  organizationId         String       @unique
+  plan                   String
+  status                 String       @default("PENDING")
+  provider               String?
+  providerCustomerId     String?
+  providerSubscriptionId String?      @unique
+  currentPeriodEnd       DateTime?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  organization           Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+// Intenção de compra criada antes do checkout. Ela permite retomar a
+// ativação sem conceder acesso pago antes da confirmação do provedor.
+model BillingIntent {
+  id            String   @id @default(cuid())
+  userId        String
+  plan          String
+  status        String   @default("PENDING")
+  workspaceName String?
+  provider      String?
+  checkoutId    String?  @unique
+  checkoutUrl   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([status])
 }
 
 // Papel do usuário na Rede. O JWT sempre fica vinculado a uma destas associações.

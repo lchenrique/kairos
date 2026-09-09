@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { requirePermission } from '../../lib/authorization.js'
+import { requireActiveSubscriptionForMutation } from '../../lib/billing.js'
 import { verifyAuthCentralJwt } from '../../lib/auth-central.js'
 import { sendTeamInvitationEmail } from '../../lib/mailer.js'
 import { prisma } from '../../lib/prisma.js'
@@ -69,13 +70,14 @@ export const invites: FastifyPluginAsyncZod = async (app) => {
     '/',
     {
       onRequest: [app.authenticate],
-      preHandler: [app.loadTenant, requirePermission('TEAM_MANAGE')],
+      preHandler: [app.loadTenant, requirePermission('TEAM_MANAGE'), requireActiveSubscriptionForMutation],
       schema: {
         tags: ['auth'],
         description: 'Lista o histórico de convites da Rede',
         response: {
           200: z.array(inviteSummarySchema),
           401: errorResponseSchema,
+          402: errorResponseSchema,
           403: errorResponseSchema,
         },
         security: [{ bearerAuth: [] }],
@@ -102,7 +104,7 @@ export const invites: FastifyPluginAsyncZod = async (app) => {
     '/',
     {
       onRequest: [app.authenticate],
-      preHandler: [app.loadTenant, requirePermission('TEAM_MANAGE')],
+      preHandler: [app.loadTenant, requirePermission('TEAM_MANAGE'), requireActiveSubscriptionForMutation],
       schema: {
         tags: ['auth'],
         description: 'Convida uma pessoa para definir a própria senha e entrar na equipe',
@@ -111,6 +113,7 @@ export const invites: FastifyPluginAsyncZod = async (app) => {
           201: inviteSummarySchema,
           400: errorResponseSchema,
           401: errorResponseSchema,
+          402: errorResponseSchema,
           403: errorResponseSchema,
           503: errorResponseSchema,
         },

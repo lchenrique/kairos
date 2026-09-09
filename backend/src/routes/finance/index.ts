@@ -1,6 +1,7 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { requirePermission } from '../../lib/authorization.js'
+import { requireActiveSubscriptionForMutation } from '../../lib/billing.js'
 import { prisma } from '../../lib/prisma.js'
 import { requireCurrentChurch } from '../../lib/tenant.js'
 import {
@@ -18,6 +19,7 @@ const idParams = z.object({ id: z.string() })
 export const financeRoutes: FastifyPluginAsyncZod = async (app) => {
   app.addHook('onRequest', app.authenticate)
   app.addHook('preHandler', app.loadTenant)
+  app.addHook('preHandler', requireActiveSubscriptionForMutation)
 
   app.get<{ Querystring: z.infer<typeof financeQuerySchema> }>(
     '/',

@@ -1,7 +1,7 @@
 "use client"
 
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Users, LayoutDashboard, UsersRound, Church, Settings, CalendarDays, BarChart3, WalletCards, HeartHandshake } from "lucide-react"
+import { Users, LayoutDashboard, UsersRound, Church, Settings, CalendarDays, BarChart3, WalletCards, HeartHandshake, LockKeyhole } from "lucide-react"
 import { useAuthStore } from "@/lib/stores/auth-store"
 import { usePathname } from "next/navigation"
 import { NavItem } from "./nav-item"
@@ -79,16 +79,17 @@ const sidebarNavItems = [
 
 interface SidebarProps {
   isCollapsed: boolean
+  isPreview?: boolean
 }
 
-export function Sidebar({ isCollapsed }: SidebarProps) {
+export function Sidebar({ isCollapsed, isPreview = false }: SidebarProps) {
   const pathname = usePathname()
   const user = useAuthStore((state) => state.user)
   const role = user?.role ?? 'USER'
 
-  const visibleItems = sidebarNavItems.filter((item) =>
-    hasPermission(role, item.permission as AppPermission),
-  )
+  const visibleItems = isPreview
+    ? sidebarNavItems
+    : sidebarNavItems.filter((item) => hasPermission(role, item.permission as AppPermission))
   const sections = Array.from(new Set(visibleItems.map((item) => item.section)))
 
   return (
@@ -133,7 +134,12 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       </motion.div>
 
       <div className="border-b border-sidebar-border py-4">
-        <ChurchSwitcher isCollapsed={isCollapsed} />
+        {isPreview ? (
+          <div className={cn("flex items-center gap-2 px-3 text-xs text-sidebar-muted", isCollapsed && "justify-center px-0")} title="Ative uma assinatura para criar sua primeira igreja">
+            <LockKeyhole className="h-4 w-4 shrink-0" aria-hidden="true" />
+            {!isCollapsed && <span className="truncate">Explorando o produto</span>}
+          </div>
+        ) : <ChurchSwitcher isCollapsed={isCollapsed} />}
       </div>
       
       <ScrollArea className="flex-1 px-3 py-5">
@@ -146,10 +152,10 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                 {items.map((item, index) => (
                   <NavItem
                     key={item.href}
-                    href={item.href}
+                    href={isPreview ? "/onboarding" : item.href}
                     icon={item.icon}
                     title={item.title}
-                    isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+                    isActive={isPreview ? pathname === "/onboarding" && item.href === "/dashboard" : pathname === item.href || pathname.startsWith(`${item.href}/`)}
                     delay={0.15 + index * 0.05}
                     isCollapsed={isCollapsed}
                   />

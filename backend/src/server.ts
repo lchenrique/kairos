@@ -19,6 +19,7 @@ import { verifyAuthCentralJwt } from './lib/auth-central.js'
 import { prisma } from './lib/prisma.js'
 import { type TenantContext, loadTenantContext } from './lib/tenant.js'
 import { authRoutes } from './routes/auth/index.js'
+import { billingRoutes } from './routes/billing/index.js'
 import { dashboardRoutes } from './routes/dashboard/index.js'
 import { eventRoutes } from './routes/events/index.js'
 import { financeRoutes } from './routes/finance/index.js'
@@ -53,7 +54,7 @@ declare module '@fastify/jwt' {
       name: string
       email: string
       role: string
-      organizationId: string
+      organizationId: string | null
       sessionVersion: number
       iat?: number
       exp?: number
@@ -63,7 +64,7 @@ declare module '@fastify/jwt' {
       name: string
       email: string
       role: string
-      organizationId: string
+      organizationId: string | null
       sessionVersion: number
     }
   }
@@ -218,20 +219,39 @@ app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply
         })
       }
     }
-    const membership = user?.organizations[0]
-    if (
-      !user ||
-      !membership || membership.status !== 'ACTIVE'
-    ) {
-      throw new Error('SESSION_REVOKED')
+    if (!user) {
+      try {
+        user = await prisma.user.create({
+          data: {
+            authCentralSubject: payload.sub,
+            name: payload.name?.trim() || payload.email.split('@')[0],
+            email: payload.email.trim().toLowerCase(),
+            password: 'AUTH_CENTRAL_MANAGED',
+            role: 'USER',
+          },
+          include: { organizations: { where: { status: 'ACTIVE' }, orderBy: { createdAt: 'asc' }, take: 1 } },
+        })
+      } catch {
+        // A simultaneous first request can create the local projection first.
+        // Reading it again makes provisioning idempotent without trusting email
+        // as the long-term identity key.
+        user = await (prisma.user as any).findUnique({
+          where: { authCentralSubject: payload.sub },
+          include: { organizations: { where: { status: 'ACTIVE' }, orderBy: { createdAt: 'asc' }, take: 1 } },
+        })
+      }
     }
+
+    if (!user) throw new Error('SESSION_REVOKED')
+
+    const membership = user.organizations[0]
 
     request.user = {
       sub: user.id,
       name: user.name,
       email: user.email,
-      role: membership.role,
-      organizationId: membership.organizationId,
+      role: membership?.role || 'USER',
+      organizationId: membership?.organizationId || null,
       sessionVersion: user.sessionVersion,
     }
   } catch (_err) {
@@ -249,6 +269,7 @@ app.decorate('loadTenant', loadTenantContext)
 
 // Rotas
 app.register(authRoutes, { prefix: '/auth' })
+app.register(billingRoutes, { prefix: '/billing' })
 app.register(dashboardRoutes, { prefix: '/dashboard' })
 app.register(memberRoutes, { prefix: '/members' })
 app.register(uploadRoutes, { prefix: '/uploads' })

@@ -82,7 +82,7 @@ function LoginPage() {
         const user = await getAuthProfile();
         login(user);
         toast.success("Login realizado com sucesso!");
-        router.push("/dashboard");
+        router.push("/onboarding");
       } catch (error) {
         if (error instanceof Error && /401|invalid|credenciais/i.test(error.message)) {
           toast.error("E-mail ou senha inválidos");

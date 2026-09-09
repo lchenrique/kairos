@@ -2,6 +2,7 @@ import type { FastifyReply } from 'fastify'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { requirePermission } from '../../lib/authorization.js'
+import { requireActiveSubscriptionForMutation } from '../../lib/billing.js'
 import { prisma } from '../../lib/prisma.js'
 import { UserRoleEnum } from '../../schemas/auth.js'
 import { errorResponseSchema } from '../../schemas/shared.js'
@@ -40,6 +41,7 @@ function lastAdminError(reply: FastifyReply) {
 
 export const users: FastifyPluginAsyncZod = async (app) => {
   app.addHook('preHandler', app.loadTenant)
+  app.addHook('preHandler', requireActiveSubscriptionForMutation)
 
   app.get(
     '/',

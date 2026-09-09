@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { PageTransition } from "@/components/shared/page-transition";
 import { canAccessPath, defaultPathForRole } from "@/lib/permissions";
+import { useAccountState } from "@/hooks/use-account-state";
 
 export default function AppLayout({
   children,
@@ -34,6 +35,9 @@ export default function AppLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const accountState = useAccountState(isAuthenticated);
+  const isOnboarding = pathname === "/onboarding";
+  const requiresActivation = accountState.data?.stage !== "ACTIVE";
 
   useEffect(() => {
     setMounted(true);
@@ -47,18 +51,31 @@ export default function AppLayout({
   }, [authLoading, isAuthenticated, mounted, router]);
 
   useEffect(() => {
-    if (mounted && !authLoading && user && !canAccessPath(user.role, pathname)) {
+    if (mounted && !authLoading && !requiresActivation && user && !canAccessPath(user.role, pathname)) {
       router.replace(defaultPathForRole(user.role));
     }
-  }, [authLoading, mounted, pathname, router, user]);
+  }, [authLoading, mounted, pathname, requiresActivation, router, user]);
+
+  useEffect(() => {
+    if (!mounted || authLoading || !isAuthenticated || accountState.isLoading || !accountState.data) return;
+    if (requiresActivation && !isOnboarding) {
+      router.replace("/onboarding");
+    } else if (!requiresActivation && isOnboarding) {
+      router.replace(defaultPathForRole(user?.role));
+    }
+  }, [accountState.data, accountState.isLoading, authLoading, isAuthenticated, isOnboarding, mounted, requiresActivation, router, user?.role]);
 
   // Mostra nada durante SSR ou loading
-  if (!mounted || authLoading) {
+  if (!mounted || authLoading || (isAuthenticated && accountState.isLoading)) {
     return null;
   }
 
   // Se não estiver autenticado, não mostra nada mas permite o redirecionamento acontecer
-  if (!isAuthenticated || !user || !canAccessPath(user.role, pathname)) {
+  if (!isAuthenticated || !user || (!isOnboarding && !canAccessPath(user.role, pathname))) {
+    return null;
+  }
+
+  if ((requiresActivation && !isOnboarding) || (!requiresActivation && isOnboarding)) {
     return null;
   }
 
@@ -72,6 +89,7 @@ export default function AppLayout({
     "/reports": "Relatórios",
     "/finance": "Financeiro",
     "/settings": "Configurações",
+    "/onboarding": "Conheça o Kairos",
   };
   const pageTitle = pageLabels[pathname] ?? "Kairos";
 
@@ -89,7 +107,7 @@ export default function AppLayout({
           isCollapsed ? "w-20" : "w-64",
         )}
       >
-        <Sidebar isCollapsed={isCollapsed} />
+        <Sidebar isCollapsed={isCollapsed} isPreview={requiresActivation} />
       </div>
 
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
@@ -97,7 +115,7 @@ export default function AppLayout({
           side="left"
           className="w-[280px] border-sidebar-border bg-sidebar p-0 lg:hidden"
         >
-          <Sidebar isCollapsed={false} />
+          <Sidebar isCollapsed={false} isPreview={requiresActivation} />
         </SheetContent>
       </Sheet>
 
@@ -168,12 +186,12 @@ export default function AppLayout({
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="hidden items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 xl:flex">
+              <div className={cn("hidden items-center gap-2 rounded-full px-3 py-1 text-xs font-medium xl:flex", requiresActivation ? "border border-primary/20 bg-primary/10 text-primary" : "border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400")}>
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className={cn("absolute inline-flex h-full w-full animate-ping rounded-full opacity-75", requiresActivation ? "bg-primary" : "bg-emerald-400")} />
+                  <span className={cn("relative inline-flex h-2 w-2 rounded-full", requiresActivation ? "bg-primary" : "bg-emerald-500")} />
                 </span>
-                Comunidade Ativa
+                {requiresActivation ? "Modo de descoberta" : "Comunidade ativa"}
               </div>
               {mounted && (
                 <Button

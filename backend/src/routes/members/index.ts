@@ -1,5 +1,6 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { requirePermission } from '../../lib/authorization.js'
+import { requireActiveSubscriptionForMutation } from '../../lib/billing.js'
 import { create } from './create.js'
 import { remove } from './delete.js'
 import { get } from './get.js'
@@ -12,6 +13,7 @@ export const memberRoutes: FastifyPluginAsyncZod = async (app) => {
   app.addHook('onRequest', app.authenticate)
   app.addHook('preHandler', app.loadTenant)
   app.addHook('preHandler', requirePermission('MEMBERS_VIEW'))
+  app.addHook('preHandler', requireActiveSubscriptionForMutation)
 
   // Registra todas as rotas
   await app.register(list)
