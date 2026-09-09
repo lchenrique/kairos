@@ -25,6 +25,7 @@ export type AccountState = {
     plan: BillingPlan["id"];
     status: string;
     workspaceName: string | null;
+    checkoutUrl: string | null;
     createdAt: string;
   } | null;
   plans: BillingPlan[];

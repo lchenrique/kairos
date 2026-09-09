@@ -7,6 +7,11 @@ import {
   hasActiveSubscription,
   isBillingPlanId,
 } from '../../lib/billing.js'
+import {
+  AsaasConfigurationError,
+  AsaasRequestError,
+  createAsaasSubscriptionCheckout,
+} from '../../lib/payments/asaas.js'
 import { prisma } from '../../lib/prisma.js'
 import { errorResponseSchema } from '../../schemas/auth.js'
 
@@ -37,6 +42,7 @@ const accountStateSchema = z.object({
       plan: planSchema,
       status: z.string(),
       workspaceName: z.string().nullable(),
+      checkoutUrl: z.string().url().nullable(),
       createdAt: z.date(),
     })
     .nullable(),
@@ -57,6 +63,7 @@ const billingIntentSchema = z.object({
   plan: planSchema,
   status: z.string(),
   workspaceName: z.string().nullable(),
+  checkoutUrl: z.string().url().nullable(),
   createdAt: z.date(),
 })
 
@@ -109,7 +116,14 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
         prisma.billingIntent.findFirst({
           where: { userId: request.user.sub },
           orderBy: { createdAt: 'desc' },
-          select: { id: true, plan: true, status: true, workspaceName: true, createdAt: true },
+          select: {
+            id: true,
+            plan: true,
+            status: true,
+            workspaceName: true,
+            checkoutUrl: true,
+            createdAt: true,
+          },
         }),
       ])
 
@@ -147,24 +161,116 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
     {
       schema: {
         tags: ['billing'],
-        description: 'Registra a escolha de plano antes de iniciar o checkout do provedor.',
+        description: 'Cria ou retoma o checkout hospedado da assinatura.',
         body: checkoutIntentSchema,
-        response: { 201: billingIntentSchema, 401: errorResponseSchema },
+        response: {
+          200: billingIntentSchema,
+          201: billingIntentSchema,
+          401: errorResponseSchema,
+          409: errorResponseSchema,
+          503: errorResponseSchema,
+        },
         security: [{ bearerAuth: [] }],
       },
     },
     async (request, reply) => {
+      if (request.user.organizationId) {
+        return reply.status(409).send({
+          statusCode: 409,
+          error: 'Conflict',
+          code: 'ACCOUNT_ALREADY_ACTIVATED',
+          message: 'Esta conta já possui uma organização em ativação ou ativa.',
+        })
+      }
+
+      const openIntent = await prisma.billingIntent.findFirst({
+        where: {
+          userId: request.user.sub,
+          status: 'PENDING',
+          provider: 'asaas',
+          checkoutUrl: { not: null },
+        },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          plan: true,
+          status: true,
+          workspaceName: true,
+          checkoutUrl: true,
+          createdAt: true,
+        },
+      })
+      const checkoutStillOpen = openIntent && Date.now() - openIntent.createdAt.getTime() < 24 * 60 * 60 * 1000
+      if (openIntent && checkoutStillOpen && isBillingPlanId(openIntent.plan)) {
+        return reply.status(200).send({ ...openIntent, plan: openIntent.plan })
+      }
+      if (openIntent) {
+        await prisma.billingIntent.update({
+          where: { id: openIntent.id },
+          data: { status: 'CHECKOUT_EXPIRED' },
+        })
+      }
+
       const intent = await prisma.billingIntent.create({
         data: {
           userId: request.user.sub,
           plan: request.body.plan,
           workspaceName: request.body.workspaceName,
-          status: 'PENDING',
+          status: 'CREATING_CHECKOUT',
         },
         select: { id: true, plan: true, status: true, workspaceName: true, createdAt: true },
       })
 
-      return reply.status(201).send(intent)
+      try {
+        const checkout = await createAsaasSubscriptionCheckout({
+          intentId: intent.id,
+          plan: request.body.plan,
+          user: { name: request.user.name, email: request.user.email },
+        })
+        const createdIntent = await prisma.billingIntent.update({
+          where: { id: intent.id },
+          data: {
+            status: 'PENDING',
+            provider: checkout.provider,
+            checkoutId: checkout.checkoutId,
+            checkoutUrl: checkout.checkoutUrl,
+          },
+          select: {
+            id: true,
+            plan: true,
+            status: true,
+            workspaceName: true,
+            checkoutUrl: true,
+            createdAt: true,
+          },
+        })
+        return reply.status(201).send(createdIntent)
+      } catch (error) {
+        await prisma.billingIntent.update({
+          where: { id: intent.id },
+          data: { status: 'CHECKOUT_FAILED', provider: 'asaas' },
+        })
+        request.log.error({ error, intentId: intent.id }, 'Não foi possível criar checkout Asaas')
+
+        if (error instanceof AsaasConfigurationError) {
+          return reply.status(503).send({
+            statusCode: 503,
+            error: 'Service Unavailable',
+            code: 'BILLING_NOT_CONFIGURED',
+            message: 'A cobrança ainda está sendo configurada. Tente novamente em breve.',
+          })
+        }
+
+        return reply.status(503).send({
+          statusCode: 503,
+          error: 'Service Unavailable',
+          code: 'CHECKOUT_UNAVAILABLE',
+          message:
+            error instanceof AsaasRequestError
+              ? 'Não foi possível abrir o checkout agora. Tente novamente em instantes.'
+              : 'Não foi possível abrir o checkout agora. Tente novamente em instantes.',
+        })
+      }
     },
   )
 

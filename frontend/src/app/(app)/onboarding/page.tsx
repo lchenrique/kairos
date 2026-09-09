@@ -14,6 +14,15 @@ import { cn } from "@/lib/utils";
 
 const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
+type CheckoutIntent = {
+  id: string;
+  plan: BillingPlan["id"];
+  status: string;
+  workspaceName: string | null;
+  checkoutUrl: string | null;
+  createdAt: string;
+};
+
 export default function OnboardingPage() {
   const queryClient = useQueryClient();
   const { data: account, isLoading } = useAccountState();
@@ -22,14 +31,17 @@ export default function OnboardingPage() {
 
   const choosePlan = useMutation({
     mutationFn: (plan: BillingPlan["id"]) =>
-      customInstance({
+      customInstance<CheckoutIntent>({
         url: "/billing/checkout-intents",
         method: "POST",
         data: { plan, workspaceName: workspaceName.trim() || undefined },
       }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: accountStateQueryKey });
-      toast.success("Escolha registrada. Vamos preparar a ativação da sua organização.");
+    onSuccess: (intent) => {
+      if (intent.checkoutUrl) {
+        window.location.assign(intent.checkoutUrl);
+        return;
+      }
+      toast.error("Não foi possível abrir o checkout. Tente novamente.");
     },
     onError: () => toast.error("Não foi possível registrar sua escolha agora."),
   });
@@ -107,7 +119,7 @@ export default function OnboardingPage() {
           <p className="max-w-md text-sm leading-6 text-muted-foreground">A conta continua acessível. O uso real do produto começa somente com uma assinatura ativa.</p>
         </div>
 
-        {hasIntent && <div className="mb-5 flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm"><LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-primary" /><p>Sua escolha pelo plano <strong>{account.latestIntent?.plan === "COMMUNITY" ? "Comunidade" : "Essencial"}</strong> está registrada. O checkout será conectado a esta etapa; até a confirmação, nenhuma igreja ou dado operacional é liberado.</p></div>}
+        {hasIntent && <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between"><div className="flex items-start gap-3"><LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-primary" /><p>Seu checkout do plano <strong>{account.latestIntent?.plan === "COMMUNITY" ? "Comunidade" : "Essencial"}</strong> está aguardando a confirmação. Assim que o Asaas confirmar o primeiro pagamento, sua organização será ativada.</p></div>{account.latestIntent?.checkoutUrl && <Button asChild size="sm" className="shrink-0"><a href={account.latestIntent.checkoutUrl}>Retomar pagamento</a></Button>}</div>}
 
         {!hasIntent && <div className="mb-5 max-w-md space-y-2"><Label htmlFor="workspace-name">Nome da rede ou espaço (opcional por enquanto)</Label><Input id="workspace-name" value={workspaceName} onChange={(event) => setWorkspaceName(event.target.value)} placeholder="Ex.: Rede Esperança" /><p className="text-xs leading-5 text-muted-foreground">Não é o nome da igreja. Você vai cadastrar a primeira igreja depois da assinatura.</p></div>}
 

@@ -65,6 +65,9 @@ export const envSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
   CLOUDINARY_API_KEY: z.string().min(1).optional(),
   CLOUDINARY_API_SECRET: z.string().min(1).optional(),
+  ASAAS_API_KEY: z.string().min(1).optional(),
+  ASAAS_WEBHOOK_TOKEN: z.string().min(32).optional(),
+  ASAAS_API_URL: z.string().url(),
 })
 
 // Tipos gerados dos schemas

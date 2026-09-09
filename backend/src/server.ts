@@ -20,6 +20,7 @@ import { prisma } from './lib/prisma.js'
 import { type TenantContext, loadTenantContext } from './lib/tenant.js'
 import { authRoutes } from './routes/auth/index.js'
 import { billingRoutes } from './routes/billing/index.js'
+import { billingWebhookRoutes } from './routes/billing/webhooks.js'
 import { dashboardRoutes } from './routes/dashboard/index.js'
 import { eventRoutes } from './routes/events/index.js'
 import { financeRoutes } from './routes/finance/index.js'
@@ -269,6 +270,7 @@ app.decorate('loadTenant', loadTenantContext)
 
 // Rotas
 app.register(authRoutes, { prefix: '/auth' })
+app.register(billingWebhookRoutes, { prefix: '/billing' })
 app.register(billingRoutes, { prefix: '/billing' })
 app.register(dashboardRoutes, { prefix: '/dashboard' })
 app.register(memberRoutes, { prefix: '/members' })

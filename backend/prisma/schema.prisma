@@ -68,6 +68,7 @@ model User {
   churches            ChurchUser[]
   sentInvites         UserInvite[]       @relation("InvitedBy")
   billingIntents      BillingIntent[]
+  paymentWebhookEvents PaymentWebhookEvent[]
 }
 
 // Assinatura vinculada à organização. O provedor de pagamentos é a fonte de
@@ -99,12 +100,29 @@ model BillingIntent {
   provider      String?
   checkoutId    String?  @unique
   checkoutUrl   String?
+  providerSubscriptionId String? @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
   @@index([status])
+}
+
+// Registro idempotente das notificações do provedor. Um mesmo evento pode ser
+// reenviado e não pode criar uma segunda organização ou conceder acesso duas vezes.
+model PaymentWebhookEvent {
+  id              String   @id @default(cuid())
+  userId          String?
+  provider        String
+  providerEventId String
+  event           String
+  payload         String
+  createdAt       DateTime @default(now())
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerEventId])
+  @@index([userId])
 }
 
 // Papel do usuário na Rede. O JWT sempre fica vinculado a uma destas associações.

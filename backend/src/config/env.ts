@@ -61,6 +61,9 @@ export const env = envSchema.parse({
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || undefined,
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || undefined,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || undefined,
+  ASAAS_API_KEY: process.env.ASAAS_API_KEY || undefined,
+  ASAAS_WEBHOOK_TOKEN: process.env.ASAAS_WEBHOOK_TOKEN || undefined,
+  ASAAS_API_URL: process.env.ASAAS_API_URL || 'https://api.asaas.com/v3',
 }) satisfies EnvConfig
 
 if (
