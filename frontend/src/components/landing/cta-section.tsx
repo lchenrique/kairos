@@ -3,151 +3,123 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
-import { Church, Users, Star, ChevronRight, Globe2 } from "lucide-react"
+import { Church, Users, Star, ArrowRight, Globe2, Sparkles } from "lucide-react"
 
 const stats = [
   {
     value: "500+",
-    label: "Igrejas",
+    label: "Igrejas & Unidades",
     icon: Church,
   },
   {
     value: "50k+",
-    label: "Membros",
+    label: "Membros Ativos",
     icon: Users,
   },
   {
-    value: "4.9",
-    label: "Avaliação",
+    value: "99.8%",
+    label: "Presença Verificada",
     icon: Star,
   },
   {
-    value: "12+",
-    label: "Países",
+    value: "100%",
+    label: "Na Nuvem & Seguro",
     icon: Globe2,
   },
 ]
 
 export function CTASection() {
   return (
-    <section className="relative border-t">
-      {/* Background with gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background to-primary/5" />
-      
-      <div className="container relative">
-        <div className="py-24 sm:py-32 lg:py-40">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <motion.h2
-                className="text-4xl font-bold tracking-tighter sm:text-5xl"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                Transforme sua Igreja com{" "}
-                <span className="text-primary">Kairos</span>
-              </motion.h2>
-              <motion.p
-                className="mt-6 text-lg leading-8 text-muted-foreground"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-              >
-                Junte-se a centenas de igrejas que já utilizam o Kairos para
-                fortalecer sua gestão ministerial e impactar mais vidas.
-              </motion.p>
-              <motion.div
-                className="mt-10 flex items-center justify-center gap-4"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-              >
-                <Button size="lg" asChild className="group">
-                  <Link href="/login">
-                    Começar Gratuitamente
-                    <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link href="#contact">Falar com a equipe</Link>
-                </Button>
-              </motion.div>
-            </div>
+    <section className="relative py-20 lg:py-28 overflow-hidden">
+      <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Signature Finnova Showcase Dark Container */}
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-800 bg-[#0c1222] p-8 text-white shadow-2xl shadow-primary/10 sm:p-12 lg:p-16">
+          {/* Radiant Glows */}
+          <div
+            className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full bg-primary/20 blur-3xl"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute -bottom-20 -left-20 h-96 w-96 rounded-full bg-indigo-500/15 blur-3xl"
+            aria-hidden="true"
+          />
 
-            {/* Stats */}
+          <div className="relative z-10 mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-4 py-1.5 text-xs font-semibold text-indigo-300">
+              <Sparkles className="h-3.5 w-3.5" />
+              Comece a Revolução na Sua Comunidade
+            </span>
+
+            <motion.h2
+              className="mt-6 font-display text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              Pronto para transformar a gestão e o cuidado da sua igreja?
+            </motion.h2>
+
+            <motion.p
+              className="mt-4 text-sm leading-relaxed text-slate-300 sm:text-base"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              Junte-se a centenas de líderes pastorais que já organizam suas células,
+              cultos e membros com mais leveza, proximidade e tecnologia.
+            </motion.p>
+
             <motion.div
-              className="mt-16 sm:mt-24"
+              className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <Button
+                size="lg"
+                asChild
+                className="h-12 rounded-full bg-white px-8 font-semibold text-slate-900 shadow-xl hover:bg-slate-100"
+              >
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  Acessar Painel Kairos
+                  <ArrowRight className="h-4 w-4 text-primary" />
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                className="h-12 rounded-full border-slate-700 bg-slate-800/80 px-8 text-white hover:bg-slate-700"
+              >
+                <Link href="#pricing">Ver Planos e Preços</Link>
+              </Button>
+            </motion.div>
+
+            {/* Quick Metrics inside CTA */}
+            <motion.div
+              className="mt-14 border-t border-slate-800/80 pt-10"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
             >
-              <dl className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
                 {stats.map((stat) => {
                   const Icon = stat.icon
                   return (
-                    <motion.div
-                      key={stat.label}
-                      className="flex flex-col items-center gap-2"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <Icon className="h-6 w-6 text-primary" />
-                      <dt className="text-sm leading-6 text-muted-foreground">
-                        {stat.label}
-                      </dt>
-                      <dd className="text-3xl font-semibold tracking-tight">
+                    <div key={stat.label} className="flex flex-col items-center">
+                      <Icon className="h-5 w-5 text-indigo-400" />
+                      <p className="mt-2 font-display text-2xl font-bold tracking-tight text-white sm:text-3xl">
                         {stat.value}
-                      </dd>
-                    </motion.div>
+                      </p>
+                      <p className="mt-0.5 text-xs text-slate-400">{stat.label}</p>
+                    </div>
                   )
                 })}
-              </dl>
+              </div>
             </motion.div>
-
-            {/* Testimonial */}
-            <motion.div
-              className="mt-16 sm:mt-24 max-w-3xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
-            >
-              <figure className="relative">
-                {/* Quote marks decoration */}
-                <svg
-                  className="absolute -top-12 -left-12 h-24 w-24 text-primary/10"
-                  fill="currentColor"
-                  viewBox="0 0 32 32"
-                  aria-hidden="true"
-                >
-                  <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
-                </svg>
-                
-                <div className="relative border bg-card/50 rounded-2xl p-10">
-                  <blockquote className="text-center">
-                    <p className="text-xl font-medium leading-8 text-card-foreground sm:text-2xl sm:leading-9">
-                      &quot;O Kairos revolucionou a forma como gerenciamos nossa igreja.
-                      <span className="block mt-2">
-                        Agora temos mais tempo para focar no que realmente importa: as pessoas.&quot;
-                      </span>
-                    </p>
-                  </blockquote>
-                  <figcaption className="mt-8 flex items-center justify-center gap-x-6">
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Church className="h-6 w-6 text-primary" aria-hidden="true" />
-                    </div>
-                    <div className="text-base">
-                      <div className="font-semibold text-card-foreground">Pastor João Silva</div>
-                      <div className="mt-1 text-sm text-muted-foreground">Igreja Vida Nova • São Paulo, SP</div>
-                    </div>
-                  </figcaption>
-                </div>
-              </figure>
-            </motion.div>
-
           </div>
         </div>
       </div>

@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Allows production validation while the local preview keeps running.
+  distDir: process.env.KAIROS_BUILD_DIR || ".next",
   eslint: {
     ignoreDuringBuilds: true,
   },

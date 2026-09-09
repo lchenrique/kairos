@@ -154,9 +154,9 @@ export default function AppLayout({
                     aria-hidden="true"
                   />
                   <Input
-                    placeholder="Buscar pessoas, eventos..."
+                    placeholder="Buscar membros, cultos, células..."
                     aria-label="Buscar no Kairos"
-                    className="h-10 w-full rounded-xl border-border/70 bg-card/70 pl-10 shadow-none transition-colors focus:bg-card"
+                    className="h-9 w-full rounded-full border-border/70 bg-card/80 pl-10 text-xs shadow-none transition-colors focus:bg-card focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -167,13 +167,13 @@ export default function AppLayout({
               </div>
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-2">
-              <div className="hidden items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 text-xs font-medium text-muted-foreground xl:flex">
-                <Circle
-                  className="h-2.5 w-2.5 fill-primary text-primary"
-                  aria-hidden="true"
-                />
-                Tudo em dia
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="hidden items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 xl:flex">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                </span>
+                Comunidade Ativa
               </div>
               {mounted && (
                 <Button

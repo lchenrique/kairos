@@ -21,7 +21,7 @@
         "tags": [
           "auth"
         ],
-        "description": "Informa se a configuração inicial está disponível",
+        "description": "Informa se o cadastro de uma nova Rede está disponível",
         "responses": {
           "200": {
             "description": "Default Response",
@@ -50,7 +50,7 @@
         "tags": [
           "auth"
         ],
-        "description": "Cria a primeira Rede, igreja sede e conta administradora",
+        "description": "Cria uma Rede, igreja sede e conta administradora",
         "requestBody": {
           "content": {
             "application/json": {
@@ -159,6 +159,37 @@
                   },
                   "required": [
                     "user"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
                   ],
                   "additionalProperties": false
                 }
@@ -781,6 +812,41 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
           }
         }
       }
@@ -933,7 +999,7 @@
         "tags": [
           "auth"
         ],
-        "description": "Autentica um usuário",
+        "description": "Desativado: a autenticação é feita pela Auth Central.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -960,95 +1026,7 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "user": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "email": {
-                          "type": "string"
-                        },
-                        "role": {
-                          "type": "string",
-                          "enum": [
-                            "ADMIN",
-                            "PASTOR",
-                            "LEADER",
-                            "SECRETARY",
-                            "USER"
-                          ]
-                        },
-                        "createdAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "name",
-                        "email",
-                        "role",
-                        "createdAt",
-                        "updatedAt"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": [
-                    "user"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "statusCode": {
-                      "type": "number"
-                    },
-                    "error": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "code": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "statusCode",
-                    "error",
-                    "message",
-                    "code"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "500": {
+          "410": {
             "description": "Default Response",
             "content": {
               "application/json": {
@@ -1087,7 +1065,7 @@
         "tags": [
           "auth"
         ],
-        "description": "Encerra todas as sessões atuais do usuário",
+        "description": "Confirma logout local; a sessão central é encerrada pelo cliente Auth Central",
         "security": [
           {
             "bearerAuth": []
