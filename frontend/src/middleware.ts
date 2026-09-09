@@ -10,6 +10,7 @@ const publicPaths = [
   "/",
   "/login",
   "/setup",
+  "/cadastro",
   "/forgot-password",
   "/reset-password",
   "/accept-invite",
