@@ -107,7 +107,7 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
         <div className="w-full max-w-md">
           <BrandLink mobile />
           <div className="auth-mobile-art-float illustration-surface mb-5 overflow-hidden rounded-2xl lg:hidden" aria-hidden="true">
-            <Image src="/illustrations/kairos-auth-transparent.png" alt="" width={1145} height={1374} className="h-36 w-full object-contain object-[55%_56%]" priority />
+            <Image src="/illustrations/kairos-auth-clay.png" alt="" width={934} height={1115} className="h-36 w-full object-contain object-[62%_50%]" priority />
           </div>
           <ClerkAuthPanel mode={mode} reduceMotion={!!reduceMotion} onModeChange={(nextMode) => router.push(`/auth?mode=${nextMode}`)} />
         </div>
@@ -187,7 +187,7 @@ function HeroPanel({ mode, copy }: { mode: Mode; copy: typeof heroCopy[Mode] }) 
     <aside className="relative hidden overflow-hidden bg-hero px-10 py-8 text-hero-foreground lg:flex lg:h-full lg:flex-col lg:justify-between xl:px-16">
       <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border-[36px] border-hero-accent/30" aria-hidden="true" />
       <div className="auth-art-float illustration-surface pointer-events-none absolute -bottom-6 -right-24 hidden w-[30rem] rounded-[2rem] xl:block" aria-hidden="true">
-        <Image src="/illustrations/kairos-auth-transparent.png" alt="" width={1145} height={1374} className="h-auto w-full object-contain" priority />
+        <Image src="/illustrations/kairos-auth-clay.png" alt="" width={934} height={1115} className="h-auto w-full object-contain" priority />
       </div>
       <AnimatePresence mode="wait">
         <motion.div

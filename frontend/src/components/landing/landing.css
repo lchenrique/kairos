@@ -292,11 +292,9 @@
   border-radius: 12px;
   background-color: #17271d;
   background-image:
-    radial-gradient(circle at 16% 18%, rgba(184, 232, 126, .24), transparent 34%),
-    radial-gradient(circle at 82% 78%, rgba(227, 142, 103, .16), transparent 40%),
     radial-gradient(circle at 1px 1px, rgba(236, 244, 233, .1) 1px, transparent 0),
     linear-gradient(135deg, #17271d, #2e4734 55%, #1b281f);
-  background-size: auto, auto, 18px 18px, auto;
+  background-size: 18px 18px, auto;
   isolation: isolate;
 }
 .lp-hero-story-art::after {
@@ -304,7 +302,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(16,23,19,.2), transparent 54%);
+  background: linear-gradient(90deg, rgba(16,23,19,.1), transparent 54%);
   z-index: 1;
 }
 .lp-hero-story-image {

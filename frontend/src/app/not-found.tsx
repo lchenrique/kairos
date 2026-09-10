@@ -61,7 +61,7 @@ export default function NotFound() {
             <div className="illustration-surface relative aspect-[1.08/1] overflow-hidden rounded-[2rem] border border-border p-5 shadow-2xl shadow-foreground/10 sm:p-8">
               <div className="absolute inset-0 opacity-60 [background-image:radial-gradient(circle_at_1px_1px,hsl(var(--foreground)/0.12)_1px,transparent_0)] [background-size:18px_18px]" aria-hidden="true" />
               <div className="not-found-art-float pointer-events-none absolute inset-[7%] overflow-hidden rounded-[1.5rem]" aria-hidden="true">
-                <Image src="/illustrations/kairos-404-transparent.png" alt="" width={1254} height={1254} className="h-full w-full object-contain" priority />
+                <Image src="/illustrations/kairos-404-clay.png" alt="" width={1062} height={722} className="h-full w-full object-contain" priority />
               </div>
               <div className="absolute left-[17%] top-[20%] h-[58%] w-[66%] rounded-full border border-primary/25" aria-hidden="true" />
               <div className="absolute left-[26%] top-[30%] h-[38%] w-[48%] rounded-full border border-primary/15" aria-hidden="true" />

@@ -377,10 +377,10 @@ export function LandingExperience() {
               </div>
               <div className="lp-hero-story-art">
                 <Image
-                  src="/illustrations/kairos-community-hero-transparent.png"
+                  src="/illustrations/kairos-community-clay.png"
                   alt="Três pessoas reunidas ao redor de um centro de comunidade"
-                  width={1024}
-                  height={1536}
+                  width={880}
+                  height={565}
                   priority
                   className="lp-hero-story-image"
                 />
