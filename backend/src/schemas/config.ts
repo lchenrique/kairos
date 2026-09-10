@@ -52,6 +52,8 @@ export const swaggerSchema = z.object({
 export const envSchema = z.object({
   PORT: z.number().int().positive(),
   JWT_SECRET: z.string().min(1),
+  CLERK_SECRET_KEY: z.string().min(1).optional(),
+  CLERK_JWT_KEY: z.string().min(1).optional(),
   FRONTEND_URL: z.string().url(),
   DATABASE_URL: z.string().min(1),
   COOKIE_DOMAIN: z.string().min(1).optional(),

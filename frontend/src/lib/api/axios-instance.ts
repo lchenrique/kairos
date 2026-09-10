@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useChurchStore } from "@/lib/stores/church-store";
-import { getAccessToken } from "@/lib/auth-central";
+import { getClerkAccessToken } from "@/lib/clerk-token";
 
 const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333",
@@ -13,8 +13,8 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getAccessToken();
+  async (config) => {
+    const token = await getClerkAccessToken();
     if (token) config.headers.Authorization = `Bearer ${token}`;
     const churchId = useChurchStore.getState().activeChurchId;
     if (churchId && config.url !== "/system/context") {

@@ -24,6 +24,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@clerk/backend": "2.33.6",
     "@fastify/auth": "^5.0.1",
     "@fastify/cookie": "^10.0.1",
     "@fastify/cors": "^10.0.1",

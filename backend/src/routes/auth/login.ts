@@ -7,7 +7,7 @@ export const login: FastifyPluginAsyncZod = async (app) => {
     {
       schema: {
         tags: ['auth'],
-        description: 'Desativado: a autenticação é feita pela Auth Central.',
+        description: 'Desativado: a autenticação é feita pelo Clerk.',
         body: loginSchema,
         response: { 410: errorResponseSchema },
       },
@@ -16,8 +16,8 @@ export const login: FastifyPluginAsyncZod = async (app) => {
       reply.status(410).send({
         statusCode: 410,
         error: 'Gone',
-        code: 'AUTH_CENTRAL_REQUIRED',
-        message: 'Use a Auth Central para entrar.',
+        code: 'CLERK_REQUIRED',
+        message: 'Use o Clerk para entrar.',
       }),
   )
 }

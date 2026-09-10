@@ -11,8 +11,8 @@ const resetSchema = z.object({
   password: z.string().min(8),
 })
 
-function authCentralRequired(reply: any) {
-  return reply.status(410).send({ statusCode: 410, error: 'Gone', code: 'AUTH_CENTRAL_REQUIRED', message: 'Gerencie senhas na Auth Central.' })
+function clerkRequired(reply: any) {
+  return reply.status(410).send({ statusCode: 410, error: 'Gone', code: 'CLERK_REQUIRED', message: 'Gerencie senhas no Clerk.' })
 }
 
 export const password: FastifyPluginAsyncZod = async (app) => {
@@ -31,7 +31,7 @@ export const password: FastifyPluginAsyncZod = async (app) => {
         security: [{ bearerAuth: [] }],
       },
     },
-    async (_request, reply) => authCentralRequired(reply),
+    async (_request, reply) => clerkRequired(reply),
   )
 
   app.post(
@@ -44,7 +44,7 @@ export const password: FastifyPluginAsyncZod = async (app) => {
         response: { 204: z.null() },
       },
     },
-    async (_request, reply) => authCentralRequired(reply),
+    async (_request, reply) => clerkRequired(reply),
   )
 
   app.post(
@@ -57,6 +57,6 @@ export const password: FastifyPluginAsyncZod = async (app) => {
         response: { 204: z.null(), 400: errorResponseSchema },
       },
     },
-    async (_request, reply) => authCentralRequired(reply),
+    async (_request, reply) => clerkRequired(reply),
   )
 }

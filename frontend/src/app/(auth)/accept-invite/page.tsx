@@ -8,6 +8,7 @@ import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useSignUp } from "@clerk/nextjs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +29,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePostAuthInvitesAccept } from "@/lib/api/generated/auth/auth";
-import { signInWithEmail, signUpWithEmail } from "@/lib/auth-central";
 
 const formSchema = z
   .object({
@@ -46,6 +46,9 @@ type AcceptInviteForm = z.infer<typeof formSchema>;
 function AcceptInviteContent() {
   const token = useSearchParams().get("token") || "";
   const [completed, setCompleted] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const { isLoaded, signUp, setActive } = useSignUp();
   const form = useForm<AcceptInviteForm>({
     resolver: zodResolver(formSchema),
     defaultValues: { email: "", password: "", confirmPassword: "" },
@@ -108,20 +111,19 @@ function AcceptInviteContent() {
                 className="space-y-5"
                 onSubmit={form.handleSubmit(async (data) => {
                   try {
-                    try {
-                      await signUpWithEmail(data.email.split("@")[0], data.email, data.password);
-                    } catch (error) {
-                      const status = (error as Error & { status?: number }).status;
-                      if (
-                        status !== 409 &&
-                        !/already|exists|duplicate|cadastrad/i.test(
-                          error instanceof Error ? error.message : "",
-                        )
-                      ) {
-                        throw error;
-                      }
+                    if (!isLoaded) return;
+                    const result = await signUp!.create({
+                      emailAddress: data.email,
+                      password: data.password,
+                      firstName: data.email.split("@")[0],
+                    });
+                    if (result.status !== "complete" || !result.createdSessionId) {
+                      await signUp!.prepareVerification({ strategy: "email_code" });
+                      setNeedsVerification(true);
+                      toast.success("Enviamos um código para confirmar seu e-mail.");
+                      return;
                     }
-                    await signInWithEmail(data.email, data.password);
+                    await setActive!({ session: result.createdSessionId });
                     await acceptInvite.mutateAsync({
                       data: { token, password: data.password },
                     });
@@ -134,7 +136,23 @@ function AcceptInviteContent() {
                   }
                 })}
               >
-                <FormField
+                {needsVerification ? (
+                  <>
+                    <p className="text-sm leading-6 text-muted-foreground">Digite o código enviado para confirmar o e-mail do convite.</p>
+                    <div className="space-y-1.5"><FormLabel>Código de verificação</FormLabel><Input inputMode="numeric" autoComplete="one-time-code" value={verificationCode} onChange={(event) => setVerificationCode(event.target.value)} autoFocus placeholder="000000" /></div>
+                    <Button type="button" className="w-full" disabled={acceptInvite.isPending || !isLoaded || verificationCode.trim().length < 4} onClick={async () => {
+                      try {
+                        const result = await signUp!.attemptVerification({ strategy: "email_code", code: verificationCode.trim() });
+                        if (result.status !== "complete" || !result.createdSessionId) throw new Error("Não foi possível confirmar o e-mail.");
+                        await setActive!({ session: result.createdSessionId });
+                        const values = form.getValues();
+                        await acceptInvite.mutateAsync({ data: { token, password: values.password } });
+                      } catch (error) {
+                        toast.error(error instanceof Error ? error.message : "Código inválido ou expirado.");
+                      }
+                    }}>{acceptInvite.isPending ? "Ativando..." : "Confirmar e ativar acesso"}</Button>
+                  </>
+                ) : <><FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
@@ -203,7 +221,7 @@ function AcceptInviteContent() {
                   ) : (
                     "Ativar meu acesso"
                   )}
-                </Button>
+                </Button></>}
               </form>
             </Form>
           </CardContent>

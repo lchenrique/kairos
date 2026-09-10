@@ -3,6 +3,7 @@ packages:
   - "frontend"
 allowBuilds:
   '@biomejs/biome': true
+  '@clerk/shared': false
   '@prisma/client': true
   '@prisma/engines': true
   bcrypt: true

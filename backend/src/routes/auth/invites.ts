@@ -3,7 +3,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { requirePermission } from '../../lib/authorization.js'
 import { requireActiveSubscriptionForMutation } from '../../lib/billing.js'
-import { verifyAuthCentralJwt } from '../../lib/auth-central.js'
+import { resolveClerkIdentity, verifyClerkJwt, type ClerkClaims } from '../../lib/clerk.js'
 import { sendTeamInvitationEmail } from '../../lib/mailer.js'
 import { prisma } from '../../lib/prisma.js'
 import { requireCurrentChurch } from '../../lib/tenant.js'
@@ -219,16 +219,18 @@ export const invites: FastifyPluginAsyncZod = async (app) => {
       const bearerToken = authorization?.startsWith('Bearer ')
         ? authorization.slice('Bearer '.length).trim()
         : ''
-      let claims: Awaited<ReturnType<typeof verifyAuthCentralJwt>>
+      let claims: ClerkClaims
+      let identity: Awaited<ReturnType<typeof resolveClerkIdentity>>
       try {
         if (!bearerToken) throw new Error('MISSING_BEARER_TOKEN')
-        claims = await verifyAuthCentralJwt(bearerToken)
+        claims = await verifyClerkJwt(bearerToken)
+        identity = await resolveClerkIdentity(claims)
       } catch (_error) {
         return reply.status(401).send({
           statusCode: 401,
           error: 'Unauthorized',
-          code: 'AUTH_CENTRAL_SESSION_REQUIRED',
-          message: 'Crie ou acesse sua conta pelo Auth Central antes de aceitar o convite.',
+          code: 'CLERK_SESSION_REQUIRED',
+          message: 'Crie ou acesse sua conta pelo Clerk antes de aceitar o convite.',
         })
       }
 
@@ -249,12 +251,12 @@ export const invites: FastifyPluginAsyncZod = async (app) => {
           message: 'Convite inválido, expirado ou já utilizado.',
         })
       }
-      if (claims.email.trim().toLowerCase() !== invite.email.trim().toLowerCase()) {
+      if (identity.email.trim().toLowerCase() !== invite.email.trim().toLowerCase()) {
         return reply.status(400).send({
           statusCode: 400,
           error: 'Bad Request',
           code: 'INVITE_EMAIL_MISMATCH',
-          message: 'Use no Auth Central o mesmo e-mail que recebeu o convite.',
+          message: 'Use no Clerk o mesmo e-mail que recebeu o convite.',
         })
       }
 
@@ -267,12 +269,12 @@ export const invites: FastifyPluginAsyncZod = async (app) => {
 
         const created = await tx.user.create({
           data: {
-            authCentralSubject: claims.sub,
+            clerkUserId: claims.sub,
             name: invite.name,
-            email: claims.email.trim().toLowerCase(),
-            // The password is owned by Auth Central; this legacy column is
+            email: identity.email.trim().toLowerCase(),
+            // The password is owned by Clerk; this legacy column is
             // intentionally unusable for local authentication.
-            password: 'AUTH_CENTRAL_MANAGED',
+            password: 'CLERK_MANAGED',
             role: invite.role,
           },
         })

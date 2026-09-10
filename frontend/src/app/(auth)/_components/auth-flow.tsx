@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useAuth as useClerkAuth, useSignIn, useSignUp } from "@clerk/nextjs";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -12,10 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuthStore } from "@/lib/stores/auth-store";
-import { signInWithEmail, signUpWithEmail } from "@/lib/auth-central";
-import { getAuthProfile } from "@/lib/api/generated/auth/auth";
-import { usePostAuthPasswordResetRequest } from "@/lib/api/generated/auth/auth";
+import { registerClerkTokenGetter } from "@/lib/clerk-token";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
@@ -38,7 +37,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -101,14 +100,25 @@ const fadeUp = {
   exit: { opacity: 0, y: -8 },
 };
 
+function clerkErrorMessage(error: unknown, fallback: string) {
+  if (isClerkAPIResponseError(error)) {
+    return error.errors[0]?.longMessage || error.errors[0]?.message || fallback;
+  }
+  return error instanceof Error ? error.message : fallback;
+}
+
 export function AuthFlow({ initialMode }: { initialMode: Mode }) {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { getToken } = useClerkAuth();
   const [mode, setMode] = useState<Mode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    registerClerkTokenGetter(getToken);
+  }, [getToken]);
 
   const switchMode = (nextMode?: Mode) => {
     const requestedMode = nextMode === "login" || nextMode === "signup" || nextMode === "recovery"
@@ -142,7 +152,6 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
             setShowConfirm={setShowConfirm}
             onSwitchMode={switchMode}
             onSuccess={(path) => router.push(path)}
-            onLogin={(user) => login(user)}
             onForgotPassword={() => switchMode("recovery")}
             onBackToLogin={() => switchMode("login")}
           />
@@ -236,7 +245,6 @@ type FormPanelProps = {
   onSwitchMode: () => void;
   onBackToLogin: () => void;
   onSuccess: (path: string) => void;
-  onLogin: (user: Awaited<ReturnType<typeof getAuthProfile>>) => void;
   onForgotPassword: () => void;
 };
 
@@ -265,17 +273,64 @@ function FormPanel(props: FormPanelProps) {
 
 function RecoveryForm({ onBackToLogin, reduceMotion }: FormPanelProps) {
   type RecoveryFormValues = z.infer<typeof recoverySchema>;
-  const [sent, setSent] = useState(false);
+  const { isLoaded, signIn } = useSignIn();
+  const [step, setStep] = useState<"request" | "verify" | "password" | "done">("request");
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pending, setPending] = useState(false);
   const form = useForm<RecoveryFormValues>({
     resolver: zodResolver(recoverySchema),
     defaultValues: { email: "" },
   });
-  const resetRequest = usePostAuthPasswordResetRequest({
-    mutation: {
-      onSuccess: () => setSent(true),
-      onError: () => toast.error("Não foi possível enviar a solicitação. Tente novamente."),
-    },
-  });
+
+  const requestReset = async ({ email: nextEmail }: RecoveryFormValues) => {
+    if (!isLoaded) return;
+    setPending(true);
+    try {
+      await signIn!.create({ strategy: "reset_password_email_code", identifier: nextEmail });
+      setEmail(nextEmail);
+      setStep("verify");
+      toast.success("Enviamos um código para seu e-mail.");
+    } catch (error) {
+      toast.error(clerkErrorMessage(error, "Não foi possível iniciar a recuperação."));
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const verifyCode = async () => {
+    if (!isLoaded || code.trim().length < 4) return;
+    setPending(true);
+    try {
+      await signIn!.attemptFirstFactor({ strategy: "reset_password_email_code", code: code.trim() });
+      setStep("password");
+    } catch (error) {
+      toast.error(clerkErrorMessage(error, "Código inválido ou expirado."));
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const updatePassword = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!isLoaded) return;
+    if (password.length < 8 || password !== confirmPassword) {
+      toast.error(password !== confirmPassword ? "As senhas não coincidem." : "Use pelo menos 8 caracteres.");
+      return;
+    }
+    setPending(true);
+    try {
+      await signIn!.resetPassword({ password });
+      setStep("done");
+      toast.success("Senha atualizada com sucesso.");
+    } catch (error) {
+      toast.error(clerkErrorMessage(error, "Não foi possível atualizar sua senha."));
+    } finally {
+      setPending(false);
+    }
+  };
 
   return (
     <motion.div {...fadeUp} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
@@ -289,13 +344,13 @@ function RecoveryForm({ onBackToLogin, reduceMotion }: FormPanelProps) {
         </p>
       </div>
       <Card className="border-border/80 bg-card/95 shadow-xl shadow-foreground/5">
-        {sent ? (
+        {step === "done" ? (
           <>
             <CardHeader className="items-center text-center">
               <CheckCircle2 className="mb-2 h-10 w-10 text-primary" aria-hidden="true" />
               <CardTitle className="text-2xl">Confira seu e-mail</CardTitle>
               <CardDescription className="max-w-sm leading-6">
-                Se existir uma conta com esse endereço, você receberá um link válido por 60 minutos.
+                Sua senha foi atualizada. Agora você já pode entrar novamente.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -304,7 +359,7 @@ function RecoveryForm({ onBackToLogin, reduceMotion }: FormPanelProps) {
               </Button>
             </CardContent>
           </>
-        ) : (
+        ) : step === "request" ? (
           <>
             <CardHeader className="space-y-1 border-b border-border/70 pb-3">
               <CardTitle className="text-base font-semibold">Esqueceu sua senha?</CardTitle>
@@ -314,7 +369,7 @@ function RecoveryForm({ onBackToLogin, reduceMotion }: FormPanelProps) {
             </CardHeader>
             <CardContent className="pt-5">
               <Form {...form}>
-                <form className="space-y-4" onSubmit={form.handleSubmit((data) => resetRequest.mutate({ data }))}>
+                <form className="space-y-4" onSubmit={form.handleSubmit(requestReset)}>
                   <FormField
                     control={form.control}
                     name="email"
@@ -328,15 +383,49 @@ function RecoveryForm({ onBackToLogin, reduceMotion }: FormPanelProps) {
                       </FormItem>
                     )}
                   />
-                  <Button className="h-10 w-full" type="submit" disabled={resetRequest.isPending}>
-                    {resetRequest.isPending ? (
+                  <Button className="h-10 w-full" type="submit" disabled={pending || !isLoaded}>
+                    {pending ? (
                       <><Loader2Icon className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> Enviando...</>
                     ) : (
-                      <>Enviar link de recuperação <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" /></>
+                      <>Enviar código de recuperação <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" /></>
                     )}
                   </Button>
                 </form>
               </Form>
+            </CardContent>
+          </>
+        ) : step === "verify" ? (
+          <>
+            <CardHeader className="space-y-1 border-b border-border/70 pb-3">
+              <CardTitle className="text-base font-semibold">Digite o código</CardTitle>
+              <CardDescription className="text-xs leading-5">Enviamos um código para {email}.</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-5">
+              <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void verifyCode(); }}>
+                <div className="space-y-1.5">
+                  <Label htmlFor="recovery-code" className="text-xs">Código de verificação</Label>
+                  <Input id="recovery-code" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(event) => setCode(event.target.value)} autoFocus placeholder="000000" />
+                </div>
+                <Button className="h-10 w-full" type="submit" disabled={pending || code.trim().length < 4}>
+                  {pending ? <><Loader2Icon className="mr-2 h-4 w-4 animate-spin" />Validando...</> : <>Validar código <ArrowRight className="ml-2 h-4 w-4" /></>}
+                </Button>
+              </form>
+            </CardContent>
+          </>
+        ) : (
+          <>
+            <CardHeader className="space-y-1 border-b border-border/70 pb-3">
+              <CardTitle className="text-base font-semibold">Crie uma nova senha</CardTitle>
+              <CardDescription className="text-xs leading-5">Use pelo menos 8 caracteres.</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-5">
+              <form className="space-y-4" onSubmit={(event) => void updatePassword(event)}>
+                <div className="space-y-1.5"><Label htmlFor="new-password" className="text-xs">Nova senha</Label><Input id="new-password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} autoFocus /></div>
+                <div className="space-y-1.5"><Label htmlFor="confirm-new-password" className="text-xs">Confirmar nova senha</Label><Input id="confirm-new-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} /></div>
+                <Button className="h-10 w-full" type="submit" disabled={pending}>
+                  {pending ? <><Loader2Icon className="mr-2 h-4 w-4 animate-spin" />Atualizando...</> : <>Atualizar senha <ArrowRight className="ml-2 h-4 w-4" /></>}
+                </Button>
+              </form>
             </CardContent>
           </>
         )}
@@ -345,13 +434,14 @@ function RecoveryForm({ onBackToLogin, reduceMotion }: FormPanelProps) {
         <ArrowLeft className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
         Voltar para o login
       </Button>
-      {!reduceMotion && !sent && <p className="mt-4 text-center text-[11px] text-muted-foreground">O link expira em 60 minutos.</p>}
+      {!reduceMotion && step !== "done" && <p className="mt-4 text-center text-[11px] text-muted-foreground">O código expira em poucos minutos.</p>}
     </motion.div>
   );
 }
 
 function LoginForm(props: FormPanelProps) {
-  const { isPending, setIsPending, showPassword, setShowPassword, onSuccess, onLogin, onForgotPassword, onSwitchMode, reduceMotion } = props;
+  const { isPending, setIsPending, showPassword, setShowPassword, onSuccess, onForgotPassword, onSwitchMode, reduceMotion } = props;
+  const { isLoaded, signIn, setActive } = useSignIn();
 
   type LoginForm = z.infer<typeof loginSchema>;
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
@@ -361,15 +451,17 @@ function LoginForm(props: FormPanelProps) {
   const submit = async (data: LoginForm) => {
     setIsPending(true);
     try {
-      await signInWithEmail(data.email, data.password);
-      const user = await getAuthProfile();
-      onLogin(user);
+      const result = await signIn!.create({ identifier: data.email, password: data.password });
+      if (result.status !== "complete" || !result.createdSessionId) {
+        throw new Error("A conta precisa de uma etapa adicional de verificação.");
+      }
+      await setActive!({ session: result.createdSessionId });
       toast.success("Login realizado com sucesso!");
       onSuccess("/onboarding");
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "";
-      if (/401|invalid|credenciais/i.test(msg)) toast.error("E-mail ou senha inválidos");
-      else toast.error("Erro ao fazer login. Tente novamente.");
+      const msg = clerkErrorMessage(error, "Erro ao fazer login. Tente novamente.");
+      if (/invalid|incorrect|identification|senha|e-mail/i.test(msg)) toast.error("E-mail ou senha inválidos");
+      else toast.error(msg);
     } finally {
       setIsPending(false);
     }
@@ -413,7 +505,7 @@ function LoginForm(props: FormPanelProps) {
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-3 pt-2">
-            <Button type="submit" className="h-10 w-full" disabled={isPending}>
+            <Button type="submit" className="h-10 w-full" disabled={isPending || !isLoaded}>
               {isPending ? <><Loader2Icon className="mr-2 h-4 w-4 animate-spin" />Entrando...</> : <>Entrar<ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" /></>}
             </Button>
             <Button type="button" variant="link" className="text-xs text-muted-foreground" onClick={onForgotPassword}>Esqueceu sua senha?</Button>
@@ -430,7 +522,10 @@ function LoginForm(props: FormPanelProps) {
 }
 
 function SignupForm(props: FormPanelProps) {
-  const { isPending, setIsPending, showPassword, setShowPassword, showConfirm, setShowConfirm, onSuccess, onLogin, onSwitchMode, reduceMotion } = props;
+  const { isPending, setIsPending, showPassword, setShowPassword, showConfirm, setShowConfirm, onSuccess, onSwitchMode, reduceMotion } = props;
+  const { isLoaded, signUp, setActive } = useSignUp();
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
 
   type SignUpForm = z.infer<typeof signUpSchema>;
   const form = useForm<SignUpForm>({
@@ -441,22 +536,39 @@ function SignupForm(props: FormPanelProps) {
   const submit = async (values: SignUpForm) => {
     setIsPending(true);
     try {
-      try {
-        await signUpWithEmail(values.name, values.email, values.password);
-      } catch (error) {
-        const status = (error as Error & { status?: number }).status;
-        const message = error instanceof Error ? error.message : "";
-        if (status !== 409 && !/already|exists|duplicate|cadastrad/i.test(message)) throw error;
+      const result = await signUp!.create({
+        emailAddress: values.email,
+        password: values.password,
+        firstName: values.name,
+      });
+      if (result.status === "complete" && result.createdSessionId) {
+        await setActive!({ session: result.createdSessionId });
+        toast.success("Sua conta está pronta. Vamos conhecer o Kairos.");
+        onSuccess("/onboarding");
+        return;
       }
-      await signInWithEmail(values.email, values.password);
-      const user = await getAuthProfile();
-      onLogin(user);
+      await signUp!.prepareVerification({ strategy: "email_code" });
+      setNeedsVerification(true);
+      toast.success("Enviamos um código para confirmar seu e-mail.");
+    } catch (error) {
+      toast.error(clerkErrorMessage(error, "Não foi possível criar sua conta agora. Tente novamente."));
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  const verifySignup = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!isLoaded || verificationCode.trim().length < 4) return;
+    setIsPending(true);
+    try {
+      const result = await signUp!.attemptVerification({ strategy: "email_code", code: verificationCode.trim() });
+      if (result.status !== "complete" || !result.createdSessionId) throw new Error("Não foi possível concluir a verificação.");
+      await setActive!({ session: result.createdSessionId });
       toast.success("Sua conta está pronta. Vamos conhecer o Kairos.");
       onSuccess("/onboarding");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "";
-      if (/401|invalid|credenciais/i.test(message)) toast.error("Este e-mail já existe. Confira a senha ou entre na sua conta.");
-      else toast.error("Não foi possível criar sua conta agora. Tente novamente.");
+      toast.error(clerkErrorMessage(error, "Código inválido ou expirado."));
     } finally {
       setIsPending(false);
     }
@@ -473,10 +585,18 @@ function SignupForm(props: FormPanelProps) {
       <Card className="border-border/80 bg-card/95 shadow-xl shadow-foreground/5">
         <CardHeader className="space-y-1 border-b border-border/70 pb-3">
           <CardTitle className="text-base">Criar conta</CardTitle>
-          <CardDescription className="text-xs">Seu acesso é protegido pelo Auth Central.</CardDescription>
+            <CardDescription className="text-xs">Seu acesso é protegido pelo Clerk.</CardDescription>
         </CardHeader>
         <CardContent className="pt-5">
-          <Form {...form}>
+          {needsVerification ? (
+            <form className="space-y-4" onSubmit={(event) => void verifySignup(event)}>
+              <p className="text-sm leading-6 text-muted-foreground">Digite o código enviado para confirmar seu e-mail e ativar sua conta.</p>
+              <div className="space-y-1.5"><Label htmlFor="signup-code" className="text-xs">Código de verificação</Label><Input id="signup-code" inputMode="numeric" autoComplete="one-time-code" value={verificationCode} onChange={(event) => setVerificationCode(event.target.value)} autoFocus placeholder="000000" /></div>
+              <Button className="h-10 w-full" type="submit" disabled={isPending || !isLoaded}>
+                {isPending ? <><Loader2Icon className="mr-2 h-4 w-4 animate-spin" />Confirmando...</> : <>Confirmar e explorar <ArrowRight className="ml-2 h-4 w-4" /></>}
+              </Button>
+            </form>
+          ) : <Form {...form}>
             <form className="space-y-3" onSubmit={form.handleSubmit(submit)}>
               <FormField control={form.control} name="name" render={({ field }) => (
                 <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.3 }}>
@@ -498,11 +618,11 @@ function SignupForm(props: FormPanelProps) {
                   <FormItem className="space-y-1.5"><FormLabel className="text-xs">Confirmar senha</FormLabel><div className="relative"><FormControl><Input className="h-10 pr-10" type={showConfirm ? "text" : "password"} autoComplete="new-password" placeholder="Digite sua senha novamente" {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-10 w-10" onClick={() => setShowConfirm(!showConfirm)} aria-label={showConfirm ? "Ocultar senha" : "Mostrar senha"}>{showConfirm ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}</Button></div><FormMessage /></FormItem>
                 </motion.div>
               )} />
-              <Button className="h-10 w-full" type="submit" disabled={isPending}>
+              <Button className="h-10 w-full" type="submit" disabled={isPending || !isLoaded}>
                 {isPending ? <><Loader2Icon className="mr-2 h-4 w-4 animate-spin" />Criando sua conta...</> : <>Criar conta e explorar<ArrowRight className="ml-2 h-4 w-4" /></>}
               </Button>
             </form>
-          </Form>
+          </Form>}
           <div className="mt-4">
             <ModeSwitch mode="signup" reduceMotion={reduceMotion} onClick={onSwitchMode} />
           </div>

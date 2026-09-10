@@ -15,7 +15,7 @@ import {
 } from 'fastify-type-provider-zod'
 
 import { env } from './config/env.js'
-import { verifyAuthCentralJwt } from './lib/auth-central.js'
+import { resolveClerkIdentity, verifyClerkJwt } from './lib/clerk.js'
 import { prisma } from './lib/prisma.js'
 import { type TenantContext, loadTenantContext } from './lib/tenant.js'
 import { authRoutes } from './routes/auth/index.js'
@@ -196,10 +196,11 @@ app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply
   try {
     const authorization = request.headers.authorization
     if (!authorization?.startsWith('Bearer ')) throw new Error('MISSING_BEARER_TOKEN')
-    const payload = await verifyAuthCentralJwt(authorization.slice('Bearer '.length))
+    const payload = await verifyClerkJwt(authorization.slice('Bearer '.length))
+    let identity: Awaited<ReturnType<typeof resolveClerkIdentity>> | null = null
 
     let user: any = await (prisma.user as any).findUnique({
-      where: { authCentralSubject: payload.sub },
+      where: { clerkUserId: payload.sub },
       include: {
         organizations: {
           where: { status: 'ACTIVE' },
@@ -208,26 +209,27 @@ app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply
         },
       },
     })
-    // One-time, guarded transition for existing Kairos users. New sessions
-    // always resolve by the immutable Auth Central subject afterwards.
+    // Link an existing local projection once, then use the immutable Clerk id.
     if (!user) {
-      const existing: any = await prisma.user.findUnique({ where: { email: payload.email } })
-      if (existing && !existing.authCentralSubject) {
-        await (prisma.user as any).update({ where: { id: existing.id }, data: { authCentralSubject: payload.sub } })
+      identity = await resolveClerkIdentity(payload)
+      const existing: any = await prisma.user.findUnique({ where: { email: identity.email.trim().toLowerCase() } })
+      if (existing && !existing.clerkUserId) {
+        await (prisma.user as any).update({ where: { id: existing.id }, data: { clerkUserId: payload.sub } })
         user = await (prisma.user as any).findUnique({
-          where: { authCentralSubject: payload.sub },
+          where: { clerkUserId: payload.sub },
           include: { organizations: { where: { status: 'ACTIVE' }, orderBy: { createdAt: 'asc' }, take: 1 } },
         })
       }
     }
     if (!user) {
+      if (!identity) identity = await resolveClerkIdentity(payload)
       try {
         user = await prisma.user.create({
           data: {
-            authCentralSubject: payload.sub,
-            name: payload.name?.trim() || payload.email.split('@')[0],
-            email: payload.email.trim().toLowerCase(),
-            password: 'AUTH_CENTRAL_MANAGED',
+            clerkUserId: payload.sub,
+            name: identity.name?.trim() || identity.email.split('@')[0],
+            email: identity.email.trim().toLowerCase(),
+            password: 'CLERK_MANAGED',
             role: 'USER',
           },
           include: { organizations: { where: { status: 'ACTIVE' }, orderBy: { createdAt: 'asc' }, take: 1 } },
@@ -237,7 +239,7 @@ app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply
         // Reading it again makes provisioning idempotent without trusting email
         // as the long-term identity key.
         user = await (prisma.user as any).findUnique({
-          where: { authCentralSubject: payload.sub },
+          where: { clerkUserId: payload.sub },
           include: { organizations: { where: { status: 'ACTIVE' }, orderBy: { createdAt: 'asc' }, take: 1 } },
         })
       }

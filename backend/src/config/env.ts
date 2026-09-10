@@ -48,6 +48,8 @@ const jwtSecret =
 export const env = envSchema.parse({
   PORT: Number(process.env.PORT) || 3333,
   JWT_SECRET: jwtSecret,
+  CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY || undefined,
+  CLERK_JWT_KEY: process.env.CLERK_JWT_KEY || undefined,
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3001',
   DATABASE_URL: process.env.DATABASE_URL || 'file:./dev.db',
   COOKIE_DOMAIN: process.env.COOKIE_DOMAIN || undefined,

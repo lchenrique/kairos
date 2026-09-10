@@ -9,7 +9,7 @@ export const logout: FastifyPluginAsyncZod = async (app) => {
       onRequest: [app.authenticate],
       schema: {
         tags: ['auth'],
-        description: 'Confirma logout local; a sessão central é encerrada pelo cliente Auth Central',
+        description: 'Confirma logout local; a sessão do Clerk é encerrada pelo cliente',
         response: { 204: z.null(), 401: errorResponseSchema },
         security: [{ bearerAuth: [] }],
       },

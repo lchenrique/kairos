@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
@@ -24,12 +25,14 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
-        <QueryProvider>
-          <Providers>
-            {children}
-            <ReactQueryDevtools initialIsOpen={false} />
-          </Providers>
-        </QueryProvider>
+        <ClerkProvider>
+          <QueryProvider>
+            <Providers>
+              {children}
+              <ReactQueryDevtools initialIsOpen={false} />
+            </Providers>
+          </QueryProvider>
+        </ClerkProvider>
       </body>
     </html>
   )

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-// Auth Central tokens deliberately remain in browser memory. Because Edge
+// Clerk tokens remain managed by the Clerk browser session. Because Edge
 // middleware cannot read them, it must not make an authentication decision
 // from an absent cookie. The client shell checks the session, while every API
 // route still validates the Bearer JWT on the server.

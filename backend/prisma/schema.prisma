@@ -54,7 +54,7 @@ model Church {
 // Usuários do sistema (admin, líderes)
 model User {
   id                  String             @id @default(cuid())
-  authCentralSubject  String?            @unique
+  clerkUserId         String?            @unique
   name                String
   email               String             @unique
   password            String
