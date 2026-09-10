@@ -110,8 +110,8 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
       <main className="flex min-h-dvh items-center justify-center px-4 py-6 sm:px-8 lg:h-full lg:min-h-0 lg:overflow-hidden lg:py-6">
         <div className="w-full max-w-md">
           <BrandLink mobile />
-          <div className="illustration-surface mb-5 h-52 overflow-hidden rounded-2xl border border-border/70 lg:hidden" aria-hidden="true">
-            <Image src="/illustrations/kairos-auth-clay.png" alt="" width={780} height={690} className="h-full w-full object-cover object-[50%_35%]" priority />
+          <div className="mb-5 flex justify-center lg:hidden" aria-hidden="true">
+            <Image src="/illustrations/kairos-auth-clay.png" alt="" width={880} height={779} className="h-auto w-full max-w-[22rem] object-contain" priority />
           </div>
           <ClerkAuthPanel mode={mode} reduceMotion={!!reduceMotion} onModeChange={(nextMode) => router.replace(`/auth?mode=${nextMode}`)} />
         </div>
@@ -188,10 +188,10 @@ function ClerkAuthPanel({
 
 function HeroPanel({ mode, copy }: { mode: Mode; copy: typeof heroCopy[Mode] }) {
   return (
-    <aside className="relative hidden overflow-hidden bg-hero px-10 py-8 text-hero-foreground lg:flex lg:h-full lg:flex-col lg:justify-between xl:px-16">
+    <aside className="illustration-surface relative hidden overflow-hidden bg-hero px-10 py-8 text-hero-foreground lg:flex lg:h-full lg:flex-col lg:justify-between xl:px-16">
       <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border-[36px] border-hero-accent/30" aria-hidden="true" />
-      <div className="auth-art-float illustration-surface pointer-events-none absolute bottom-0 right-4 hidden h-[19rem] w-[21rem] overflow-hidden rounded-[2rem] border border-hero-border/20 xl:block 2xl:h-[22rem] 2xl:w-[24rem]" aria-hidden="true">
-        <Image src="/illustrations/kairos-auth-clay.png" alt="" width={780} height={690} className="h-full w-full object-contain object-bottom" priority />
+      <div className="pointer-events-none absolute right-0 top-1/2 hidden w-[48%] -translate-y-1/2 lg:block" aria-hidden="true">
+        <Image src="/illustrations/kairos-auth-clay.png" alt="" width={880} height={779} className="auth-art-float h-auto w-full object-contain" priority />
       </div>
       <AnimatePresence mode="wait">
         <motion.div
@@ -203,7 +203,7 @@ function HeroPanel({ mode, copy }: { mode: Mode; copy: typeof heroCopy[Mode] }) 
           className="relative space-y-8"
         >
           <BrandLink />
-          <div className="max-w-xl space-y-4">
+          <div className="max-w-[48%] space-y-4">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-hero-accent">{copy.eyebrow}</p>
             <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-tight xl:text-5xl">{copy.title}</h1>
             <p className="max-w-md text-sm leading-6 text-hero-muted">{copy.body}</p>
@@ -212,7 +212,7 @@ function HeroPanel({ mode, copy }: { mode: Mode; copy: typeof heroCopy[Mode] }) 
       </AnimatePresence>
 
       {copy.features > 0 && (
-        <div className="relative grid max-w-md gap-3 sm:grid-cols-3">
+        <div className="relative grid max-w-[51%] gap-3 sm:grid-cols-3">
           {features.slice(0, copy.features).map((feature, i) => (
             <motion.div
               key={feature.title}
