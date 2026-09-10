@@ -183,6 +183,19 @@
   animation: kairos-not-found-art-float 11s ease-in-out infinite;
 }
 
+/* O rodapé de desenvolvimento do Clerk não precisa disputar atenção com o
+   formulário. Mantemos apenas a ação de criar conta, integrada ao card. */
+.login-shell .cl-footer {
+  background: hsl(var(--card) / 0.95) !important;
+  background-image: none !important;
+  border-top: 1px solid hsl(var(--border) / 0.7) !important;
+  box-shadow: none !important;
+}
+
+.login-shell .cl-footer > :last-child {
+  display: none !important;
+}
+
 /* Rotas sem stagger próprio seguem a mesma cascata visual do dashboard. */
 .page-stagger > * > * {
   animation: kairos-page-item-enter 320ms cubic-bezier(0.2, 0, 0, 1) both;

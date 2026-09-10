@@ -31,6 +31,9 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 && typeof window !== "undefined") {
       const auth = useAuthStore.getState();
       auth.logout();
+      const requestUrl = error.config?.url;
+      const isAuthBootstrapRequest =
+        typeof requestUrl === "string" && requestUrl.endsWith("/auth/profile");
       const publicPaths = [
         "/login",
         "/setup",
@@ -45,8 +48,11 @@ axiosInstance.interceptors.response.use(
           window.location.pathname === path ||
           window.location.pathname.startsWith(`${path}/`),
       );
-      if (!auth.isSigningOut && !isPublic) {
-        window.location.assign("/auth?mode=login&session=expired");
+      // /auth/profile is handled by useAuth. Redirecting here would unmount
+      // that hook before it can close an invalid Clerk session, causing the
+      // sign-in component to bounce back to /onboarding forever.
+      if (!auth.isSigningOut && !isPublic && !isAuthBootstrapRequest) {
+        window.location.replace("/auth?mode=login&session=expired");
       }
     }
     return Promise.reject(error);

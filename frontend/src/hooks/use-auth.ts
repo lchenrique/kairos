@@ -36,8 +36,21 @@ export function useAuth() {
       .then((profile) => {
         if (active) login(profile);
       })
-      .catch(() => {
-        if (active) logout();
+      .catch(async (error) => {
+        const status = (error as { response?: { status?: number } })?.response?.status;
+
+        // A Clerk session with a rejected API token must be closed before
+        // leaving the app shell. Otherwise Clerk sends /auth straight back
+        // to /onboarding and the two routes keep bouncing forever.
+        if (status === 401) {
+          try {
+            await clerkSignOut();
+          } catch {
+            // The local session is still cleared below if Clerk is unavailable.
+          }
+        }
+
+        logout();
       })
       .finally(() => {
         if (active) setIsChecking(false);
@@ -46,7 +59,7 @@ export function useAuth() {
     return () => {
       active = false;
     };
-  }, [clerkLoaded, isSignedIn, isSigningOut, login, logout]);
+  }, [clerkLoaded, isSignedIn, isSigningOut, login, logout, clerkSignOut]);
 
   const signOut = useCallback(async () => {
     beginSignOut();

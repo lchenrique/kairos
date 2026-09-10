@@ -81,6 +81,9 @@ const clerkAuthAppearance = {
     socialButtonsBlockButton: "h-10 border-border/80 bg-background/60 text-foreground hover:bg-muted",
     dividerLine: "bg-border/70",
     dividerText: "text-muted-foreground",
+    footer: "w-full border-t border-border/70 bg-card/95 px-6 py-4 shadow-none",
+    footerAction: "bg-transparent",
+    footerActionText: "text-muted-foreground",
     footerActionLink: "text-primary",
   },
 };
@@ -107,8 +110,8 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
       <main className="flex min-h-dvh items-center justify-center px-4 py-6 sm:px-8 lg:h-full lg:min-h-0 lg:overflow-hidden lg:py-6">
         <div className="w-full max-w-md">
           <BrandLink mobile />
-          <div className="auth-mobile-art-float illustration-surface mb-5 overflow-hidden rounded-2xl lg:hidden" aria-hidden="true">
-            <Image src="/illustrations/kairos-auth-clay.png" alt="" width={934} height={1115} className="h-36 w-full object-contain object-[62%_50%]" priority />
+          <div className="illustration-surface mb-5 h-52 overflow-hidden rounded-2xl border border-border/70 lg:hidden" aria-hidden="true">
+            <Image src="/illustrations/kairos-auth-clay.png" alt="" width={780} height={690} className="h-full w-full object-cover object-[50%_35%]" priority />
           </div>
           <ClerkAuthPanel mode={mode} reduceMotion={!!reduceMotion} onModeChange={(nextMode) => router.replace(`/auth?mode=${nextMode}`)} />
         </div>
@@ -187,8 +190,8 @@ function HeroPanel({ mode, copy }: { mode: Mode; copy: typeof heroCopy[Mode] }) 
   return (
     <aside className="relative hidden overflow-hidden bg-hero px-10 py-8 text-hero-foreground lg:flex lg:h-full lg:flex-col lg:justify-between xl:px-16">
       <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border-[36px] border-hero-accent/30" aria-hidden="true" />
-      <div className="auth-art-float illustration-surface pointer-events-none absolute -bottom-6 -right-24 hidden w-[30rem] rounded-[2rem] xl:block" aria-hidden="true">
-        <Image src="/illustrations/kairos-auth-clay.png" alt="" width={934} height={1115} className="h-auto w-full object-contain" priority />
+      <div className="auth-art-float illustration-surface pointer-events-none absolute bottom-0 right-4 hidden h-[19rem] w-[21rem] overflow-hidden rounded-[2rem] border border-hero-border/20 xl:block 2xl:h-[22rem] 2xl:w-[24rem]" aria-hidden="true">
+        <Image src="/illustrations/kairos-auth-clay.png" alt="" width={780} height={690} className="h-full w-full object-contain object-bottom" priority />
       </div>
       <AnimatePresence mode="wait">
         <motion.div
@@ -209,7 +212,7 @@ function HeroPanel({ mode, copy }: { mode: Mode; copy: typeof heroCopy[Mode] }) 
       </AnimatePresence>
 
       {copy.features > 0 && (
-        <div className="relative grid max-w-xl gap-3 sm:grid-cols-3">
+        <div className="relative grid max-w-md gap-3 sm:grid-cols-3">
           {features.slice(0, copy.features).map((feature, i) => (
             <motion.div
               key={feature.title}
