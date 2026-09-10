@@ -5,6 +5,7 @@
   --lp-line: #dce2dc;
   --lp-green: #176344;
   --lp-soft: #edf1eb;
+  --lp-mark-surface: #f0f4ec;
   background: var(--lp-paper);
   color: var(--lp-ink);
   overflow: clip;
@@ -16,6 +17,7 @@
   --lp-line: #303c33;
   --lp-green: #9cdbb4;
   --lp-soft: #1c271f;
+  --lp-mark-surface: #edf3e8;
 }
 .lp-shell {
   width: min(1240px, calc(100% - 96px));
@@ -72,6 +74,11 @@
   place-items: center;
   width: 35px;
   height: 38px;
+  overflow: hidden;
+  border: 1px solid var(--lp-line);
+  border-radius: 10px;
+  background: var(--lp-mark-surface);
+  box-shadow: 0 4px 14px rgba(12, 31, 20, .16);
   color: var(--lp-green);
 }
 .lp-brand-dot {
