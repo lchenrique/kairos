@@ -99,7 +99,7 @@ pnpm --filter @kairos/backend migrate:deploy
 pnpm dev
 ```
 
-Development uses `http://localhost:3001` for the frontend and `http://localhost:3333` for the API. To start them separately, run `pnpm dev:backend` and `pnpm dev:frontend` in different terminals. Turbopack is optional through `pnpm --filter @kairos/frontend dev:turbo`.
+The development command starts the API on `http://localhost:3333` and chooses the first free frontend port starting at `3001`. The selected frontend URL is printed in the terminal and is passed to the API automatically. To start them separately, run `pnpm dev:backend` and `pnpm dev:frontend` in different terminals. Turbopack is optional through `pnpm --filter @kairos/frontend dev:turbo`.
 
 6. Validate the release flow
 ```bash
@@ -243,7 +243,7 @@ pnpm --filter @kairos/backend migrate:deploy
 pnpm dev
 ```
 
-O desenvolvimento usa `http://localhost:3001` para o frontend e `http://localhost:3333` para a API. Para iniciar separadamente, execute `pnpm dev:backend` e `pnpm dev:frontend` em terminais diferentes. O Turbopack é opcional com `pnpm --filter @kairos/frontend dev:turbo`.
+O comando de desenvolvimento inicia a API em `http://localhost:3333` e escolhe a primeira porta livre do frontend a partir da `3001`. A URL escolhida aparece no terminal e é enviada automaticamente para a API. Para iniciar separadamente, execute `pnpm dev:backend` e `pnpm dev:frontend` em terminais diferentes. O Turbopack é opcional com `pnpm --filter @kairos/frontend dev:turbo`.
 
 6. Valide o fluxo de lançamento
 ```bash

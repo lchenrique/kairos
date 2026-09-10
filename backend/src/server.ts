@@ -112,7 +112,7 @@ await app.register(rateLimit, {
 const allowedOrigins =
   process.env.NODE_ENV === 'production'
     ? [env.FRONTEND_URL]
-    : Array.from(new Set([env.FRONTEND_URL, 'http://localhost:3000', 'http://localhost:3001']))
+    : [env.FRONTEND_URL, /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/]
 
 await app.register(cors, {
   origin: allowedOrigins,

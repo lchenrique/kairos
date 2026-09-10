@@ -4,9 +4,9 @@
   "private": true,
   "packageManager": "pnpm@11.15.1",
   "scripts": {
-    "dev": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
-    "dev:backend": "cd backend && pnpm run dev",
-    "dev:frontend": "cd frontend && pnpm run dev",
+    "dev": "node scripts/dev.mjs",
+    "dev:backend": "pnpm --dir backend run dev",
+    "dev:frontend": "pnpm --dir frontend run dev",
     "build": "pnpm -r --if-present run build",
     "typecheck": "pnpm --filter @kairos/frontend typecheck && pnpm --filter @kairos/backend build",
     "test": "pnpm --filter @kairos/backend test",
