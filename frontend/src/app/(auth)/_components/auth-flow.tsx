@@ -348,7 +348,7 @@ function RecoveryForm({ onBackToLogin, reduceMotion }: FormPanelProps) {
           <>
             <CardHeader className="items-center text-center">
               <CheckCircle2 className="mb-2 h-10 w-10 text-primary" aria-hidden="true" />
-              <CardTitle className="text-2xl">Confira seu e-mail</CardTitle>
+              <CardTitle className="text-2xl">Senha atualizada</CardTitle>
               <CardDescription className="max-w-sm leading-6">
                 Sua senha foi atualizada. Agora você já pode entrar novamente.
               </CardDescription>
