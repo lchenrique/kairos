@@ -1,5 +1,6 @@
 import { ArrowUpRight, Compass, Home, MoveUpRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function NotFound() {
   return (
@@ -58,6 +59,9 @@ export default function NotFound() {
 
             <div className="relative aspect-[1.08/1] overflow-hidden rounded-[2rem] border border-border bg-card/75 p-5 shadow-2xl shadow-foreground/10 sm:p-8">
               <div className="absolute inset-0 opacity-60 [background-image:radial-gradient(circle_at_1px_1px,hsl(var(--foreground)/0.12)_1px,transparent_0)] [background-size:18px_18px]" aria-hidden="true" />
+              <div className="not-found-art-float pointer-events-none absolute inset-[7%] overflow-hidden rounded-[1.5rem] opacity-75 mix-blend-multiply dark:mix-blend-screen" aria-hidden="true">
+                <Image src="/illustrations/kairos-404.webp" alt="" width={1254} height={1254} className="h-full w-full object-cover" priority />
+              </div>
               <div className="absolute left-[17%] top-[20%] h-[58%] w-[66%] rounded-full border border-primary/25" aria-hidden="true" />
               <div className="absolute left-[26%] top-[30%] h-[38%] w-[48%] rounded-full border border-primary/15" aria-hidden="true" />
               <div className="absolute left-1/2 top-[17%] h-[66%] w-px -translate-x-1/2 bg-border" aria-hidden="true" />

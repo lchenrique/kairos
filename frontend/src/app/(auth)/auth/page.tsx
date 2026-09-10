@@ -7,7 +7,11 @@ type AuthPageProps = {
 };
 
 export default function AuthPage({ searchParams }: AuthPageProps) {
-  const initialMode = searchParams?.mode === "login" ? "login" : "signup";
+  const initialMode = searchParams?.mode === "login"
+    ? "login"
+    : searchParams?.mode === "recovery"
+      ? "recovery"
+      : "signup";
 
   return <AuthFlow initialMode={initialMode} />;
 }

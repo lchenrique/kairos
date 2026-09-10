@@ -138,6 +138,25 @@
   }
 }
 
+@keyframes kairos-auth-art-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-1deg); }
+  50% { transform: translate3d(-6px, -8px, 0) rotate(1deg); }
+}
+
+@keyframes kairos-not-found-art-float {
+  0%, 100% { transform: scale(1.01) translate3d(0, 0, 0); }
+  50% { transform: scale(1.035) translate3d(0, -5px, 0); }
+}
+
+.auth-art-float,
+.auth-mobile-art-float {
+  animation: kairos-auth-art-float 9s ease-in-out infinite;
+}
+
+.not-found-art-float {
+  animation: kairos-not-found-art-float 11s ease-in-out infinite;
+}
+
 /* Rotas sem stagger próprio seguem a mesma cascata visual do dashboard. */
 .page-stagger > * > * {
   animation: kairos-page-item-enter 320ms cubic-bezier(0.2, 0, 0, 1) both;
@@ -165,6 +184,15 @@
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .auth-art-float,
+  .auth-mobile-art-float {
+    animation: none;
+  }
+
+  .not-found-art-float {
+    animation: none;
   }
 }
 

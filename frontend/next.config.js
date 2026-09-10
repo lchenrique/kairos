@@ -7,6 +7,7 @@ const nextConfig = {
       { source: "/login", destination: "/auth?mode=login", permanent: false },
       { source: "/cadastro", destination: "/auth?mode=signup", permanent: false },
       { source: "/setup", destination: "/auth?mode=signup", permanent: false },
+      { source: "/forgot-password", destination: "/auth?mode=recovery", permanent: false },
     ];
   },
   eslint: {

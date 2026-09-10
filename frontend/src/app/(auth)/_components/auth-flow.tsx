@@ -15,10 +15,12 @@ import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { signInWithEmail, signUpWithEmail } from "@/lib/auth-central";
 import { getAuthProfile } from "@/lib/api/generated/auth/auth";
+import { usePostAuthPasswordResetRequest } from "@/lib/api/generated/auth/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
+  ArrowLeft,
   CalendarIcon,
   Check,
   ChurchIcon,
@@ -27,11 +29,14 @@ import {
   HeartHandshakeIcon,
   HomeIcon,
   Loader2Icon,
+  Mail,
+  CheckCircle2,
   Sparkles,
   UsersIcon,
   BookOpenIcon,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -55,7 +60,7 @@ const signUpSchema = z
     path: ["confirmPassword"],
   });
 
-type Mode = "login" | "signup";
+type Mode = "login" | "signup" | "recovery";
 
 const features = [
   { icon: UsersIcon, title: "Gestão de Membros", description: "Cadastre e gerencie todos os membros da sua igreja." },
@@ -78,7 +83,17 @@ const heroCopy: Record<Mode, { eyebrow: string; title: string; body: string; fea
     body: "A conta é só sua. A decisão de criar uma igreja e ativar uma assinatura acontece depois, já dentro da plataforma.",
     features: 0,
   },
+  recovery: {
+    eyebrow: "Volte ao seu ritmo",
+    title: "A gente ajuda você a reencontrar o acesso.",
+    body: "Envie um link para o seu e-mail e retome o cuidado com a sua comunidade em poucos passos.",
+    features: 0,
+  },
 };
+
+const recoverySchema = z.object({
+  email: z.string().trim().email("Informe um e-mail válido"),
+});
 
 const fadeUp = {
   initial: { opacity: 0, y: 12 },
@@ -95,8 +110,8 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
   const [isPending, setIsPending] = useState(false);
   const reduceMotion = useReducedMotion();
 
-  const switchMode = () => {
-    const next = mode === "login" ? "signup" : "login";
+  const switchMode = (nextMode?: Mode) => {
+    const next = nextMode ?? (mode === "login" ? "signup" : "login");
     setMode(next);
     router.replace(`/auth?mode=${next}`);
   };
@@ -108,6 +123,9 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
       <main className="flex min-h-dvh items-center justify-center px-4 py-6 sm:px-8 lg:h-full lg:min-h-0 lg:overflow-hidden lg:py-6">
         <div className="w-full max-w-md">
           <BrandLink mobile />
+          <div className="auth-mobile-art-float mb-5 overflow-hidden rounded-2xl bg-hero lg:hidden" aria-hidden="true">
+            <Image src="/illustrations/kairos-auth.webp" alt="" width={1024} height={1536} className="h-36 w-full object-cover object-[55%_56%] opacity-90 mix-blend-screen" priority />
+          </div>
 
           <FormPanel
             key={mode}
@@ -122,7 +140,8 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
             onSwitchMode={switchMode}
             onSuccess={(path) => router.push(path)}
             onLogin={(user) => login(user)}
-            onForgotPassword={() => router.push("/forgot-password")}
+            onForgotPassword={() => switchMode("recovery")}
+            onBackToLogin={() => switchMode("login")}
           />
         </div>
       </main>
@@ -137,6 +156,9 @@ function HeroPanel({ mode, copy }: { mode: Mode; copy: typeof heroCopy[Mode] }) 
         className="absolute -right-24 -top-24 h-72 w-72 rounded-full border-[36px] border-hero-accent/30"
         aria-hidden="true"
       />
+      <div className="auth-art-float pointer-events-none absolute -bottom-6 -right-24 hidden w-[30rem] opacity-80 xl:block" aria-hidden="true">
+        <Image src="/illustrations/kairos-auth.webp" alt="" width={1024} height={1536} className="h-auto w-full mix-blend-screen" priority />
+      </div>
       <AnimatePresence mode="wait">
         <motion.div
           key={mode}
@@ -209,6 +231,7 @@ type FormPanelProps = {
   showConfirm: boolean;
   setShowConfirm: (v: boolean) => void;
   onSwitchMode: () => void;
+  onBackToLogin: () => void;
   onSuccess: (path: string) => void;
   onLogin: (user: Awaited<ReturnType<typeof getAuthProfile>>) => void;
   onForgotPassword: () => void;
@@ -227,10 +250,99 @@ function FormPanel(props: FormPanelProps) {
       <AnimatePresence mode="wait">
         {mode === "login" ? (
           <LoginForm key="login" {...props} reduceMotion={reduceMotion} />
-        ) : (
+        ) : mode === "signup" ? (
           <SignupForm key="signup" {...props} reduceMotion={reduceMotion} />
+        ) : (
+          <RecoveryForm key="recovery" {...props} reduceMotion={reduceMotion} />
         )}
       </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function RecoveryForm({ onBackToLogin, reduceMotion }: FormPanelProps) {
+  type RecoveryFormValues = z.infer<typeof recoverySchema>;
+  const [sent, setSent] = useState(false);
+  const form = useForm<RecoveryFormValues>({
+    resolver: zodResolver(recoverySchema),
+    defaultValues: { email: "" },
+  });
+  const resetRequest = usePostAuthPasswordResetRequest({
+    mutation: {
+      onSuccess: () => setSent(true),
+      onError: () => toast.error("Não foi possível enviar a solicitação. Tente novamente."),
+    },
+  });
+
+  return (
+    <motion.div {...fadeUp} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
+      <div className="mb-5 space-y-2">
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+          <Mail className="h-3.5 w-3.5" aria-hidden="true" /> Recuperar acesso
+        </div>
+        <h2 className="font-display text-3xl font-semibold leading-none sm:text-4xl">Volte a cuidar.</h2>
+        <p className="max-w-sm text-sm leading-6 text-muted-foreground">
+          Um link seguro resolve o próximo passo sem interromper seu ritmo.
+        </p>
+      </div>
+      <Card className="border-border/80 bg-card/95 shadow-xl shadow-foreground/5">
+        {sent ? (
+          <>
+            <CardHeader className="items-center text-center">
+              <CheckCircle2 className="mb-2 h-10 w-10 text-primary" aria-hidden="true" />
+              <CardTitle className="text-2xl">Confira seu e-mail</CardTitle>
+              <CardDescription className="max-w-sm leading-6">
+                Se existir uma conta com esse endereço, você receberá um link válido por 60 minutos.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" type="button" onClick={onBackToLogin}>
+                Voltar para o login <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+              </Button>
+            </CardContent>
+          </>
+        ) : (
+          <>
+            <CardHeader className="space-y-1 border-b border-border/70 pb-3">
+              <CardTitle className="text-base font-semibold">Esqueceu sua senha?</CardTitle>
+              <CardDescription className="text-xs leading-5">
+                Informe seu e-mail de acesso para receber as instruções de redefinição.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-5">
+              <Form {...form}>
+                <form className="space-y-4" onSubmit={form.handleSubmit((data) => resetRequest.mutate({ data }))}>
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1.5">
+                        <FormLabel className="text-xs">E-mail</FormLabel>
+                        <FormControl>
+                          <Input type="email" autoComplete="email" placeholder="voce@igreja.com" autoFocus {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button className="h-10 w-full" type="submit" disabled={resetRequest.isPending}>
+                    {resetRequest.isPending ? (
+                      <><Loader2Icon className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> Enviando...</>
+                    ) : (
+                      <>Enviar link de recuperação <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" /></>
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </>
+        )}
+      </Card>
+      <Button type="button" variant="ghost" className="mt-3 w-full text-xs text-muted-foreground" onClick={onBackToLogin}>
+        <ArrowLeft className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+        Voltar para o login
+      </Button>
+      {!reduceMotion && !sent && <p className="mt-4 text-center text-[11px] text-muted-foreground">O link expira em 60 minutos.</p>}
     </motion.div>
   );
 }

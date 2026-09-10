@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useTheme } from "next-themes";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -367,6 +368,24 @@ export function LandingExperience() {
                 <span>01 / VISÃO GERAL</span>
               </div>
               <ProductPreview />
+            </div>
+            <div className="lp-hero-story lp-hero-enter" aria-label="Ilustração sobre comunidade e cuidado">
+              <div className="lp-hero-story-copy">
+                <span className="lp-eyebrow"><i /> O RITMO POR TRÁS DA ROTINA</span>
+                <h2>Quando as pessoas se encontram, a gestão vira <em>presença.</em></h2>
+                <p>Uma visão compartilhada aproxima quem cuida, quem participa e quem está chegando.</p>
+              </div>
+              <div className="lp-hero-story-art">
+                <Image
+                  src="/illustrations/kairos-community-hero.webp"
+                  alt="Três pessoas reunidas ao redor de um centro de comunidade"
+                  width={1536}
+                  height={1024}
+                  priority
+                  className="lp-hero-story-image"
+                />
+                <span className="lp-hero-story-tag">PESSOAS NO CENTRO</span>
+              </div>
             </div>
             <div className="lp-capabilities">
               <span>O cuidado conecta tudo.</span>
