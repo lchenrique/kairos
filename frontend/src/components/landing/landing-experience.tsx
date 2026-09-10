@@ -64,7 +64,7 @@ function Brand() {
   return (
     <Link href="/" className="lp-brand" aria-label="Kairos, início">
       <span className="lp-brand-icon">
-        <KairosMark className="h-9 w-9 object-contain" priority />
+        <KairosMark className="lp-brand-mark h-9 w-9 object-contain" priority />
       </span>
       kairos<span className="lp-brand-dot">.</span>
     </Link>

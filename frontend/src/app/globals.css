@@ -133,10 +133,22 @@
     background-size: 20px 20px, auto;
   }
 
-  .brand-mark-surface {
-    border: 1px solid hsl(var(--border) / 0.8);
-    background: #edf3e8;
-    box-shadow: 0 4px 14px rgb(12 31 20 / 0.14);
+  .brand-mark-frame {
+    border: 1px solid hsl(var(--primary) / 0.55);
+    background: hsl(var(--primary));
+  }
+
+  .brand-mark-image {
+    filter: brightness(0) invert(1);
+  }
+
+  .dark .brand-mark-frame {
+    border-color: hsl(var(--hero-foreground) / 0.28);
+    background: hsl(var(--hero-foreground));
+  }
+
+  .dark .brand-mark-image {
+    filter: none;
   }
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { SignIn, SignUp, useAuth as useClerkAuth } from "@clerk/nextjs";
-import { registerClerkTokenGetter } from "@/lib/clerk-token";
+import { clearClerkTokenGetter, registerClerkTokenGetter } from "@/lib/clerk-token";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   BookOpenIcon,
@@ -93,10 +93,11 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
 
   useEffect(() => {
     registerClerkTokenGetter(getToken);
+    return () => clearClerkTokenGetter(getToken);
   }, [getToken]);
 
   useEffect(() => {
-    setMode(initialMode);
+    setMode((currentMode) => (currentMode === initialMode ? currentMode : initialMode));
   }, [initialMode]);
 
   return (
@@ -109,7 +110,7 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
           <div className="auth-mobile-art-float illustration-surface mb-5 overflow-hidden rounded-2xl lg:hidden" aria-hidden="true">
             <Image src="/illustrations/kairos-auth-clay.png" alt="" width={934} height={1115} className="h-36 w-full object-contain object-[62%_50%]" priority />
           </div>
-          <ClerkAuthPanel mode={mode} reduceMotion={!!reduceMotion} onModeChange={(nextMode) => router.push(`/auth?mode=${nextMode}`)} />
+          <ClerkAuthPanel mode={mode} reduceMotion={!!reduceMotion} onModeChange={(nextMode) => router.replace(`/auth?mode=${nextMode}`)} />
         </div>
       </main>
     </div>
@@ -238,8 +239,8 @@ function BrandLink({ mobile = false }: { mobile?: boolean }) {
         mobile ? "mb-6 lg:hidden" : "",
       ].join(" ")}
     >
-      <div className={mobile ? "flex h-10 w-10 items-center justify-center rounded-xl bg-hero-foreground text-primary shadow-lg shadow-black/10" : "flex h-11 w-11 items-center justify-center rounded-xl bg-hero-foreground text-primary shadow-lg shadow-black/10"}>
-        <KairosMark className={mobile ? "h-8 w-8 object-contain" : "h-9 w-9 object-contain"} priority={!mobile} />
+      <div className={mobile ? "brand-mark-frame flex h-10 w-10 items-center justify-center rounded-xl" : "brand-mark-frame flex h-11 w-11 items-center justify-center rounded-xl"}>
+        <KairosMark className={mobile ? "brand-mark-image h-8 w-8 object-contain" : "brand-mark-image h-9 w-9 object-contain"} priority={!mobile} />
       </div>
       <div>
         <p className={mobile ? "font-display text-xl font-semibold" : "font-display text-2xl font-semibold tracking-tight"}>KAIROS</p>

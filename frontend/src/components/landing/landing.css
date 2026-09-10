@@ -75,11 +75,19 @@
   width: 35px;
   height: 38px;
   overflow: hidden;
-  border: 1px solid var(--lp-line);
+  border: 1px solid var(--lp-green);
   border-radius: 10px;
+  background: var(--lp-green);
+}
+.lp-brand-mark {
+  filter: brightness(0) invert(1);
+}
+.dark .lp-brand-icon {
+  border-color: var(--lp-line);
   background: var(--lp-mark-surface);
-  box-shadow: 0 4px 14px rgba(12, 31, 20, .16);
-  color: var(--lp-green);
+}
+.dark .lp-brand-mark {
+  filter: none;
 }
 .lp-brand-dot {
   margin-left: -8px;

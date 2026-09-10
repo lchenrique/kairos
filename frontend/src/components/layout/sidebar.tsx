@@ -106,9 +106,9 @@ export function Sidebar({ isCollapsed, isPreview = false }: SidebarProps) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
-            className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-hero-foreground text-primary shadow-lg shadow-black/20"
+            className="brand-mark-frame relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
           >
-            <KairosMark className="h-8 w-8 object-contain" />
+            <KairosMark className="brand-mark-image h-8 w-8 object-contain" />
             <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-sidebar bg-accent" aria-hidden="true" />
           </motion.div>
           <AnimatePresence>

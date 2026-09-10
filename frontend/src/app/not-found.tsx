@@ -18,8 +18,8 @@ export default function NotFound() {
             aria-label="Kairos, voltar para a página inicial"
             className="group relative z-10 inline-flex w-fit cursor-pointer items-center gap-3 rounded-xl outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-hero-accent focus-visible:ring-offset-4 focus-visible:ring-offset-hero"
           >
-            <span className="grid h-11 w-11 place-items-center rounded-xl bg-hero-foreground text-primary shadow-lg shadow-black/10">
-              <KairosMark className="h-9 w-9 object-contain" priority />
+            <span className="brand-mark-frame grid h-11 w-11 place-items-center rounded-xl">
+              <KairosMark className="brand-mark-image h-9 w-9 object-contain" priority />
             </span>
             <span>
               <span className="block font-display text-2xl font-semibold tracking-tight">KAIROS</span>
