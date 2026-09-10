@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function SetupPage() {
-  redirect("/cadastro");
+  redirect("/auth?mode=signup");
 }

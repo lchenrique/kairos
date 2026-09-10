@@ -40,7 +40,7 @@ export function useAuth() {
       await signOutFromAuthCentral();
     } finally {
       logout();
-      router.replace("/login");
+      router.replace("/auth?mode=login");
       router.refresh();
     }
   }, [beginSignOut, router, logout]);

@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
               </CardHeader>
               <CardContent>
                 <Button asChild className="w-full">
-                  <Link href="/login">Voltar para o login</Link>
+                  <Link href="/auth?mode=login">Voltar para o login</Link>
                 </Button>
               </CardContent>
             </>
@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
         </Card>
 
         <Button asChild variant="ghost" className="w-full text-muted-foreground">
-          <Link href="/login">
+          <Link href="/auth?mode=login">
             <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
             Voltar para o login
           </Link>

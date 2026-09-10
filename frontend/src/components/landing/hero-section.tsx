@@ -90,7 +90,7 @@ export function HeroSection() {
               className="h-12 rounded-full border-border/80 bg-card/80 px-8 text-sm font-semibold backdrop-blur-sm hover:bg-muted"
               asChild
             >
-              <Link href="/login">Fazer Login</Link>
+              <Link href="/auth?mode=login">Fazer Login</Link>
             </Button>
           </motion.div>
 

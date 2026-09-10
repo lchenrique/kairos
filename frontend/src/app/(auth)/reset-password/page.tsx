@@ -68,7 +68,7 @@ function ResetPasswordContent() {
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/login">Entrar com a nova senha</Link>
+              <Link href="/auth?mode=login">Entrar com a nova senha</Link>
             </Button>
           </CardContent>
         </>

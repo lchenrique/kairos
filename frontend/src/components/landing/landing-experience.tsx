@@ -282,11 +282,11 @@ export function LandingExperience() {
                   <Moon size={18} />
                 )}
               </Button>
-              <Link href="/login" className="lp-login">
+              <Link href="/auth?mode=login" className="lp-login">
                 Entrar
               </Link>
               <Button asChild className="lp-button lp-header-cta">
-                <Link href="/cadastro">
+                <Link href="/auth?mode=signup">
                   Começar agora <ArrowUpRight size={16} />
                 </Link>
               </Button>
@@ -316,7 +316,7 @@ export function LandingExperience() {
                   <ArrowUpRight size={18} />
                 </a>
               ))}
-              <Link href="/cadastro">
+              <Link href="/auth?mode=signup">
                 Criar minha conta <ArrowRight size={18} />
               </Link>
             </nav>
@@ -352,7 +352,7 @@ export function LandingExperience() {
                   ter clareza e sua comunidade ter você por perto.
                 </p>
                 <Button asChild className="lp-button lp-primary-cta">
-                  <Link href="/cadastro">
+                  <Link href="/auth?mode=signup">
                     Começar minha comunidade <ArrowUpRight size={20} />
                   </Link>
                 </Button>
@@ -434,7 +434,7 @@ export function LandingExperience() {
                   acontecer. O Kairos organiza o que é rotina para você se
                   dedicar ao que tem significado.
                 </p>
-                <Link href="/cadastro" className="lp-text-link">
+                <Link href="/auth?mode=signup" className="lp-text-link">
                   Mais tempo para estar perto <ArrowUpRight size={20} />
                 </Link>
               </div>
@@ -550,7 +550,7 @@ export function LandingExperience() {
                   <br />E devolva tempo ao que realmente importa.
                 </p>
                 <Button asChild className="lp-button lp-primary-cta">
-                  <Link href="/cadastro">
+                  <Link href="/auth?mode=signup">
                     Criar minha conta <ArrowUpRight size={22} />
                   </Link>
                 </Button>

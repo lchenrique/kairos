@@ -31,7 +31,7 @@ export function ContactSection() {
                   </a>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
-                  <Link href="/login">
+                  <Link href="/auth?mode=login">
                     Acessar plataforma
                     <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                   </Link>

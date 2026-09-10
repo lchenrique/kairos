@@ -115,7 +115,7 @@ export function PricingSection() {
                         : "bg-muted text-foreground hover:bg-muted/80 border border-border/60",
                     )}
                   >
-                    <Link href="/cadastro">
+                    <Link href="/auth?mode=signup">
                       Criar conta
                     </Link>
                   </Button>

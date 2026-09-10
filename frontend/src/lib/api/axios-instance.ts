@@ -35,6 +35,7 @@ axiosInstance.interceptors.response.use(
         "/login",
         "/setup",
         "/cadastro",
+        "/auth",
         "/forgot-password",
         "/reset-password",
         "/accept-invite",
@@ -45,7 +46,7 @@ axiosInstance.interceptors.response.use(
           window.location.pathname.startsWith(`${path}/`),
       );
       if (!auth.isSigningOut && !isPublic) {
-        window.location.assign("/login?session=expired");
+        window.location.assign("/auth?mode=login&session=expired");
       }
     }
     return Promise.reject(error);

@@ -46,7 +46,7 @@ export default function AppLayout({
   useEffect(() => {
     // Só redireciona se estiver montado para evitar redirecionamentos durante SSR
     if (mounted && !authLoading && !isAuthenticated) {
-      router.replace("/login");
+      router.replace("/auth?mode=login");
     }
   }, [authLoading, isAuthenticated, mounted, router]);
 

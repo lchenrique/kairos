@@ -66,7 +66,7 @@ function AcceptInviteContent() {
         <AlertDescription className="mt-2 space-y-4">
           <p>Peça a um administrador para enviar um novo convite.</p>
           <Button asChild variant="outline">
-            <Link href="/login">Voltar para o login</Link>
+            <Link href="/auth?mode=login">Voltar para o login</Link>
           </Button>
         </AlertDescription>
       </Alert>
@@ -90,7 +90,7 @@ function AcceptInviteContent() {
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/login">Entrar no Kairós</Link>
+              <Link href="/auth?mode=login">Entrar no Kairós</Link>
             </Button>
           </CardContent>
         </>
