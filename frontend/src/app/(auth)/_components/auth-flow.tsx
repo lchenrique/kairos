@@ -22,6 +22,7 @@ import {
   ArrowLeft,
   CalendarIcon,
   Check,
+  Chrome,
   ChurchIcon,
   EyeIcon,
   EyeOffIcon,
@@ -472,6 +473,21 @@ function LoginForm(props: FormPanelProps) {
     void handleSubmit(submit)(e);
   };
 
+  const continueWithGoogle = async () => {
+    if (!isLoaded) return;
+    setIsPending(true);
+    try {
+      await signIn!.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/onboarding",
+      });
+    } catch (error) {
+      toast.error(clerkErrorMessage(error, "Não foi possível entrar com o Google."));
+      setIsPending(false);
+    }
+  };
+
   return (
     <motion.div {...fadeUp} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
       <div className="mb-5 space-y-2">
@@ -485,9 +501,16 @@ function LoginForm(props: FormPanelProps) {
         <form onSubmit={handleFormSubmit}>
           <CardHeader className="space-y-1 border-b border-border/70 pb-3">
             <CardTitle className="text-base font-semibold">Entrar na plataforma</CardTitle>
-            <CardDescription className="text-xs">Use seu e-mail e senha cadastrados.</CardDescription>
+            <CardDescription className="text-xs">Use sua conta Google ou o e-mail cadastrado.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-5">
+            <Button type="button" variant="outline" className="h-10 w-full" disabled={isPending || !isLoaded} onClick={() => void continueWithGoogle()}>
+              <Chrome className="mr-2 h-4 w-4" aria-hidden="true" /> Continuar com Google
+            </Button>
+            <div className="relative py-1" aria-hidden="true">
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border/70" /></div>
+              <div className="relative flex justify-center text-[10px] uppercase tracking-[0.16em]"><span className="bg-card px-2 text-muted-foreground">ou use e-mail</span></div>
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-xs">E-mail</Label>
               <Input id="email" type="email" placeholder="seu@email.com" className="h-10 bg-background/60" {...register("email")} autoComplete="email" autoFocus />
@@ -574,6 +597,21 @@ function SignupForm(props: FormPanelProps) {
     }
   };
 
+  const continueWithGoogle = async () => {
+    if (!isLoaded) return;
+    setIsPending(true);
+    try {
+      await signUp!.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/onboarding",
+      });
+    } catch (error) {
+      toast.error(clerkErrorMessage(error, "Não foi possível criar sua conta com o Google."));
+      setIsPending(false);
+    }
+  };
+
   return (
     <motion.div {...fadeUp} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
       <div className="mb-4 space-y-2">
@@ -597,7 +635,15 @@ function SignupForm(props: FormPanelProps) {
               </Button>
             </form>
           ) : <Form {...form}>
-            <form className="space-y-3" onSubmit={form.handleSubmit(submit)}>
+            <>
+              <Button type="button" variant="outline" className="h-10 w-full" disabled={isPending || !isLoaded} onClick={() => void continueWithGoogle()}>
+                <Chrome className="mr-2 h-4 w-4" aria-hidden="true" /> Continuar com Google
+              </Button>
+              <div className="relative my-4" aria-hidden="true">
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border/70" /></div>
+                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.16em]"><span className="bg-card px-2 text-muted-foreground">ou crie com e-mail</span></div>
+              </div>
+              <form className="space-y-3" onSubmit={form.handleSubmit(submit)}>
               <FormField control={form.control} name="name" render={({ field }) => (
                 <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.3 }}>
                   <FormItem className="space-y-1.5"><FormLabel className="text-xs">Seu nome</FormLabel><FormControl><Input className="h-10" autoComplete="name" autoFocus placeholder="Como podemos chamar você?" {...field} /></FormControl><FormMessage /></FormItem>
@@ -621,7 +667,8 @@ function SignupForm(props: FormPanelProps) {
               <Button className="h-10 w-full" type="submit" disabled={isPending || !isLoaded}>
                 {isPending ? <><Loader2Icon className="mr-2 h-4 w-4 animate-spin" />Criando sua conta...</> : <>Criar conta e explorar<ArrowRight className="ml-2 h-4 w-4" /></>}
               </Button>
-            </form>
+              </form>
+            </>
           </Form>}
           <div className="mt-4">
             <ModeSwitch mode="signup" reduceMotion={reduceMotion} onClick={onSwitchMode} />
