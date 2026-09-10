@@ -2,6 +2,13 @@
 const nextConfig = {
   // Allows production validation while the local preview keeps running.
   distDir: process.env.KAIROS_BUILD_DIR || ".next",
+  async redirects() {
+    return [
+      { source: "/login", destination: "/auth?mode=login", permanent: false },
+      { source: "/cadastro", destination: "/auth?mode=signup", permanent: false },
+      { source: "/setup", destination: "/auth?mode=signup", permanent: false },
+    ];
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

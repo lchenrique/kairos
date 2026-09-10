@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function SetupPage() {
+export default function SetupAliasPage() {
   redirect("/auth?mode=signup");
 }
