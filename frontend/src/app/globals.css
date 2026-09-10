@@ -134,6 +134,12 @@
       linear-gradient(135deg, hsl(var(--hero-background)), hsl(var(--hero-background) / 0.82));
     background-size: auto, auto, 20px 20px, auto;
   }
+
+  .brand-mark-surface {
+    border: 1px solid hsl(var(--border) / 0.8);
+    background: #edf3e8;
+    box-shadow: 0 4px 14px rgb(12 31 20 / 0.14);
+  }
 }
 
 @keyframes kairos-page-item-enter {

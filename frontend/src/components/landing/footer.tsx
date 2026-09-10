@@ -43,7 +43,9 @@ export function Footer() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <KairosMark className="h-8 w-8 object-contain" />
+            <span className="brand-mark-surface grid h-9 w-9 place-items-center rounded-lg">
+              <KairosMark className="h-8 w-8 object-contain" />
+            </span>
             <span className="text-2xl font-bold">Kairos</span>
           </motion.div>
 
