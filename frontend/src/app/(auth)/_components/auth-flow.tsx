@@ -111,7 +111,10 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
   const reduceMotion = useReducedMotion();
 
   const switchMode = (nextMode?: Mode) => {
-    const next = nextMode ?? (mode === "login" ? "signup" : "login");
+    const requestedMode = nextMode === "login" || nextMode === "signup" || nextMode === "recovery"
+      ? nextMode
+      : undefined;
+    const next = requestedMode ?? (mode === "login" ? "signup" : "login");
     setMode(next);
     router.replace(`/auth?mode=${next}`);
   };
@@ -517,7 +520,7 @@ function ModeSwitch({ mode, onClick, reduceMotion }: { mode: Mode; onClick: () =
       className="text-center text-sm text-muted-foreground"
     >
       {isLogin ? "Ainda não tem uma conta?" : "Já tem uma conta?"}{" "}
-      <Button type="button" variant="link" className="relative h-auto p-0 font-medium text-primary" onClick={onClick}>
+      <Button type="button" variant="link" className="relative h-auto p-0 font-medium text-primary" onClick={() => onClick()}>
         <span className="relative">
           {isLogin ? "Cadastre-se" : "Entrar"}
           <motion.span
