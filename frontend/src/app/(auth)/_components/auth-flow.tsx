@@ -19,9 +19,9 @@ import { KairosMark } from "@/components/brand/kairos-mark";
 type Mode = "login" | "signup" | "recovery";
 
 const features = [
-  { icon: UsersIcon, title: "Gestão de Membros", description: "Cadastre e gerencie todos os membros da sua igreja." },
-  { icon: CalendarIcon, title: "Agenda de Eventos", description: "Organize cultos e eventos especiais em um só lugar." },
-  { icon: HomeIcon, title: "Gestão de Células", description: "Acompanhe o crescimento das células da sua igreja." },
+  { icon: UsersIcon, title: "Gestão de Membros", description: "Cadastre e acompanhe sua igreja." },
+  { icon: CalendarIcon, title: "Agenda de Eventos", description: "Organize cultos e eventos em um só lugar." },
+  { icon: HomeIcon, title: "Gestão de Células", description: "Acompanhe o crescimento das células." },
   { icon: HeartHandshakeIcon, title: "Ação Social", description: "Gerencie projetos sociais e voluntariado." },
   { icon: BookOpenIcon, title: "Escola Bíblica", description: "Organize turmas e acompanhe a frequência." },
 ];
@@ -111,7 +111,7 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
         <div className="w-full max-w-md">
           <BrandLink mobile />
           <div className="mb-5 flex justify-center lg:hidden" aria-hidden="true">
-            <Image src="/illustrations/kairos-auth-clay.png" alt="" width={880} height={779} className="h-auto w-full max-w-[22rem] object-contain" priority />
+            <Image src="/illustrations/kairos-auth-clay-v2.png" alt="" width={1152} height={1680} className="auth-mobile-art-float h-auto w-full max-w-[16rem] object-contain sm:max-w-[18rem]" priority />
           </div>
           <ClerkAuthPanel mode={mode} reduceMotion={!!reduceMotion} onModeChange={(nextMode) => router.replace(`/auth?mode=${nextMode}`)} />
         </div>
@@ -188,10 +188,10 @@ function ClerkAuthPanel({
 
 function HeroPanel({ mode, copy }: { mode: Mode; copy: typeof heroCopy[Mode] }) {
   return (
-    <aside className="illustration-surface relative hidden overflow-hidden bg-hero px-10 py-8 text-hero-foreground lg:flex lg:h-full lg:flex-col lg:justify-between xl:px-16">
+    <aside className="illustration-surface relative hidden overflow-hidden bg-hero px-10 py-8 text-hero-foreground lg:flex lg:h-full lg:flex-col lg:justify-between xl:px-16 xl:py-10">
       <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border-[36px] border-hero-accent/30" aria-hidden="true" />
-      <div className="pointer-events-none absolute right-0 top-1/2 hidden w-[48%] -translate-y-1/2 lg:block" aria-hidden="true">
-        <Image src="/illustrations/kairos-auth-clay.png" alt="" width={880} height={779} className="auth-art-float h-auto w-full object-contain" priority />
+      <div className="auth-art-frame pointer-events-none absolute hidden lg:block" aria-hidden="true">
+        <Image src="/illustrations/kairos-auth-clay-v2.png" alt="" width={1152} height={1680} className="auth-art-float block h-full w-full object-contain" priority />
       </div>
       <AnimatePresence mode="wait">
         <motion.div
@@ -212,14 +212,14 @@ function HeroPanel({ mode, copy }: { mode: Mode; copy: typeof heroCopy[Mode] }) 
       </AnimatePresence>
 
       {copy.features > 0 && (
-        <div className="relative grid max-w-[51%] gap-3 sm:grid-cols-3">
+        <div className="relative grid max-w-[66%] gap-5 sm:grid-cols-3 xl:gap-7">
           {features.slice(0, copy.features).map((feature, i) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 + i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="border-l border-hero-border/20 pl-3"
+              className="min-w-0 border-l border-hero-border/20 pl-4"
             >
               <feature.icon className="mb-2 h-5 w-5 text-hero-accent" aria-hidden="true" />
               <p className="text-sm font-semibold">{feature.title}</p>
