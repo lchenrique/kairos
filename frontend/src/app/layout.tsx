@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     template: "%s | Kairos",
   },
   description: "Uma plataforma simples para cuidar melhor da sua comunidade.",
+  icons: {
+    icon: "/brand/kairos-mark.png",
+  },
 }
 
 export default function RootLayout({

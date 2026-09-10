@@ -1,8 +1,9 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Church, Facebook, Instagram, Linkedin } from "lucide-react"
+import { Facebook, Instagram, Linkedin } from "lucide-react"
 import Link from "next/link"
+import { KairosMark } from "@/components/brand/kairos-mark"
 
 const navigation = {
   links: [
@@ -42,7 +43,7 @@ export function Footer() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Church className="h-6 w-6" />
+            <KairosMark className="h-8 w-8 object-contain" />
             <span className="text-2xl font-bold">Kairos</span>
           </motion.div>
 

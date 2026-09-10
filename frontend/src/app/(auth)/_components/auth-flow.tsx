@@ -6,7 +6,6 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   BookOpenIcon,
   CalendarIcon,
-  ChurchIcon,
   HeartHandshakeIcon,
   HomeIcon,
   UsersIcon,
@@ -15,6 +14,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { KairosMark } from "@/components/brand/kairos-mark";
 
 type Mode = "login" | "signup" | "recovery";
 
@@ -106,8 +106,8 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
       <main className="flex min-h-dvh items-center justify-center px-4 py-6 sm:px-8 lg:h-full lg:min-h-0 lg:overflow-hidden lg:py-6">
         <div className="w-full max-w-md">
           <BrandLink mobile />
-          <div className="auth-mobile-art-float mb-5 overflow-hidden rounded-2xl bg-hero lg:hidden" aria-hidden="true">
-            <Image src="/illustrations/kairos-auth.webp" alt="" width={1024} height={1536} className="h-36 w-full object-cover object-[55%_56%] opacity-90 mix-blend-screen" priority />
+          <div className="auth-mobile-art-float illustration-surface mb-5 overflow-hidden rounded-2xl lg:hidden" aria-hidden="true">
+            <Image src="/illustrations/kairos-auth-transparent.png" alt="" width={1145} height={1374} className="h-36 w-full object-contain object-[55%_56%]" priority />
           </div>
           <ClerkAuthPanel mode={mode} reduceMotion={!!reduceMotion} onModeChange={(nextMode) => router.push(`/auth?mode=${nextMode}`)} />
         </div>
@@ -186,8 +186,8 @@ function HeroPanel({ mode, copy }: { mode: Mode; copy: typeof heroCopy[Mode] }) 
   return (
     <aside className="relative hidden overflow-hidden bg-hero px-10 py-8 text-hero-foreground lg:flex lg:h-full lg:flex-col lg:justify-between xl:px-16">
       <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border-[36px] border-hero-accent/30" aria-hidden="true" />
-      <div className="auth-art-float pointer-events-none absolute -bottom-6 -right-24 hidden w-[30rem] opacity-80 xl:block" aria-hidden="true">
-        <Image src="/illustrations/kairos-auth.webp" alt="" width={1024} height={1536} className="h-auto w-full mix-blend-screen" priority />
+      <div className="auth-art-float illustration-surface pointer-events-none absolute -bottom-6 -right-24 hidden w-[30rem] rounded-[2rem] xl:block" aria-hidden="true">
+        <Image src="/illustrations/kairos-auth-transparent.png" alt="" width={1145} height={1374} className="h-auto w-full object-contain" priority />
       </div>
       <AnimatePresence mode="wait">
         <motion.div
@@ -238,8 +238,8 @@ function BrandLink({ mobile = false }: { mobile?: boolean }) {
         mobile ? "mb-6 lg:hidden" : "",
       ].join(" ")}
     >
-      <div className={mobile ? "flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground" : "flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground"}>
-        <ChurchIcon className={mobile ? "h-5 w-5" : "h-6 w-6"} aria-hidden="true" />
+      <div className={mobile ? "flex h-10 w-10 items-center justify-center rounded-xl bg-hero-foreground text-primary shadow-lg shadow-black/10" : "flex h-11 w-11 items-center justify-center rounded-xl bg-hero-foreground text-primary shadow-lg shadow-black/10"}>
+        <KairosMark className={mobile ? "h-8 w-8 object-contain" : "h-9 w-9 object-contain"} priority={!mobile} />
       </div>
       <div>
         <p className={mobile ? "font-display text-xl font-semibold" : "font-display text-2xl font-semibold tracking-tight"}>KAIROS</p>

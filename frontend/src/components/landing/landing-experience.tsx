@@ -13,7 +13,6 @@ import {
   ArrowUpRight,
   CalendarDays,
   Check,
-  Church,
   HeartHandshake,
   LayoutDashboard,
   Mail,
@@ -28,6 +27,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PricingSection } from "./pricing-section";
+import { KairosMark } from "@/components/brand/kairos-mark";
 import "./landing.css";
 
 const navigation = [
@@ -64,7 +64,7 @@ function Brand() {
   return (
     <Link href="/" className="lp-brand" aria-label="Kairos, início">
       <span className="lp-brand-icon">
-        <Church size={22} strokeWidth={1.6} aria-hidden="true" />
+        <KairosMark className="h-9 w-9 object-contain" priority />
       </span>
       kairos<span className="lp-brand-dot">.</span>
     </Link>
@@ -377,10 +377,10 @@ export function LandingExperience() {
               </div>
               <div className="lp-hero-story-art">
                 <Image
-                  src="/illustrations/kairos-community-hero.webp"
+                  src="/illustrations/kairos-community-hero-transparent.png"
                   alt="Três pessoas reunidas ao redor de um centro de comunidade"
-                  width={1536}
-                  height={1024}
+                  width={1024}
+                  height={1536}
                   priority
                   className="lp-hero-story-image"
                 />

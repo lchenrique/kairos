@@ -1,6 +1,7 @@
-import { ArrowUpRight, Compass, Home, MoveUpRight } from "lucide-react";
+import { ArrowUpRight, Home, MoveUpRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { KairosMark } from "@/components/brand/kairos-mark";
 
 export default function NotFound() {
   return (
@@ -17,8 +18,8 @@ export default function NotFound() {
             aria-label="Kairos, voltar para a página inicial"
             className="group relative z-10 inline-flex w-fit cursor-pointer items-center gap-3 rounded-xl outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-hero-accent focus-visible:ring-offset-4 focus-visible:ring-offset-hero"
           >
-            <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <Compass className="h-6 w-6" aria-hidden="true" />
+            <span className="grid h-11 w-11 place-items-center rounded-xl bg-hero-foreground text-primary shadow-lg shadow-black/10">
+              <KairosMark className="h-9 w-9 object-contain" priority />
             </span>
             <span>
               <span className="block font-display text-2xl font-semibold tracking-tight">KAIROS</span>
@@ -57,10 +58,10 @@ export default function NotFound() {
               </span>
             </div>
 
-            <div className="relative aspect-[1.08/1] overflow-hidden rounded-[2rem] border border-border bg-card/75 p-5 shadow-2xl shadow-foreground/10 sm:p-8">
+            <div className="illustration-surface relative aspect-[1.08/1] overflow-hidden rounded-[2rem] border border-border p-5 shadow-2xl shadow-foreground/10 sm:p-8">
               <div className="absolute inset-0 opacity-60 [background-image:radial-gradient(circle_at_1px_1px,hsl(var(--foreground)/0.12)_1px,transparent_0)] [background-size:18px_18px]" aria-hidden="true" />
-              <div className="not-found-art-float pointer-events-none absolute inset-[7%] overflow-hidden rounded-[1.5rem] opacity-75 mix-blend-multiply dark:mix-blend-screen" aria-hidden="true">
-                <Image src="/illustrations/kairos-404.webp" alt="" width={1254} height={1254} className="h-full w-full object-cover" priority />
+              <div className="not-found-art-float pointer-events-none absolute inset-[7%] overflow-hidden rounded-[1.5rem]" aria-hidden="true">
+                <Image src="/illustrations/kairos-404-transparent.png" alt="" width={1254} height={1254} className="h-full w-full object-contain" priority />
               </div>
               <div className="absolute left-[17%] top-[20%] h-[58%] w-[66%] rounded-full border border-primary/25" aria-hidden="true" />
               <div className="absolute left-[26%] top-[30%] h-[38%] w-[48%] rounded-full border border-primary/15" aria-hidden="true" />

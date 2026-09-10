@@ -1,7 +1,7 @@
 "use client"
 
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Users, LayoutDashboard, UsersRound, Church, Settings, CalendarDays, BarChart3, WalletCards, HeartHandshake, LockKeyhole } from "lucide-react"
+import { Users, LayoutDashboard, UsersRound, Settings, CalendarDays, BarChart3, WalletCards, HeartHandshake, LockKeyhole } from "lucide-react"
 import { useAuthStore } from "@/lib/stores/auth-store"
 import { usePathname } from "next/navigation"
 import { NavItem } from "./nav-item"
@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { ChurchSwitcher } from './church-switcher'
 import { hasPermission, type AppPermission } from '@/lib/permissions'
+import { KairosMark } from '@/components/brand/kairos-mark'
 
 const sidebarNavItems = [
   {
@@ -105,9 +106,9 @@ export function Sidebar({ isCollapsed, isPreview = false }: SidebarProps) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
-            className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-black/20"
+            className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-hero-foreground text-primary shadow-lg shadow-black/20"
           >
-            <Church className="h-6 w-6 text-primary-foreground" aria-hidden="true" />
+            <KairosMark className="h-8 w-8 object-contain" />
             <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-sidebar bg-accent" aria-hidden="true" />
           </motion.div>
           <AnimatePresence>
