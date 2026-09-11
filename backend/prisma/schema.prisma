@@ -81,6 +81,7 @@ model Subscription {
   provider               String?
   providerCustomerId     String?
   providerSubscriptionId String?      @unique
+  trialEndsAt            DateTime?
   currentPeriodEnd       DateTime?
   createdAt              DateTime     @default(now())
   updatedAt              DateTime     @updatedAt

@@ -102,12 +102,12 @@ export const churches: FastifyPluginAsyncZod = async (app) => {
     },
     async (request, reply) => {
       const subscription = await getOrganizationSubscription(request.tenant.organizationId)
-      if (!hasActiveSubscription(subscription?.status)) {
+      if (!hasActiveSubscription(subscription?.status, subscription?.trialEndsAt)) {
         return reply.status(402).send({
           statusCode: 402,
           error: 'Payment Required',
           code: 'SUBSCRIPTION_REQUIRED',
-          message: 'Ative uma assinatura para adicionar uma nova igreja ou unidade.',
+          message: 'Inicie um teste ou ative uma assinatura para adicionar uma nova igreja ou unidade.',
         })
       }
 

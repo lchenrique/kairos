@@ -39,13 +39,13 @@ export function PricingSection() {
         >
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
 
-            Dois planos. Sem versão gratuita.
+            7 dias grátis. Depois, dois planos.
           </span>
           <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
             Escolha o ritmo ideal da sua comunidade
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Crie sua conta, conheça o produto e ative a comunidade quando estiver pronto para usar dados reais.
+            Crie sua conta e experimente o plano Essencial por 7 dias, sem cartão. Depois, escolha o formato ideal para sua comunidade.
           </p>
         </motion.div>
 

@@ -13,11 +13,12 @@ export type BillingPlan = {
 };
 
 export type AccountState = {
-  stage: "ACCOUNT_READY" | "CHECKOUT_PENDING" | "CREATE_CHURCH" | "ACTIVE";
+  stage: "ACCOUNT_READY" | "CHECKOUT_PENDING" | "CREATE_CHURCH" | "SUBSCRIPTION_REQUIRED" | "ACTIVE";
   organization: { id: string; name: string } | null;
   subscription: {
     plan: BillingPlan["id"];
-    status: "PENDING" | "ACTIVE" | "PAST_DUE" | "CANCELED";
+    status: "PENDING" | "TRIALING" | "ACTIVE" | "PAST_DUE" | "CANCELED";
+    trialEndsAt: string | null;
     currentPeriodEnd: string | null;
   } | null;
   latestIntent: {

@@ -177,6 +177,7 @@ export const billingWebhookRoutes: FastifyPluginAsyncZod = async (app) => {
                 provider: ASAAS_PROVIDER,
                 providerCustomerId: providerData.providerCustomerId,
                 providerSubscriptionId: providerData.providerSubscriptionId,
+                trialEndsAt: null,
               },
               update: {
                 plan: intent.plan,
@@ -184,6 +185,7 @@ export const billingWebhookRoutes: FastifyPluginAsyncZod = async (app) => {
                 provider: ASAAS_PROVIDER,
                 providerCustomerId: providerData.providerCustomerId,
                 providerSubscriptionId: providerData.providerSubscriptionId,
+                trialEndsAt: null,
               },
             })
             await tx.billingIntent.update({ where: { id: intent.id }, data: { status: 'PAID' } })

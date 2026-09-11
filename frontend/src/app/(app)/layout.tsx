@@ -38,6 +38,15 @@ export default function AppLayout({
   const accountState = useAccountState(isAuthenticated);
   const isOnboarding = pathname === "/onboarding";
   const requiresActivation = accountState.data?.stage !== "ACTIVE";
+  const trialEndsAt = accountState.data?.subscription?.trialEndsAt;
+  const trialDaysLeft = trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000)))
+    : 0;
+  const statusLabel = accountState.data?.subscription?.status === "TRIALING"
+    ? `Teste grátis · ${trialDaysLeft}d`
+    : requiresActivation
+      ? "Modo de descoberta"
+      : "Comunidade ativa";
 
   useEffect(() => {
     setMounted(true);
@@ -191,7 +200,7 @@ export default function AppLayout({
                   <span className={cn("absolute inline-flex h-full w-full animate-ping rounded-full opacity-75", requiresActivation ? "bg-primary" : "bg-emerald-400")} />
                   <span className={cn("relative inline-flex h-2 w-2 rounded-full", requiresActivation ? "bg-primary" : "bg-emerald-500")} />
                 </span>
-                {requiresActivation ? "Modo de descoberta" : "Comunidade ativa"}
+                {statusLabel}
               </div>
               {mounted && (
                 <Button

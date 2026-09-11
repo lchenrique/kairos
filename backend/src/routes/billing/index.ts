@@ -1,8 +1,11 @@
+import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { Prisma } from '@prisma/client'
 import {
   BILLING_PLANS,
+  TRIAL_DAYS,
+  TRIAL_DURATION_MS,
   getOrganizationSubscription,
   hasActiveSubscription,
   isBillingPlanId,
@@ -27,12 +30,13 @@ const publicPlanSchema = z.object({
 })
 
 const accountStateSchema = z.object({
-  stage: z.enum(['ACCOUNT_READY', 'CHECKOUT_PENDING', 'CREATE_CHURCH', 'ACTIVE']),
+  stage: z.enum(['ACCOUNT_READY', 'CHECKOUT_PENDING', 'CREATE_CHURCH', 'SUBSCRIPTION_REQUIRED', 'ACTIVE']),
   organization: z.object({ id: z.string(), name: z.string() }).nullable(),
   subscription: z
     .object({
       plan: planSchema,
-      status: z.enum(['PENDING', 'ACTIVE', 'PAST_DUE', 'CANCELED']),
+      status: z.enum(['PENDING', 'TRIALING', 'ACTIVE', 'PAST_DUE', 'CANCELED']),
+      trialEndsAt: z.date().nullable(),
       currentPeriodEnd: z.date().nullable(),
     })
     .nullable(),
@@ -52,6 +56,15 @@ const accountStateSchema = z.object({
 const checkoutIntentSchema = z.object({
   plan: planSchema,
   workspaceName: z.string().trim().min(3).max(120).optional(),
+})
+
+const trialSchema = z.object({
+  workspaceName: z.string().trim().min(3).max(120).optional(),
+})
+
+const trialResponseSchema = z.object({
+  organization: z.object({ id: z.string(), name: z.string() }),
+  trialEndsAt: z.date(),
 })
 
 const firstChurchSchema = z.object({
@@ -107,7 +120,7 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
                 id: true,
                 name: true,
                 subscription: {
-                  select: { plan: true, status: true, currentPeriodEnd: true },
+                  select: { plan: true, status: true, trialEndsAt: true, currentPeriodEnd: true },
                 },
                 _count: { select: { churches: true } },
               },
@@ -128,15 +141,20 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
       ])
 
       const subscription = organization?.subscription
-      const activeSubscription = hasActiveSubscription(subscription?.status)
+      const activeSubscription = hasActiveSubscription(subscription?.status, subscription?.trialEndsAt)
       const normalizedLatestIntent = latestIntent && isBillingPlanId(latestIntent.plan)
         ? { ...latestIntent, plan: latestIntent.plan }
         : null
+      const hasPendingCheckout = normalizedLatestIntent?.status === 'PENDING'
+        && !!normalizedLatestIntent.checkoutUrl
+        && Date.now() - normalizedLatestIntent.createdAt.getTime() < 24 * 60 * 60 * 1000
       const stage: z.infer<typeof accountStateSchema>["stage"] = organization
-        ? activeSubscription && organization._count.churches === 0
-          ? 'CREATE_CHURCH'
-          : 'ACTIVE'
-        : normalizedLatestIntent?.status === 'PENDING'
+        ? activeSubscription
+          ? organization._count.churches === 0
+            ? 'CREATE_CHURCH'
+            : 'ACTIVE'
+          : 'SUBSCRIPTION_REQUIRED'
+        : hasPendingCheckout
           ? 'CHECKOUT_PENDING'
           : 'ACCOUNT_READY'
 
@@ -146,13 +164,82 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
         subscription: subscription && isBillingPlanId(subscription.plan)
           ? {
               plan: subscription.plan,
-              status: subscription.status as 'PENDING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELED',
+              status: subscription.status as 'PENDING' | 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELED',
+              trialEndsAt: subscription.trialEndsAt,
               currentPeriodEnd: subscription.currentPeriodEnd,
             }
           : null,
         latestIntent: normalizedLatestIntent,
         plans: billingPlans(),
       }
+    },
+  )
+
+  app.post<{ Body: z.infer<typeof trialSchema> }>(
+    '/trial',
+    {
+      schema: {
+        tags: ['billing'],
+        description: `Inicia o teste gratuito de ${TRIAL_DAYS} dias sem cartão.`,
+        body: trialSchema,
+        response: {
+          201: trialResponseSchema,
+          401: errorResponseSchema,
+          409: errorResponseSchema,
+        },
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      if (request.user.organizationId) {
+        return reply.status(409).send({
+          statusCode: 409,
+          error: 'Conflict',
+          code: 'TRIAL_ALREADY_STARTED',
+          message: 'Esta conta já possui uma organização e não pode iniciar outro teste.',
+        })
+      }
+
+      const existingMembership = await prisma.organizationUser.findFirst({
+        where: { userId: request.user.sub },
+        select: { organizationId: true },
+      })
+      if (existingMembership) {
+        return reply.status(409).send({
+          statusCode: 409,
+          error: 'Conflict',
+          code: 'TRIAL_ALREADY_STARTED',
+          message: 'Esta conta já possui uma organização e não pode iniciar outro teste.',
+        })
+      }
+
+      const trialEndsAt = new Date(Date.now() + TRIAL_DURATION_MS)
+      const workspaceName = request.body.workspaceName?.trim() || 'Minha comunidade'
+      const slug = `${slugify(workspaceName) || 'comunidade'}-${randomUUID().slice(0, 8)}`
+
+      const trial = await prisma.$transaction(async (tx) => {
+        const organization = await tx.organization.create({
+          data: {
+            name: workspaceName,
+            slug,
+            users: { create: { userId: request.user.sub, role: 'ADMIN', status: 'ACTIVE' } },
+          },
+          select: { id: true, name: true },
+        })
+        await tx.subscription.create({
+          data: {
+            organizationId: organization.id,
+            plan: 'ESSENTIAL',
+            status: 'TRIALING',
+            provider: 'kairos',
+            trialEndsAt,
+            currentPeriodEnd: trialEndsAt,
+          },
+        })
+        return organization
+      })
+
+      return reply.status(201).send({ organization: trial, trialEndsAt })
     },
   )
 
@@ -175,12 +262,15 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request, reply) => {
       if (request.user.organizationId) {
-        return reply.status(409).send({
-          statusCode: 409,
-          error: 'Conflict',
-          code: 'ACCOUNT_ALREADY_ACTIVATED',
-          message: 'Esta conta já possui uma organização em ativação ou ativa.',
-        })
+        const currentSubscription = await getOrganizationSubscription(request.user.organizationId)
+        if (hasActiveSubscription(currentSubscription?.status, currentSubscription?.trialEndsAt)) {
+          return reply.status(409).send({
+            statusCode: 409,
+            error: 'Conflict',
+            code: 'ACCOUNT_ALREADY_ACTIVATED',
+            message: 'Esta conta já possui uma organização em ativação ou ativa.',
+          })
+        }
       }
 
       const openIntent = await prisma.billingIntent.findFirst({
@@ -279,7 +369,7 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
     {
       schema: {
         tags: ['billing'],
-        description: 'Cria a primeira igreja após a confirmação de uma assinatura ativa.',
+        description: 'Cria a primeira igreja após a confirmação de uma assinatura ou durante o teste.',
         body: firstChurchSchema,
         response: {
           201: z.object({ id: z.string(), name: z.string(), slug: z.string() }),
@@ -303,12 +393,12 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
       }
 
       const subscription = await getOrganizationSubscription(organizationId)
-      if (!hasActiveSubscription(subscription?.status)) {
+      if (!hasActiveSubscription(subscription?.status, subscription?.trialEndsAt)) {
         return reply.status(402).send({
           statusCode: 402,
           error: 'Payment Required',
           code: 'SUBSCRIPTION_REQUIRED',
-          message: 'Confirme uma assinatura ativa antes de criar a primeira igreja.',
+          message: 'Inicie o teste ou confirme uma assinatura antes de criar a primeira igreja.',
         })
       }
 
