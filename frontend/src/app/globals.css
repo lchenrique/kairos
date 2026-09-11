@@ -182,8 +182,7 @@
   50% { transform: scale(1.035) translate3d(0, -5px, 0); }
 }
 
-.auth-art-float,
-.auth-mobile-art-float {
+.auth-art-float {
   animation: kairos-auth-art-float 9s ease-in-out infinite;
 }
 
@@ -233,8 +232,7 @@
     transition-duration: 0.01ms !important;
   }
 
-  .auth-art-float,
-  .auth-mobile-art-float {
+  .auth-art-float {
     animation: none;
   }
 

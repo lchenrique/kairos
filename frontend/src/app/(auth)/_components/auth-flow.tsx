@@ -110,9 +110,6 @@ export function AuthFlow({ initialMode }: { initialMode: Mode }) {
       <main className="flex min-h-dvh items-center justify-center px-4 py-6 sm:px-8 lg:h-full lg:min-h-0 lg:overflow-hidden lg:py-6">
         <div className="w-full max-w-md">
           <BrandLink mobile />
-          <div className="mb-5 flex justify-center lg:hidden" aria-hidden="true">
-            <Image src="/illustrations/kairos-auth-clay-v2.png" alt="" width={1152} height={1680} className="auth-mobile-art-float h-auto w-full max-w-[16rem] object-contain sm:max-w-[18rem]" priority />
-          </div>
           <ClerkAuthPanel mode={mode} reduceMotion={!!reduceMotion} onModeChange={(nextMode) => router.replace(`/auth?mode=${nextMode}`)} />
         </div>
       </main>
