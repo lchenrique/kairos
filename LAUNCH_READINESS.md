@@ -13,15 +13,50 @@ O sistema pode ser demonstrado localmente com o seed atual, mas isso não equiva
 - Monorepo pnpm com backend Fastify/Prisma/SQLite e frontend Next.js 14 com App Router.
 - Rotas principais de membros, grupos, eventos, check-in, calendário, finanças, relatórios e configurações existem.
 - Os scripts de desenvolvimento usam API em `http://localhost:3333` e frontend em `http://localhost:3001`; o E2E usa instâncias isoladas em 3341 e 3012.
-- O fluxo automatizado recria um banco vazio pelas migrations, executa setup, login, cadastros principais, restrições de usuário comum e logout.
-- A suíte da API cobre caminhos positivos, erros de domínio, isolamento multi-tenant, ciclo de sessão e testes negativos para os cinco papéis.
+- O fluxo automatizado recria um banco vazio pelas migrations, executa setup, autenticação pelo Clerk, cadastros principais, restrições de usuário comum e logout.
+- A suíte da API cobre caminhos positivos, erros de domínio, isolamento multi-tenant, ciclo de sessão e testes negativos para os cinco papéis. A autenticação atual é o Clerk: o backend valida apenas o Bearer token do Clerk e a suíte passou a assinar JWTs RS256 de teste, sem mock de regra de negócio (detalhes na continuação de 11/09/2026).
 - A base suporta uma Rede com sede e filiais, contexto ativo por unidade e visão consolidada autorizada.
 - O seed demonstrativo mantém credencial conhecida somente para desenvolvimento e é recusado quando `NODE_ENV=production`.
 - O repositório já continha muitas alterações locais e elas foram preservadas; nenhum commit foi criado.
 
+## Continuação da verificação (11/09/2026)
+
+Em 11/09/2026 a prontidão foi revalidada com foco em autenticação, suíte de API e publicação. A autenticação do produto migrou para o Clerk: o backend valida apenas o Bearer token do Clerk (`backend/src/lib/clerk.ts`, decorator `authenticate` em `backend/src/server.ts`) e as rotas de senha respondem 410 `CLERK_REQUIRED`.
+
+### O que foi corrigido
+
+- A suíte de API estava quebrada (59/60 falhando com 410/401) porque ainda exercitava o fluxo antigo por senha. Foi reescrita para exercitar o Clerk de verdade: `backend/scripts/test-api.mjs` gera um par de chaves RSA e injeta `CLERK_JWT_KEY` (público) no servidor de teste, e `backend/src/__tests__/api.test.ts` assina JWTs RS256 de teste. Nenhuma regra de negócio foi mockada.
+- `pnpm-workspace.yaml` usava `allowBuilds:`, chave não reconhecida pelo pnpm 11.15.1. Foi trocada por `onlyBuiltDependencies:` com `@biomejs/biome`, `@prisma/client`, `@prisma/engines`, `bcrypt`, `core-js-pure`, `esbuild`, `prisma` e `unrs-resolver`; confirmado com `pnpm config get only-built-dependencies`.
+- UI: listas de membros, grupos e eventos unificadas em `ListShell`/`ListToolbar` compartilhados, com empty state padronizado; correções em finance/relatórios (datas, select de categoria, DatePicker) e overflow no drawer de grupos.
+
+### Comandos e resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `pnpm --filter @kairos/backend test` | 60 passed / 60 total |
+| `pnpm --filter @kairos/backend build` | exit 0 |
+| `pnpm --filter @kairos/backend check` | "Checked 70 files. No fixes applied." |
+| `pnpm --filter @kairos/frontend typecheck` | verde |
+| `pnpm --filter @kairos/frontend lint` | verde |
+| `pnpm --filter @kairos/frontend build` | sucesso; rotas listadas, incluindo `/setup` e `/auth` |
+
+### Deploy e smoke
+
+- Deploys concluídos no Coolify, projeto Kairos/production: kairos-frontend (`qsmztum9f4u5jkozgry1co8d`) e kairos-api (`7jmh9fwxcdoganysatkeiztv`).
+- Smoke público: `https://kairos.codebycarlos.dev` respondeu HTTP 200 com a copy nova; `https://api.kairos.codebycarlos.dev/health` respondeu 200 `{status:ok,database:ok}`.
+- Commits recentes em `main`: `a778e63`, `ec0c1ac`, `4ba0236`, `315b7b8`, `11e491a`.
+
+### Bug de ambiente local (não do produto)
+
+- Nesta máquina o store do pnpm está em `D:` e `pnpm install/rebuild` falha com erro de symlink cross-drive. Para rodar a suíte local é preciso usar `pnpm --config.verify-deps-before-run=false ...`.
+
+### Não executado nesta rodada
+
+- E2E (`pnpm test:e2e`) e QA manual não foram executados nesta rodada.
+
 ## Funcionalidades já validadas
 
-As validações abaixo foram executadas no workspace atual:
+As validações abaixo foram executadas no workspace atual. As evidências de sessão por cookie são anteriores à migração para o Clerk e ficam mantidas como histórico; a autenticação vigente é a descrita em `## Continuação da verificação (11/09/2026)`.
 
 - `pnpm lint`: sucesso; Biome no backend informou “No fixes applied” e o lint do Next não reportou erros.
 - `pnpm typecheck`: sucesso; TypeScript do frontend e compilação TypeScript do backend passaram.
@@ -506,6 +541,10 @@ Os testes de API usam `backend/prisma/test.db` e porta 3335. O E2E usa `backend/
 - [ ] Política de privacidade, retenção de dados, termos, suporte e canal de incidentes estão disponíveis.
 - [ ] Deploy de produção foi ensaiado e há plano de rollback.
 
+> Revalidação de 11/09/2026: os itens de código e teste locais (Biome com 70 arquivos verificados, backend build exit 0, 60/60 testes de API exercitando o Clerk real, frontend typecheck/lint/build verdes) foram reexecutados e estão verdes. Os itens acima permanecem desmarcados enquanto dependerem de staging, segredos SMTP/Cloudinary, E2E desta rodada e QA humano.
+
 ## Conclusão
 
 O Kairos concluiu os P0 e P1 que dependiam somente de código local. Onboarding, multi-tenant, sessão, indicadores reais, permissões, fluxos principais, acessibilidade automatizada e operação local possuem evidência. O próximo passo é operacional: staging, segredos, SMTP, Cloudinary, imagens Docker, backup externo, observabilidade e QA humano. Como ainda há critérios P0 que dependem dessas evidências externas, o veredito para lançamento público permanece **não pronto**; tecnicamente, a aplicação está preparada para iniciar a homologação em staging.
+
+Em 11/09/2026 os itens de código e teste locais foram revalidados com a autenticação já migrada para o Clerk: a suíte de API voltou a 60/60, o backend compilou (exit 0), o Biome verificou 70 arquivos sem correções e o frontend passou typecheck, lint e build. O deploy no Coolify foi concluído e o smoke público respondeu 200 no frontend e no health da API. Os bloqueios externos (SMTP real, Cloudinary, restore em staging, observabilidade e QA humano) continuam abertos, assim como o E2E e o QA manual desta rodada, que não foram executados.
