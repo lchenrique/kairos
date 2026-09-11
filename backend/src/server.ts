@@ -122,6 +122,7 @@ await app.register(cors, {
     'Content-Type',
     'Authorization',
     'X-Church-Id',
+    'X-Organization-Id',
     'X-Kairos-Client',
     'X-Request-Id',
   ],
@@ -192,6 +193,25 @@ await app.register(fastifySwaggerUi, {
 })
 
 // Autenticação
+// Tenant explícito: header X-Organization-Id vence; sem header usa vínculo único;
+// multi-org sem seleção cai no vínculo mais antigo por compatibilidade (frontend
+// single-org não envia o header). Nunca confia em take 1 cego como decisão final.
+async function resolveActiveMembership(userId: string, requestedOrganizationId?: string) {
+  const memberships = await prisma.organizationUser.findMany({
+    where: { userId, status: 'ACTIVE' },
+    select: { organizationId: true, role: true, createdAt: true },
+    orderBy: { createdAt: 'asc' },
+  })
+  if (memberships.length === 0) return null
+  if (requestedOrganizationId) {
+    return (
+      memberships.find((membership) => membership.organizationId === requestedOrganizationId) ||
+      null
+    )
+  }
+  return memberships[0]
+}
+
 app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
   try {
     const authorization = request.headers.authorization
@@ -199,25 +219,26 @@ app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply
     const payload = await verifyClerkJwt(authorization.slice('Bearer '.length))
     let identity: Awaited<ReturnType<typeof resolveClerkIdentity>> | null = null
 
+    const rawOrganization = request.headers['x-organization-id']
+    const requestedOrganizationId =
+      (Array.isArray(rawOrganization) ? rawOrganization[0] : rawOrganization)?.trim() || undefined
+
     let user: any = await (prisma.user as any).findUnique({
       where: { clerkUserId: payload.sub },
-      include: {
-        organizations: {
-          where: { status: 'ACTIVE' },
-          orderBy: { createdAt: 'asc' },
-          take: 1,
-        },
-      },
     })
     // Link an existing local projection once, then use the immutable Clerk id.
     if (!user) {
       identity = await resolveClerkIdentity(payload)
-      const existing: any = await prisma.user.findUnique({ where: { email: identity.email.trim().toLowerCase() } })
+      const existing: any = await prisma.user.findUnique({
+        where: { email: identity.email.trim().toLowerCase() },
+      })
       if (existing && !existing.clerkUserId) {
-        await (prisma.user as any).update({ where: { id: existing.id }, data: { clerkUserId: payload.sub } })
+        await (prisma.user as any).update({
+          where: { id: existing.id },
+          data: { clerkUserId: payload.sub },
+        })
         user = await (prisma.user as any).findUnique({
           where: { clerkUserId: payload.sub },
-          include: { organizations: { where: { status: 'ACTIVE' }, orderBy: { createdAt: 'asc' }, take: 1 } },
         })
       }
     }
@@ -232,7 +253,6 @@ app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply
             password: 'CLERK_MANAGED',
             role: 'USER',
           },
-          include: { organizations: { where: { status: 'ACTIVE' }, orderBy: { createdAt: 'asc' }, take: 1 } },
         })
       } catch {
         // A simultaneous first request can create the local projection first.
@@ -240,14 +260,13 @@ app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply
         // as the long-term identity key.
         user = await (prisma.user as any).findUnique({
           where: { clerkUserId: payload.sub },
-          include: { organizations: { where: { status: 'ACTIVE' }, orderBy: { createdAt: 'asc' }, take: 1 } },
         })
       }
     }
 
     if (!user) throw new Error('SESSION_REVOKED')
 
-    const membership = user.organizations[0]
+    const membership = await resolveActiveMembership(user.id, requestedOrganizationId)
 
     request.user = {
       sub: user.id,
@@ -287,7 +306,11 @@ app.register(financeRoutes, { prefix: '/finance' })
 const writeSwaggerFile = () => {
   const swagger = app.swagger()
   try {
-    writeFileSync(path.resolve(__dirname, '../swagger.json'), JSON.stringify(swagger, null, 2))
+    writeFileSync(
+      path.resolve(__dirname, '../swagger.json'),
+      JSON.stringify(swagger, null, 2),
+      'utf8',
+    )
   } catch (err) {
     app.log.error({ error: err }, 'Error writing swagger.json')
   }

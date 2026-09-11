@@ -50,7 +50,7 @@
         "tags": [
           "auth"
         ],
-        "description": "Desativado: a conta é criada no Auth Central e a igreja é criada após a assinatura.",
+        "description": "Desativado: a conta é criada no Clerk e a igreja é criada após a assinatura.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -981,7 +981,7 @@
         "tags": [
           "auth"
         ],
-        "description": "Desativado: a autenticação é feita pela Auth Central.",
+        "description": "Desativado: a autenticação é feita pelo Clerk.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1047,7 +1047,7 @@
         "tags": [
           "auth"
         ],
-        "description": "Confirma logout local; a sessão central é encerrada pelo cliente Auth Central",
+        "description": "Confirma logout local; a sessão do Clerk é encerrada pelo cliente",
         "security": [
           {
             "bearerAuth": []
@@ -1094,6 +1094,231 @@
                     "code"
                   ],
                   "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/organization": {
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "description": "Remove permanentemente a Rede selecionada (header X-Organization-Id ou sessão atual) e todos os seus dados operacionais. Cancela a recorrência no Asaas via providerSubscriptionId antes de apagar a subscription local. Incrementa User.sessionVersion de todos os membros para revogar sessões antigas. BillingIntent e PaymentWebhookEvent são retidos por auditoria (sem vínculo com Organization, apenas userId).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "confirmation": {
+                    "type": "string",
+                    "enum": [
+                      "EXCLUIR"
+                    ]
+                  }
+                },
+                "required": [
+                  "confirmation"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "enum": [
+                    "null"
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Erro padrão da API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "description": "Código do status HTTP"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Tipo do erro"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de erro"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro padrão da API"
                 }
               }
             }
@@ -2234,6 +2459,197 @@
         }
       }
     },
+    "/billing/webhooks/asaas": {
+      "post": {
+        "tags": [
+          "billing"
+        ],
+        "description": "Recebe eventos de cobrança enviados pelo Asaas.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "event": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "payment": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "externalReference": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "subscription": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "customer": {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "subscription": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "externalReference": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "subscription": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "customer": {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "checkout": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "externalReference": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "subscription": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "customer": {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "id",
+                  "event"
+                ],
+                "additionalProperties": true
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "received": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    }
+                  },
+                  "required": [
+                    "received"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/billing/account-state": {
       "get": {
         "tags": [
@@ -2259,6 +2675,7 @@
                         "ACCOUNT_READY",
                         "CHECKOUT_PENDING",
                         "CREATE_CHURCH",
+                        "SUBSCRIPTION_REQUIRED",
                         "ACTIVE"
                       ]
                     },
@@ -2293,10 +2710,16 @@
                           "type": "string",
                           "enum": [
                             "PENDING",
+                            "TRIALING",
                             "ACTIVE",
                             "PAST_DUE",
                             "CANCELED"
                           ]
+                        },
+                        "trialEndsAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "nullable": true
                         },
                         "currentPeriodEnd": {
                           "type": "string",
@@ -2307,6 +2730,7 @@
                       "required": [
                         "plan",
                         "status",
+                        "trialEndsAt",
                         "currentPeriodEnd"
                       ],
                       "additionalProperties": false,
@@ -2332,6 +2756,11 @@
                           "type": "string",
                           "nullable": true
                         },
+                        "checkoutUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
                         "createdAt": {
                           "type": "string",
                           "format": "date-time"
@@ -2342,6 +2771,7 @@
                         "plan",
                         "status",
                         "workspaceName",
+                        "checkoutUrl",
                         "createdAt"
                       ],
                       "additionalProperties": false,
@@ -2437,12 +2867,143 @@
         }
       }
     },
+    "/billing/trial": {
+      "post": {
+        "tags": [
+          "billing"
+        ],
+        "description": "Inicia o teste gratuito de 7 dias sem cartão.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "workspaceName": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 120
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "organization": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "trialEndsAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "organization",
+                    "trialEndsAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/billing/checkout-intents": {
       "post": {
         "tags": [
           "billing"
         ],
-        "description": "Registra a escolha de plano antes de iniciar o checkout do provedor.",
+        "description": "Cria ou retoma o checkout hospedado da assinatura.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -2477,6 +3038,53 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "plan": {
+                      "type": "string",
+                      "enum": [
+                        "ESSENTIAL",
+                        "COMMUNITY"
+                      ]
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "workspaceName": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "checkoutUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "nullable": true
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "plan",
+                    "status",
+                    "workspaceName",
+                    "checkoutUrl",
+                    "createdAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
           "201": {
             "description": "Default Response",
             "content": {
@@ -2501,6 +3109,11 @@
                       "type": "string",
                       "nullable": true
                     },
+                    "checkoutUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "nullable": true
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time"
@@ -2511,6 +3124,7 @@
                     "plan",
                     "status",
                     "workspaceName",
+                    "checkoutUrl",
                     "createdAt"
                   ],
                   "additionalProperties": false
@@ -2519,6 +3133,68 @@
             }
           },
           "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "statusCode",
+                    "error",
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
             "description": "Default Response",
             "content": {
               "application/json": {
@@ -2557,7 +3233,7 @@
         "tags": [
           "billing"
         ],
-        "description": "Cria a primeira igreja após a confirmação de uma assinatura ativa.",
+        "description": "Cria a primeira igreja após a confirmação de uma assinatura ou durante o teste.",
         "requestBody": {
           "content": {
             "application/json": {

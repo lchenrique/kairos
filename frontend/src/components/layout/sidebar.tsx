@@ -6,7 +6,7 @@ import { useAuthStore } from "@/lib/stores/auth-store"
 import { usePathname } from "next/navigation"
 import { NavItem } from "./nav-item"
 import { ProfileSection } from "./profile-section"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { ChurchSwitcher } from './church-switcher'
 import { hasPermission, type AppPermission } from '@/lib/permissions'
@@ -87,6 +87,7 @@ export function Sidebar({ isCollapsed, isPreview = false }: SidebarProps) {
   const pathname = usePathname()
   const user = useAuthStore((state) => state.user)
   const role = user?.role ?? 'USER'
+  const shouldReduceMotion = useReducedMotion()
 
   const visibleItems = isPreview
     ? sidebarNavItems
@@ -94,18 +95,19 @@ export function Sidebar({ isCollapsed, isPreview = false }: SidebarProps) {
   const sections = Array.from(new Set(visibleItems.map((item) => item.section)))
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="sidebar-surface flex h-full flex-col border-r border-sidebar-border">
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={shouldReduceMotion ? undefined : { opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.5 }}
         className="relative overflow-hidden border-b border-sidebar-border px-5 py-6"
       >
         <div className="flex items-center gap-3 overflow-hidden">
           <motion.div
-            initial={{ scale: 0 }}
+            initial={shouldReduceMotion ? undefined : { scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
             className="brand-mark-frame relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
           >
             <KairosMark className="brand-mark-image h-8 w-8 object-contain" />
@@ -114,10 +116,10 @@ export function Sidebar({ isCollapsed, isPreview = false }: SidebarProps) {
           <AnimatePresence>
             {!isCollapsed && (
               <motion.div
-                initial={{ opacity: 0, x: -20 }}
+                initial={shouldReduceMotion ? undefined : { opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
+                transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
                 className="flex min-w-0 flex-col"
               >
                 <motion.h2
@@ -136,9 +138,22 @@ export function Sidebar({ isCollapsed, isPreview = false }: SidebarProps) {
 
       <div className="border-b border-sidebar-border py-4">
         {isPreview ? (
-          <div className={cn("flex items-center gap-2 px-3 text-xs text-sidebar-muted", isCollapsed && "justify-center px-0")} title="Ative uma assinatura para criar sua primeira igreja">
-            <LockKeyhole className="h-4 w-4 shrink-0" aria-hidden="true" />
-            {!isCollapsed && <span className="truncate">Explorando o produto</span>}
+          <div className={cn("px-3", isCollapsed && "px-0")}>
+            {!isCollapsed && (
+              <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-sidebar-muted">
+                Espaço da comunidade
+              </p>
+            )}
+            <div
+              title="Ative uma assinatura para criar sua primeira igreja"
+              className={cn(
+                "flex h-10 w-full items-center gap-2 rounded-md border border-sidebar-border bg-sidebar-accent/40 px-3 text-sm text-sidebar-foreground",
+                isCollapsed && "mx-auto w-10 justify-center p-0",
+              )}
+            >
+              <LockKeyhole className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {!isCollapsed && <span className="truncate text-xs">Explorando o produto</span>}
+            </div>
           </div>
         ) : <ChurchSwitcher isCollapsed={isCollapsed} />}
       </div>
@@ -173,5 +188,6 @@ export function Sidebar({ isCollapsed, isPreview = false }: SidebarProps) {
         </div>
       </div>
     </div>
+    </MotionConfig>
   )
 }

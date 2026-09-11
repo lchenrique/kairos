@@ -62,7 +62,8 @@ async function asaasRequest<T>(pathname: string, init: RequestInit): Promise<T> 
 
   if (!response.ok) {
     const details = body as AsaasCheckoutResponse | null
-    const message = details?.errors?.[0]?.description || 'Não foi possível iniciar a cobrança no Asaas.'
+    const message =
+      details?.errors?.[0]?.description || 'Não foi possível iniciar a cobrança no Asaas.'
     throw new AsaasRequestError(message)
   }
 
@@ -133,6 +134,21 @@ export async function createAsaasSubscriptionCheckout(input: {
 
 export async function getAsaasPayment(paymentId: string) {
   return asaasRequest<AsaasPayment>(`/payments/${encodeURIComponent(paymentId)}`, { method: 'GET' })
+}
+
+export async function cancelAsaasSubscription(subscriptionId: string): Promise<void> {
+  try {
+    await asaasRequest<{ deleted?: boolean; id?: string }>(
+      `/subscriptions/${encodeURIComponent(subscriptionId)}`,
+      { method: 'DELETE' },
+    )
+  } catch (error) {
+    // Remoção idempotente: 404 significa que a recorrência já não existe no Asaas.
+    if (error instanceof AsaasRequestError && /not found|não encontrado|404/i.test(error.message)) {
+      return
+    }
+    throw error
+  }
 }
 
 export async function getLatestAsaasSubscriptionForCustomer(customerId: string) {

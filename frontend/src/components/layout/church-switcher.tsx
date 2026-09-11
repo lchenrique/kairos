@@ -46,7 +46,7 @@ export function ChurchSwitcher({ isCollapsed }: { isCollapsed: boolean }) {
   return (
     <div className={cn('px-3', isCollapsed && 'px-0')}>
       {!isCollapsed && (
-        <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-sidebar-muted">
+        <p className="mb-2 truncate px-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-sidebar-muted" title={data.organization.name}>
           {data.organization.name}
         </p>
       )}
