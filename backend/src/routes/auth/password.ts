@@ -1,3 +1,4 @@
+import type { FastifyReply } from 'fastify'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { errorResponseSchema } from '../../schemas/auth.js'
@@ -11,8 +12,13 @@ const resetSchema = z.object({
   password: z.string().min(8),
 })
 
-function clerkRequired(reply: any) {
-  return reply.status(410).send({ statusCode: 410, error: 'Gone', code: 'CLERK_REQUIRED', message: 'Gerencie senhas no Clerk.' })
+function clerkRequired(reply: FastifyReply) {
+  return reply.status(410).send({
+    statusCode: 410,
+    error: 'Gone',
+    code: 'CLERK_REQUIRED',
+    message: 'Gerencie senhas no Clerk.',
+  })
 }
 
 export const password: FastifyPluginAsyncZod = async (app) => {

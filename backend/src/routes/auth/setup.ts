@@ -32,7 +32,8 @@ export const setup: FastifyPluginAsyncZod = async (app) => {
         statusCode: 410,
         error: 'Gone',
         code: 'TENANT_SETUP_REPLACED',
-        message: 'Crie sua conta pelo Clerk e escolha um plano dentro do Kairos para adicionar uma igreja.',
+        message:
+          'Crie sua conta pelo Clerk e escolha um plano dentro do Kairos para adicionar uma igreja.',
       }),
   )
 }

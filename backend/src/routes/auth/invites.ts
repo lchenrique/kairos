@@ -3,7 +3,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { requirePermission } from '../../lib/authorization.js'
 import { requireActiveSubscriptionForMutation } from '../../lib/billing.js'
-import { resolveClerkIdentity, verifyClerkJwt, type ClerkClaims } from '../../lib/clerk.js'
+import { type ClerkClaims, resolveClerkIdentity, verifyClerkJwt } from '../../lib/clerk.js'
 import { sendTeamInvitationEmail } from '../../lib/mailer.js'
 import { prisma } from '../../lib/prisma.js'
 import { requireCurrentChurch } from '../../lib/tenant.js'
@@ -70,7 +70,11 @@ export const invites: FastifyPluginAsyncZod = async (app) => {
     '/',
     {
       onRequest: [app.authenticate],
-      preHandler: [app.loadTenant, requirePermission('TEAM_MANAGE'), requireActiveSubscriptionForMutation],
+      preHandler: [
+        app.loadTenant,
+        requirePermission('TEAM_MANAGE'),
+        requireActiveSubscriptionForMutation,
+      ],
       schema: {
         tags: ['auth'],
         description: 'Lista o histórico de convites da Rede',
@@ -104,7 +108,11 @@ export const invites: FastifyPluginAsyncZod = async (app) => {
     '/',
     {
       onRequest: [app.authenticate],
-      preHandler: [app.loadTenant, requirePermission('TEAM_MANAGE'), requireActiveSubscriptionForMutation],
+      preHandler: [
+        app.loadTenant,
+        requirePermission('TEAM_MANAGE'),
+        requireActiveSubscriptionForMutation,
+      ],
       schema: {
         tags: ['auth'],
         description: 'Convida uma pessoa para definir a própria senha e entrar na equipe',

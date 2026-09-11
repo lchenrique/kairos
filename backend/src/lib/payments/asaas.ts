@@ -33,11 +33,7 @@ export class AsaasConfigurationError extends Error {
   }
 }
 
-export class AsaasRequestError extends Error {
-  constructor(message: string) {
-    super(message)
-  }
-}
+export class AsaasRequestError extends Error {}
 
 function asaasUrl(pathname: string) {
   return `${env.ASAAS_API_URL.replace(/\/$/, '')}${pathname}`

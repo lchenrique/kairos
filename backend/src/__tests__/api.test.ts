@@ -1,16 +1,24 @@
-import { createHash } from 'node:crypto'
+import { createHash, createPrivateKey, createSign } from 'node:crypto'
 import axios from 'axios'
-import bcrypt from 'bcrypt'
 import { prisma } from '../lib/prisma.js'
 import type { UserRole } from '../schemas/auth.js'
 
+const baseURL = process.env.TEST_API_URL || 'http://localhost:3335'
+
 const api = axios.create({
-  baseURL: process.env.TEST_API_URL || 'http://localhost:3335',
+  baseURL,
   validateStatus: () => true,
   headers: { 'X-Kairos-Client': 'web' },
 })
 
-let sessionCookie: string
+const privateKeyPem = process.env.CLERK_TEST_PRIVATE_KEY
+if (!privateKeyPem) {
+  throw new Error(
+    'CLERK_TEST_PRIVATE_KEY ausente. Rode a suíte via pnpm test (scripts/test-api.mjs).',
+  )
+}
+const clerkPrivateKey = createPrivateKey(privateKeyPem)
+
 let userId: string
 let memberId: string
 let groupId: string
@@ -19,24 +27,43 @@ let financeId: string
 let firstChurchId: string
 let secondChurchId: string
 let secondChurchMemberId: string
-let adminSessionCookie: string
 let teamUserId: string
-const passwordResetToken = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+
+const adminIdentity = { sub: 'user_admin', email: 'test@example.com', name: 'Test User' }
+const teamIdentity = { sub: 'user_team', email: 'team@example.com', name: 'Team User' }
+
+function base64Url(value: string) {
+  return Buffer.from(value, 'utf8').toString('base64url')
+}
+
+let tokenSequence = 0
+
+// Assina um JWT RS256 local aceito pelo CLERK_JWT_KEY de teste injetado pelo
+// scripts/test-api.mjs. O servidor continua executando verifyToken de verdade;
+// o teste controla apenas a chave que representa a fronteira externa do Clerk.
+function signClerkToken(identity: { sub: string; email: string; name: string }) {
+  const issuedAt = Math.floor(Date.now() / 1000)
+  const header = { alg: 'RS256', typ: 'JWT', kid: 'kairos-test-key' }
+  const payload = {
+    sub: identity.sub,
+    email: identity.email,
+    name: identity.name,
+    sid: `session-${++tokenSequence}`,
+    iat: issuedAt,
+    nbf: issuedAt - 5,
+    exp: issuedAt + 60 * 60,
+  }
+  const signingInput = `${base64Url(JSON.stringify(header))}.${base64Url(JSON.stringify(payload))}`
+  const signature = createSign('RSA-SHA256').update(signingInput).sign(clerkPrivateKey)
+  return `${signingInput}.${signature.toString('base64url')}`
+}
+
+function bearerFor(identity: { sub: string; email: string; name: string }) {
+  return `Bearer ${signClerkToken(identity)}`
+}
 
 const inviteTokenFor = (email: string) =>
   createHash('sha256').update(`kairos-invite:${email}`).digest('hex')
-
-function sessionCookieFrom(response: { headers: Record<string, unknown> }) {
-  const header = response.headers['set-cookie']
-  const cookie = (Array.isArray(header) ? header[0] : header)?.toString().split(';')[0]
-  if (!cookie?.startsWith('token=')) throw new Error('Cookie de sessão não recebido')
-  return cookie
-}
-
-const setupSession = (response: { headers: Record<string, unknown> }) => {
-  sessionCookie = sessionCookieFrom(response)
-  api.defaults.headers.common.Cookie = sessionCookie
-}
 
 async function createRoleClient(role: Exclude<UserRole, 'ADMIN'>) {
   const church = await prisma.church.findUniqueOrThrow({
@@ -44,12 +71,15 @@ async function createRoleClient(role: Exclude<UserRole, 'ADMIN'>) {
     select: { organizationId: true },
   })
   const email = `${role.toLowerCase()}-matrix@example.com`
-  const password = 'MatrixPassword123!'
+  const name = `${role} Matrix`
+  const sub = `user_${role.toLowerCase()}_matrix`
   await prisma.user.create({
     data: {
-      name: `${role} Matrix`,
+      clerkUserId: sub,
+      name,
       email,
-      password: await bcrypt.hash(password, 10),
+      // O Clerk é dono da credencial; a coluna legada fica deliberadamente inutilizável.
+      password: 'CLERK_MANAGED',
       // Deliberadamente diferente para provar que o papel da Rede é a fonte de verdade.
       role: 'USER',
       organizations: {
@@ -62,19 +92,54 @@ async function createRoleClient(role: Exclude<UserRole, 'ADMIN'>) {
       churches: { create: { churchId: firstChurchId, role } },
     },
   })
-  const login = await api.post('/auth/login', { email, password })
-  expect(login.status).toBe(200)
 
   return axios.create({
-    baseURL: process.env.TEST_API_URL || 'http://localhost:3335',
+    baseURL,
     validateStatus: () => true,
     headers: {
-      Cookie: sessionCookieFrom(login),
+      Authorization: bearerFor({ sub, email, name }),
       'X-Kairos-Client': 'web',
       'X-Church-Id': firstChurchId,
     },
   })
 }
+
+beforeAll(async () => {
+  const organization = await prisma.organization.create({
+    data: { name: 'Test Network', slug: 'test-network' },
+  })
+  const church = await prisma.church.create({
+    data: {
+      organizationId: organization.id,
+      name: 'Test Church',
+      slug: 'sede',
+      isHeadquarters: true,
+    },
+  })
+  firstChurchId = church.id
+
+  const admin = await prisma.user.create({
+    data: {
+      clerkUserId: adminIdentity.sub,
+      name: adminIdentity.name,
+      email: adminIdentity.email,
+      password: 'CLERK_MANAGED',
+      role: 'ADMIN',
+      organizations: {
+        create: { organizationId: organization.id, role: 'ADMIN', defaultChurchId: church.id },
+      },
+      churches: { create: { churchId: church.id, role: 'ADMIN' } },
+    },
+  })
+  userId = admin.id
+
+  await prisma.subscription.create({
+    data: { organizationId: organization.id, plan: 'COMMUNITY', status: 'ACTIVE' },
+  })
+
+  api.defaults.headers.common.Authorization = bearerFor(adminIdentity)
+  api.defaults.headers.common['X-Church-Id'] = church.id
+})
 
 describe('Health Routes', () => {
   test('GET /health - should report API and database status', async () => {
@@ -90,14 +155,14 @@ describe('Health Routes', () => {
 
 // Testes de Autenticação
 describe('Auth Routes', () => {
-  test('GET /auth/setup/status - should allow setup in an empty database', async () => {
+  test('GET /auth/setup/status - tenant setup is replaced by Clerk onboarding', async () => {
     const response = await api.get('/auth/setup/status')
 
     expect(response.status).toBe(200)
-    expect(response.data).toEqual({ available: true })
+    expect(response.data).toEqual({ available: false })
   })
 
-  test('POST /auth/setup - should create the network, headquarters and first admin', async () => {
+  test('POST /auth/setup - is closed and points to Clerk activation', async () => {
     const response = await api.post('/auth/setup', {
       organizationName: 'Test Network',
       churchName: 'Test Church',
@@ -106,67 +171,60 @@ describe('Auth Routes', () => {
       password: '12345678',
     })
 
-    expect(response.status).toBe(201)
-    expect(response.data).not.toHaveProperty('token')
-    expect(response.data).toHaveProperty('user')
-    expect(response.data.user).toHaveProperty('id')
-    expect(response.headers['set-cookie']?.[0]).toContain('HttpOnly')
-    expect(response.headers['set-cookie']?.[0]).toContain('SameSite=Lax')
-
-    setupSession(response)
-    adminSessionCookie = sessionCookie
-    userId = response.data.user.id
-  })
-
-  test('initial setup should become unavailable and reject a repeated attempt', async () => {
-    const status = await api.get('/auth/setup/status')
-    expect(status.status).toBe(200)
-    expect(status.data).toEqual({ available: false })
-
-    const repeated = await api.post('/auth/setup', {
-      organizationName: 'Second Network',
-      churchName: 'Second Church',
-      adminName: 'Second Admin',
-      email: 'second@example.com',
-      password: '12345678',
-    })
-
-    expect(repeated.status).toBe(409)
-    expect(repeated.data).toHaveProperty('code', 'SETUP_ALREADY_COMPLETED')
+    expect(response.status).toBe(410)
+    expect(response.data).toHaveProperty('code', 'TENANT_SETUP_REPLACED')
+    // A projeção local do tenant nasce do seed/ativação, não do setup legado.
     expect(await prisma.organization.count()).toBe(1)
-    expect(await prisma.church.count()).toBe(1)
     expect(await prisma.user.count()).toBe(1)
   })
 
-  test('POST /auth/login - should authenticate user', async () => {
+  test('POST /auth/login - password login is disabled in favor of Clerk', async () => {
     const response = await api.post('/auth/login', {
       email: 'test@example.com',
       password: '12345678',
     })
 
-    expect(response.status).toBe(200)
-    expect(response.data).not.toHaveProperty('token')
-    expect(response.data).toHaveProperty('user')
-
-    setupSession(response)
+    expect(response.status).toBe(410)
+    expect(response.data).toHaveProperty('code', 'CLERK_REQUIRED')
   })
 
-  test('GET /auth/profile - should get user profile', async () => {
+  test('GET /auth/profile - resolves the local projection from a Clerk bearer token', async () => {
     const response = await api.get('/auth/profile')
 
     expect(response.status).toBe(200)
     expect(response.data).toHaveProperty('id', userId)
   })
 
-  test('cookie mutations should require the CSRF request header', async () => {
+  test('requests without a bearer token are rejected with 401', async () => {
+    const anonymous = axios.create({
+      baseURL,
+      validateStatus: () => true,
+      headers: { 'X-Kairos-Client': 'web' },
+    })
+    const response = await anonymous.get('/auth/profile')
+
+    expect(response.status).toBe(401)
+    expect(response.data).toHaveProperty('code', 'INVALID_OR_EXPIRED_SESSION')
+  })
+
+  test('an invalid bearer token is rejected with 401', async () => {
+    const response = await api.get('/auth/profile', {
+      headers: { Authorization: 'Bearer not-a-valid-clerk-jwt' },
+    })
+
+    expect(response.status).toBe(401)
+    expect(response.data).toHaveProperty('code', 'INVALID_OR_EXPIRED_SESSION')
+  })
+
+  test('cookie-based mutations still require the CSRF request header', async () => {
     const untrustedClient = axios.create({
-      baseURL: process.env.TEST_API_URL || 'http://localhost:3335',
+      baseURL,
       validateStatus: () => true,
     })
     const response = await untrustedClient.post(
       '/auth/invites',
       { name: 'Blocked Invite', email: 'blocked@example.com', role: 'USER' },
-      { headers: { Cookie: sessionCookie } },
+      { headers: { Cookie: 'token=legacy-cookie-value' } },
     )
 
     expect(response.status).toBe(403)
@@ -236,20 +294,34 @@ describe('Auth Routes', () => {
       data: { expiresAt: new Date(Date.now() - 1000) },
     })
 
-    const expired = await api.post('/auth/invites/accept', {
-      token: inviteTokenFor('expired@example.com'),
-      password: 'TeamPassword123',
-    })
+    const expired = await api.post(
+      '/auth/invites/accept',
+      {
+        token: inviteTokenFor('expired@example.com'),
+        password: 'TeamPassword123',
+      },
+      {
+        headers: {
+          Authorization: bearerFor({
+            sub: 'user_expired',
+            email: 'expired@example.com',
+            name: 'Expired User',
+          }),
+        },
+      },
+    )
     expect(expired.status).toBe(400)
     expect(expired.data).toHaveProperty('code', 'INVALID_INVITE')
   })
 
-  test('invited person should define their own password and use the invite once', async () => {
+  test('an invited person with a Clerk session activates the same e-mail and uses the invite once', async () => {
     const rawToken = inviteTokenFor('team@example.com')
-    const accepted = await api.post('/auth/invites/accept', {
-      token: rawToken,
-      password: 'TeamPassword123',
-    })
+    const teamAuth = { Authorization: bearerFor(teamIdentity) }
+    const accepted = await api.post(
+      '/auth/invites/accept',
+      { token: rawToken, password: 'TeamPassword123' },
+      { headers: teamAuth },
+    )
     expect(accepted.status).toBe(201)
     expect(accepted.data).toMatchObject({
       email: 'team@example.com',
@@ -258,10 +330,11 @@ describe('Auth Routes', () => {
     })
     teamUserId = accepted.data.id
 
-    const reused = await api.post('/auth/invites/accept', {
-      token: rawToken,
-      password: 'AnotherPassword123',
-    })
+    const reused = await api.post(
+      '/auth/invites/accept',
+      { token: rawToken, password: 'AnotherPassword123' },
+      { headers: teamAuth },
+    )
     expect(reused.status).toBe(400)
 
     const users = await api.get('/auth/users')
@@ -273,19 +346,60 @@ describe('Auth Routes', () => {
     )
   })
 
-  test('non-admin team member should not manage users or invitations', async () => {
-    const login = await api.post('/auth/login', {
-      email: 'team@example.com',
+  test('invite acceptance requires a Clerk session', async () => {
+    const invitation = await api.post('/auth/invites', {
+      name: 'No Session User',
+      email: 'no-session@example.com',
+      role: 'USER',
+    })
+    expect(invitation.status).toBe(201)
+
+    const anonymous = axios.create({
+      baseURL,
+      validateStatus: () => true,
+      headers: { 'X-Kairos-Client': 'web' },
+    })
+    const response = await anonymous.post('/auth/invites/accept', {
+      token: inviteTokenFor('no-session@example.com'),
       password: 'TeamPassword123',
     })
-    expect(login.status).toBe(200)
+    expect(response.status).toBe(401)
+    expect(response.data).toHaveProperty('code', 'CLERK_SESSION_REQUIRED')
+  })
 
+  test('invite acceptance rejects a Clerk identity with a different e-mail', async () => {
+    const invitation = await api.post('/auth/invites', {
+      name: 'Mismatch User',
+      email: 'expected@example.com',
+      role: 'USER',
+    })
+    expect(invitation.status).toBe(201)
+
+    const response = await api.post(
+      '/auth/invites/accept',
+      { token: inviteTokenFor('expected@example.com'), password: 'TeamPassword123' },
+      {
+        headers: {
+          Authorization: bearerFor({
+            sub: 'user_mismatch',
+            email: 'other@example.com',
+            name: 'Other User',
+          }),
+        },
+      },
+    )
+    expect(response.status).toBe(400)
+    expect(response.data).toHaveProperty('code', 'INVITE_EMAIL_MISMATCH')
+  })
+
+  test('non-admin team member should not manage users or invitations', async () => {
     const teamApi = axios.create({
-      baseURL: process.env.TEST_API_URL || 'http://localhost:3335',
+      baseURL,
       validateStatus: () => true,
       headers: {
-        Cookie: sessionCookieFrom(login),
+        Authorization: bearerFor(teamIdentity),
         'X-Kairos-Client': 'web',
+        'X-Church-Id': firstChurchId,
       },
     })
 
@@ -341,36 +455,37 @@ describe('Auth Routes', () => {
   })
 
   test('admin should suspend and reactivate team access immediately', async () => {
-    const teamLogin = await api.post('/auth/login', {
-      email: 'team@example.com',
-      password: 'TeamPassword123',
-    })
-    expect(teamLogin.status).toBe(200)
-
     const suspended = await api.patch(`/auth/users/${teamUserId}/status`, {
       status: 'SUSPENDED',
     })
     expect(suspended.status).toBe(200)
     expect(suspended.data).toHaveProperty('status', 'SUSPENDED')
 
-    const rejectedSession = await api.get('/auth/profile', {
-      headers: { Cookie: sessionCookieFrom(teamLogin) },
+    // Sem vínculo ACTIVE, o Clerk ainda autentica, mas o tenant é negado.
+    const denied = await api.get('/system/context', {
+      headers: { Authorization: bearerFor(teamIdentity) },
     })
-    expect(rejectedSession.status).toBe(401)
-    const rejectedLogin = await api.post('/auth/login', {
-      email: 'team@example.com',
-      password: 'TeamPassword123',
-    })
-    expect(rejectedLogin.status).toBe(401)
+    expect(denied.status).toBe(403)
+    expect(denied.data).toHaveProperty('code', 'ORGANIZATION_REQUIRED')
 
     const reactivated = await api.patch(`/auth/users/${teamUserId}/status`, {
       status: 'ACTIVE',
     })
     expect(reactivated.status).toBe(200)
     expect(reactivated.data).toHaveProperty('status', 'ACTIVE')
+
+    const restored = await api.get('/system/context', {
+      headers: { Authorization: bearerFor(teamIdentity) },
+    })
+    expect(restored.status).toBe(200)
   })
 
   test('admin should revoke team access without deleting the global user', async () => {
+    const tempIdentity = {
+      sub: 'user_temporary',
+      email: 'temporary@example.com',
+      name: 'Temporary Access',
+    }
     const invitation = await api.post('/auth/invites', {
       name: 'Temporary Access',
       email: 'temporary@example.com',
@@ -378,25 +493,20 @@ describe('Auth Routes', () => {
     })
     expect(invitation.status).toBe(201)
 
-    const accepted = await api.post('/auth/invites/accept', {
-      token: inviteTokenFor('temporary@example.com'),
-      password: 'TemporaryPassword123',
-    })
+    const accepted = await api.post(
+      '/auth/invites/accept',
+      { token: inviteTokenFor('temporary@example.com'), password: 'TemporaryPassword123' },
+      { headers: { Authorization: bearerFor(tempIdentity) } },
+    )
     expect(accepted.status).toBe(201)
-
-    const login = await api.post('/auth/login', {
-      email: 'temporary@example.com',
-      password: 'TemporaryPassword123',
-    })
-    expect(login.status).toBe(200)
 
     const revoked = await api.delete(`/auth/users/${accepted.data.id}`)
     expect(revoked.status).toBe(204)
 
-    const rejectedSession = await api.get('/auth/profile', {
-      headers: { Cookie: sessionCookieFrom(login) },
+    const denied = await api.get('/system/context', {
+      headers: { Authorization: bearerFor(tempIdentity) },
     })
-    expect(rejectedSession.status).toBe(401)
+    expect(denied.status).toBe(403)
     expect(await prisma.user.count({ where: { id: accepted.data.id } })).toBe(1)
     expect(
       await prisma.organizationUser.count({
@@ -405,119 +515,32 @@ describe('Auth Routes', () => {
     ).toBe(0)
   })
 
-  test('password reset request should not reveal whether an account exists', async () => {
-    const missing = await api.post('/auth/password/reset-request', {
-      email: 'missing@example.com',
-    })
-    const existing = await api.post('/auth/password/reset-request', {
+  test('password management routes are delegated to Clerk and return 410', async () => {
+    const resetRequest = await api.post('/auth/password/reset-request', {
       email: 'test@example.com',
     })
-
-    expect(missing.status).toBe(204)
-    expect(existing.status).toBe(204)
-
-    const user = await prisma.user.findUniqueOrThrow({ where: { email: 'test@example.com' } })
-    expect(user.resetToken).toBe(createHash('sha256').update(passwordResetToken).digest('hex'))
-    expect(user.resetToken).not.toBe(passwordResetToken)
-    expect(user.resetTokenExpiresAt?.getTime()).toBeGreaterThan(Date.now())
-  })
-
-  test('password reset should reject invalid and expired tokens', async () => {
-    const invalid = await api.post('/auth/password/reset', {
-      token: 'invalid-token-value-with-more-than-thirty-two-characters',
-      password: 'Recovered123',
-    })
-    expect(invalid.status).toBe(400)
-    expect(invalid.data).toHaveProperty('code', 'INVALID_TOKEN')
-
-    await prisma.user.update({
-      where: { email: 'test@example.com' },
-      data: { resetTokenExpiresAt: new Date(Date.now() - 1000) },
-    })
-    const expired = await api.post('/auth/password/reset', {
-      token: passwordResetToken,
-      password: 'Recovered123',
-    })
-    expect(expired.status).toBe(400)
-    expect(expired.data).toHaveProperty('code', 'INVALID_TOKEN')
-
-    await api.post('/auth/password/reset-request', { email: 'test@example.com' })
-  })
-
-  test('password reset should be single-use and revoke previous sessions', async () => {
-    const previousSession = sessionCookie
     const reset = await api.post('/auth/password/reset', {
-      token: passwordResetToken,
+      token: '0123456789abcdef0123456789abcdef',
       password: 'Recovered123',
     })
-    expect(reset.status).toBe(204)
-
-    const reused = await api.post('/auth/password/reset', {
-      token: passwordResetToken,
-      password: 'AnotherPassword123',
-    })
-    expect(reused.status).toBe(400)
-
-    const revoked = await api.get('/auth/profile', {
-      headers: { Cookie: previousSession },
-    })
-    expect(revoked.status).toBe(401)
-    expect(revoked.data).toHaveProperty('code', 'INVALID_OR_EXPIRED_SESSION')
-
-    const oldPassword = await api.post('/auth/login', {
-      email: 'test@example.com',
-      password: '12345678',
-    })
-    expect(oldPassword.status).toBe(401)
-
-    const login = await api.post('/auth/login', {
-      email: 'test@example.com',
-      password: 'Recovered123',
-    })
-    expect(login.status).toBe(200)
-    setupSession(login)
-  })
-
-  test('password change should revoke the current session', async () => {
-    const previousSession = sessionCookie
-    const response = await api.put('/auth/password/change', {
+    const change = await api.put('/auth/password/change', {
       currentPassword: 'Recovered123',
       newPassword: 'Changed123',
     })
 
-    expect(response.status).toBe(204)
-
-    const revoked = await api.get('/auth/profile', {
-      headers: { Cookie: previousSession },
-    })
-    expect(revoked.status).toBe(401)
-
-    const login = await api.post('/auth/login', {
-      email: 'test@example.com',
-      password: 'Changed123',
-    })
-    expect(login.status).toBe(200)
-    setupSession(login)
+    for (const response of [resetRequest, reset, change]) {
+      expect(response.status).toBe(410)
+      expect(response.data).toHaveProperty('code', 'CLERK_REQUIRED')
+    }
   })
 
-  test('POST /auth/logout - should revoke the current session', async () => {
-    const previousSession = sessionCookie
+  test('POST /auth/logout - acknowledges the client-side Clerk sign-out', async () => {
     const response = await api.post('/auth/logout', {})
     expect(response.status).toBe(204)
-    expect(response.headers['set-cookie']?.[0]).toContain('token=;')
 
-    const revoked = await api.get('/auth/profile', {
-      headers: { Cookie: previousSession },
-    })
-    expect(revoked.status).toBe(401)
-
-    const login = await api.post('/auth/login', {
-      email: 'test@example.com',
-      password: 'Changed123',
-    })
-    expect(login.status).toBe(200)
-    setupSession(login)
-    adminSessionCookie = sessionCookie
+    // O Clerk é dono da sessão; o endpoint local não revoga o bearer emitido.
+    const stillAuthenticated = await api.get('/auth/profile')
+    expect(stillAuthenticated.status).toBe(200)
   })
 })
 
@@ -587,23 +610,14 @@ describe('System Routes', () => {
   })
 
   test('a restricted team user should not access an unassigned church', async () => {
-    const login = await api.post('/auth/login', {
-      email: 'team@example.com',
-      password: 'TeamPassword123',
-    })
-    expect(login.status).toBe(200)
-
     const response = await api.get('/members', {
       headers: {
-        Cookie: sessionCookieFrom(login),
+        Authorization: bearerFor(teamIdentity),
         'X-Church-Id': secondChurchId,
       },
     })
     expect(response.status).toBe(403)
-
-    sessionCookie = adminSessionCookie
-    api.defaults.headers.common.Cookie = adminSessionCookie
-    api.defaults.headers.common['X-Church-Id'] = firstChurchId
+    expect(response.data).toHaveProperty('code', 'CHURCH_ACCESS_DENIED')
   })
 
   test('GET /reports/overview - should return real management indicators', async () => {

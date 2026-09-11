@@ -223,21 +223,21 @@ app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply
     const requestedOrganizationId =
       (Array.isArray(rawOrganization) ? rawOrganization[0] : rawOrganization)?.trim() || undefined
 
-    let user: any = await (prisma.user as any).findUnique({
+    let user = await prisma.user.findUnique({
       where: { clerkUserId: payload.sub },
     })
     // Link an existing local projection once, then use the immutable Clerk id.
     if (!user) {
       identity = await resolveClerkIdentity(payload)
-      const existing: any = await prisma.user.findUnique({
+      const existing = await prisma.user.findUnique({
         where: { email: identity.email.trim().toLowerCase() },
       })
       if (existing && !existing.clerkUserId) {
-        await (prisma.user as any).update({
+        await prisma.user.update({
           where: { id: existing.id },
           data: { clerkUserId: payload.sub },
         })
-        user = await (prisma.user as any).findUnique({
+        user = await prisma.user.findUnique({
           where: { clerkUserId: payload.sub },
         })
       }
@@ -258,7 +258,7 @@ app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply
         // A simultaneous first request can create the local projection first.
         // Reading it again makes provisioning idempotent without trusting email
         // as the long-term identity key.
-        user = await (prisma.user as any).findUnique({
+        user = await prisma.user.findUnique({
           where: { clerkUserId: payload.sub },
         })
       }

@@ -14,7 +14,7 @@ export const logout: FastifyPluginAsyncZod = async (app) => {
         security: [{ bearerAuth: [] }],
       },
     },
-    async (request, reply) => {
+    async (_request, reply) => {
       return reply.status(204).send()
     },
   )

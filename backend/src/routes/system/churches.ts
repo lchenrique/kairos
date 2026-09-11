@@ -2,7 +2,11 @@ import { Prisma } from '@prisma/client'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { requirePermission } from '../../lib/authorization.js'
-import { BILLING_PLANS, hasActiveSubscription, getOrganizationSubscription } from '../../lib/billing.js'
+import {
+  BILLING_PLANS,
+  getOrganizationSubscription,
+  hasActiveSubscription,
+} from '../../lib/billing.js'
 import { prisma } from '../../lib/prisma.js'
 import { errorResponseSchema } from '../../schemas/shared.js'
 
@@ -107,13 +111,15 @@ export const churches: FastifyPluginAsyncZod = async (app) => {
           statusCode: 402,
           error: 'Payment Required',
           code: 'SUBSCRIPTION_REQUIRED',
-          message: 'Inicie um teste ou ative uma assinatura para adicionar uma nova igreja ou unidade.',
+          message:
+            'Inicie um teste ou ative uma assinatura para adicionar uma nova igreja ou unidade.',
         })
       }
 
-      const plan = subscription && subscription.plan in BILLING_PLANS
-        ? BILLING_PLANS[subscription.plan as keyof typeof BILLING_PLANS]
-        : null
+      const plan =
+        subscription && subscription.plan in BILLING_PLANS
+          ? BILLING_PLANS[subscription.plan as keyof typeof BILLING_PLANS]
+          : null
       if (plan?.churchLimit) {
         const churchCount = await prisma.church.count({
           where: { organizationId: request.tenant.organizationId },
@@ -123,7 +129,8 @@ export const churches: FastifyPluginAsyncZod = async (app) => {
             statusCode: 402,
             error: 'Payment Required',
             code: 'PLAN_CHURCH_LIMIT_REACHED',
-            message: 'O plano Essencial inclui uma igreja. Assine o Comunidade para adicionar unidades.',
+            message:
+              'O plano Essencial inclui uma igreja. Assine o Comunidade para adicionar unidades.',
           })
         }
       }

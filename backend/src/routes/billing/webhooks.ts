@@ -57,7 +57,10 @@ async function enrichWebhook(payload: z.infer<typeof asaasWebhookSchema>) {
   const subscription = payload.subscription
   const checkout = payload.checkout
   let externalReference =
-    subscription?.externalReference || payment?.externalReference || checkout?.externalReference || null
+    subscription?.externalReference ||
+    payment?.externalReference ||
+    checkout?.externalReference ||
+    null
   let providerSubscriptionId = subscription?.id || payment?.subscription || null
   let providerCustomerId = subscription?.customer || payment?.customer || checkout?.customer || null
 
@@ -90,7 +93,11 @@ export const billingWebhookRoutes: FastifyPluginAsyncZod = async (app) => {
         tags: ['billing'],
         description: 'Recebe eventos de cobrança enviados pelo Asaas.',
         body: asaasWebhookSchema,
-        response: { 200: webhookResponseSchema, 400: errorResponseSchema, 401: errorResponseSchema },
+        response: {
+          200: webhookResponseSchema,
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+        },
       },
     },
     async (request, reply) => {
@@ -118,7 +125,10 @@ export const billingWebhookRoutes: FastifyPluginAsyncZod = async (app) => {
       try {
         providerData = await enrichWebhook(parsed.data)
       } catch (error) {
-        request.log.error({ error, eventId: parsed.data.id }, 'Não foi possível reconciliar evento Asaas')
+        request.log.error(
+          { error, eventId: parsed.data.id },
+          'Não foi possível reconciliar evento Asaas',
+        )
         throw error
       }
 
@@ -131,7 +141,9 @@ export const billingWebhookRoutes: FastifyPluginAsyncZod = async (app) => {
                   where: { providerSubscriptionId: providerData.providerSubscriptionId },
                 })
               : providerData.checkoutId
-                ? await tx.billingIntent.findUnique({ where: { checkoutId: providerData.checkoutId } })
+                ? await tx.billingIntent.findUnique({
+                    where: { checkoutId: providerData.checkoutId },
+                  })
                 : null
 
           await tx.paymentWebhookEvent.create({
@@ -157,16 +169,18 @@ export const billingWebhookRoutes: FastifyPluginAsyncZod = async (app) => {
               orderBy: { createdAt: 'asc' },
               select: { organizationId: true },
             })
-            const organizationId = membership?.organizationId || (
-              await tx.organization.create({
-                data: {
-                  name: intent.workspaceName || 'Minha comunidade',
-                  slug: organizationSlug(intent.workspaceName || 'Minha comunidade', intent.id),
-                  users: { create: { userId: intent.userId, role: 'ADMIN', status: 'ACTIVE' } },
-                },
-                select: { id: true },
-              })
-            ).id
+            const organizationId =
+              membership?.organizationId ||
+              (
+                await tx.organization.create({
+                  data: {
+                    name: intent.workspaceName || 'Minha comunidade',
+                    slug: organizationSlug(intent.workspaceName || 'Minha comunidade', intent.id),
+                    users: { create: { userId: intent.userId, role: 'ADMIN', status: 'ACTIVE' } },
+                  },
+                  select: { id: true },
+                })
+              ).id
 
             await tx.subscription.upsert({
               where: { organizationId },

@@ -8,7 +8,12 @@ export const BILLING_PLANS = {
     priceCents: 4900,
     churchLimit: 1,
     description: 'Para uma igreja que quer organizar a rotina com clareza.',
-    features: ['1 igreja', 'Membros, grupos e eventos', 'Presença e calendário', 'Equipe com permissões'],
+    features: [
+      '1 igreja',
+      'Membros, grupos e eventos',
+      'Presença e calendário',
+      'Equipe com permissões',
+    ],
   },
   COMMUNITY: {
     id: 'COMMUNITY',
@@ -16,7 +21,12 @@ export const BILLING_PLANS = {
     priceCents: 9900,
     churchLimit: null,
     description: 'Para redes, sedes e congregações que crescem juntas.',
-    features: ['Igrejas e unidades ilimitadas', 'Visão consolidada da rede', 'Relatórios e financeiro', 'Equipe e permissões por unidade'],
+    features: [
+      'Igrejas e unidades ilimitadas',
+      'Visão consolidada da rede',
+      'Relatórios e financeiro',
+      'Equipe e permissões por unidade',
+    ],
   },
 } as const
 
@@ -25,7 +35,13 @@ export type BillingPlanId = keyof typeof BILLING_PLANS
 export const TRIAL_DAYS = 7
 export const TRIAL_DURATION_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000
 
-export const SUBSCRIPTION_STATUSES = ['PENDING', 'TRIALING', 'ACTIVE', 'PAST_DUE', 'CANCELED'] as const
+export const SUBSCRIPTION_STATUSES = [
+  'PENDING',
+  'TRIALING',
+  'ACTIVE',
+  'PAST_DUE',
+  'CANCELED',
+] as const
 export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number]
 
 export function isBillingPlanId(value: string): value is BillingPlanId {

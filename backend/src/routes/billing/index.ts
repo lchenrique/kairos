@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
-import { z } from 'zod'
-import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { Prisma } from '@prisma/client'
+import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 import {
   BILLING_PLANS,
   TRIAL_DAYS,
@@ -30,7 +30,13 @@ const publicPlanSchema = z.object({
 })
 
 const accountStateSchema = z.object({
-  stage: z.enum(['ACCOUNT_READY', 'CHECKOUT_PENDING', 'CREATE_CHURCH', 'SUBSCRIPTION_REQUIRED', 'ACTIVE']),
+  stage: z.enum([
+    'ACCOUNT_READY',
+    'CHECKOUT_PENDING',
+    'CREATE_CHURCH',
+    'SUBSCRIPTION_REQUIRED',
+    'ACTIVE',
+  ]),
   organization: z.object({ id: z.string(), name: z.string() }).nullable(),
   subscription: z
     .object({
@@ -141,14 +147,19 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
       ])
 
       const subscription = organization?.subscription
-      const activeSubscription = hasActiveSubscription(subscription?.status, subscription?.trialEndsAt)
-      const normalizedLatestIntent = latestIntent && isBillingPlanId(latestIntent.plan)
-        ? { ...latestIntent, plan: latestIntent.plan }
-        : null
-      const hasPendingCheckout = normalizedLatestIntent?.status === 'PENDING'
-        && !!normalizedLatestIntent.checkoutUrl
-        && Date.now() - normalizedLatestIntent.createdAt.getTime() < 24 * 60 * 60 * 1000
-      const stage: z.infer<typeof accountStateSchema>["stage"] = organization
+      const activeSubscription = hasActiveSubscription(
+        subscription?.status,
+        subscription?.trialEndsAt,
+      )
+      const normalizedLatestIntent =
+        latestIntent && isBillingPlanId(latestIntent.plan)
+          ? { ...latestIntent, plan: latestIntent.plan }
+          : null
+      const hasPendingCheckout =
+        normalizedLatestIntent?.status === 'PENDING' &&
+        !!normalizedLatestIntent.checkoutUrl &&
+        Date.now() - normalizedLatestIntent.createdAt.getTime() < 24 * 60 * 60 * 1000
+      const stage: z.infer<typeof accountStateSchema>['stage'] = organization
         ? activeSubscription
           ? organization._count.churches === 0
             ? 'CREATE_CHURCH'
@@ -161,14 +172,20 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
       return {
         stage,
         organization: organization ? { id: organization.id, name: organization.name } : null,
-        subscription: subscription && isBillingPlanId(subscription.plan)
-          ? {
-              plan: subscription.plan,
-              status: subscription.status as 'PENDING' | 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELED',
-              trialEndsAt: subscription.trialEndsAt,
-              currentPeriodEnd: subscription.currentPeriodEnd,
-            }
-          : null,
+        subscription:
+          subscription && isBillingPlanId(subscription.plan)
+            ? {
+                plan: subscription.plan,
+                status: subscription.status as
+                  | 'PENDING'
+                  | 'TRIALING'
+                  | 'ACTIVE'
+                  | 'PAST_DUE'
+                  | 'CANCELED',
+                trialEndsAt: subscription.trialEndsAt,
+                currentPeriodEnd: subscription.currentPeriodEnd,
+              }
+            : null,
         latestIntent: normalizedLatestIntent,
         plans: billingPlans(),
       }
@@ -290,7 +307,8 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
           createdAt: true,
         },
       })
-      const checkoutStillOpen = openIntent && Date.now() - openIntent.createdAt.getTime() < 24 * 60 * 60 * 1000
+      const checkoutStillOpen =
+        openIntent && Date.now() - openIntent.createdAt.getTime() < 24 * 60 * 60 * 1000
       if (openIntent && checkoutStillOpen && isBillingPlanId(openIntent.plan)) {
         return reply.status(200).send({ ...openIntent, plan: openIntent.plan })
       }
@@ -369,7 +387,8 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
     {
       schema: {
         tags: ['billing'],
-        description: 'Cria a primeira igreja após a confirmação de uma assinatura ou durante o teste.',
+        description:
+          'Cria a primeira igreja após a confirmação de uma assinatura ou durante o teste.',
         body: firstChurchSchema,
         response: {
           201: z.object({ id: z.string(), name: z.string(), slug: z.string() }),
@@ -437,9 +456,7 @@ export const billingRoutes: FastifyPluginAsyncZod = async (app) => {
         })
         return reply.status(201).send(church)
       } catch (error) {
-        if (
-          error instanceof Error && error.message === 'FIRST_CHURCH_ALREADY_EXISTS'
-        ) {
+        if (error instanceof Error && error.message === 'FIRST_CHURCH_ALREADY_EXISTS') {
           return reply.status(409).send({
             statusCode: 409,
             error: 'Conflict',

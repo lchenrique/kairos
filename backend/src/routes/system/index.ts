@@ -1,8 +1,8 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
+import { requireActiveSubscriptionForMutation } from '../../lib/billing.js'
 import { church } from './church.js'
 import { churches } from './churches.js'
 import { info } from './info.js'
-import { requireActiveSubscriptionForMutation } from '../../lib/billing.js'
 
 export const systemRoutes: FastifyPluginAsyncZod = async (app) => {
   // Adiciona autenticação em todas as rotas
