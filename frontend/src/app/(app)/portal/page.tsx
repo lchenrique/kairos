@@ -1,12 +1,14 @@
 "use client"
 
 import Link from "next/link"
+import { useMemo, useState } from "react"
 import { CalendarDays, ChevronRight, HeartHandshake, QrCode, UsersRound } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useGetEvents } from "@/lib/api/generated/events/events"
+import type { GetEventsParams } from "@/lib/api/generated/model"
 import { hasPermission } from "@/lib/permissions"
 import { useAuthStore } from "@/lib/stores/auth-store"
 import { cn } from "@/lib/utils"
@@ -15,16 +17,20 @@ export default function PortalPage() {
   const role = useAuthStore((state) => state.user?.role)
   const canViewGroups = hasPermission(role, "GROUPS_VIEW")
   const canManageEvents = hasPermission(role, "EVENTS_MANAGE")
-  const { data, isLoading } = useGetEvents(
-    {
+  const [startDate] = useState(() => new Date().toISOString())
+  const eventsParams = useMemo<GetEventsParams>(
+    () => ({
       page: 1,
       limit: 6,
-      startDate: new Date().toISOString(),
+      startDate,
       sortBy: "startDate",
       order: "asc",
-    },
-    { query: { refetchOnWindowFocus: false } },
+    }),
+    [startDate],
   )
+  const { data, isLoading } = useGetEvents(eventsParams, {
+    query: { refetchOnWindowFocus: false },
+  })
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">

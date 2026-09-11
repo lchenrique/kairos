@@ -79,14 +79,17 @@ export function DataFilters({
               <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-            <SheetHeader>
+          <SheetContent
+            side="right"
+            className="flex h-full w-[400px] flex-col gap-0 overflow-hidden p-0 sm:w-[540px]"
+          >
+            <SheetHeader className="shrink-0 border-b px-6 py-4 pr-12">
               <SheetTitle>{title}</SheetTitle>
               <SheetDescription>
                 {description}
               </SheetDescription>
             </SheetHeader>
-            <div className="space-y-6 py-6">
+            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto scrollbar-system px-6 py-6">
               {filters.map((filter) => (
                 <div key={filter.id} className="space-y-2">
                   {filter.type === "select" ? (
@@ -123,7 +126,7 @@ export function DataFilters({
               ))}
             </div>
             {onClearFilters && (
-              <SheetFooter>
+              <SheetFooter className="shrink-0 border-t px-6 py-4">
                 <Button
                   variant="outline"
                   onClick={onClearFilters}

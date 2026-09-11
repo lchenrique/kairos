@@ -32,30 +32,30 @@ import "./landing.css";
 
 const navigation = [
   ["Recursos", "#features"],
-  ["Nossa essência", "#about"],
+  ["Sobre", "#about"],
   ["Planos", "#pricing"],
   ["Contato", "#contact"],
 ];
 const modules = [
   {
     icon: Users,
-    title: "Cada pessoa, uma história.",
+    title: "Toda a comunidade num cadastro só.",
     label: "Membros e grupos",
-    text: "Reúna contatos, organize células e conecte membros à sua comunidade. Informações acessíveis para quem cuida de perto.",
+    text: "Contatos, células e histórico de cada pessoa num lugar. Quem cuida de perto encontra o que precisa sem perguntar a ninguém.",
     href: "/members",
   },
   {
     icon: CalendarDays,
-    title: "Uma agenda. Todos juntos.",
+    title: "Uma agenda que a equipe toda enxerga.",
     label: "Cultos e encontros",
-    text: "Cultos, reuniões e eventos em um calendário compartilhado. Registre presenças por lista ou QR Code e acompanhe cada encontro.",
+    text: "Cultos, reuniões e eventos no mesmo calendário. A presença entra pela lista ou pelo QR Code, e você acompanha cada encontro.",
     href: "/events",
   },
   {
     icon: Wallet,
-    title: "Clareza para seguir em frente.",
+    title: "Números que você pode conferir.",
     label: "Finanças e relatórios",
-    text: "Organize entradas e saídas, consulte os indicadores e tenha uma visão clara da rotina da igreja para decidir com confiança.",
+    text: "Entradas e saídas registradas e indicadores na tela. Você decide com o número na frente, não de cabeça.",
     href: "/finance",
   },
 ];
@@ -109,7 +109,7 @@ function ProductPreview() {
               <strong>
                 248<span>pessoas</span>
               </strong>
-              <small>Histórias que caminham juntas</small>
+              <small>Cadastradas e ativas</small>
             </div>
             <div>
               <span>
@@ -118,7 +118,7 @@ function ProductPreview() {
               <strong>
                 12<span>grupos</span>
               </strong>
-              <small>Conexões além do domingo</small>
+              <small>Grupos ativos na comunidade</small>
             </div>
             <div>
               <span>
@@ -127,7 +127,7 @@ function ProductPreview() {
               <strong>
                 08<span>eventos</span>
               </strong>
-              <small>Tempo de estar presente</small>
+              <small>Cultos e reuniões do mês</small>
             </div>
           </div>
           <div className="lp-preview-bottom">
@@ -331,26 +331,26 @@ export function LandingExperience() {
                 <i /> GESTÃO PARA IGREJAS, FEITA PARA PESSOAS
               </span>
               <span className="lp-edition">
-                MENOS DISTÂNCIA. MAIS PRESENÇA.
+                MEMBROS, ENCONTROS E FINANÇAS NUM SÓ LUGAR
               </span>
             </div>
             <div className="lp-hero-grid">
               <h1 className="lp-hero-enter">
-                Organize a rotina.
+                Organize a igreja
                 <br />
-                Abra espaço
+                para sobrar tempo
                 <br />
-                para <em>cuidar.</em>
+                de <em>cuidar.</em>
               </h1>
               <div className="lp-hero-copy lp-hero-enter">
                 <span className="lp-tiny-rule" />
                 <p>
-                  Uma igreja é feita de pessoas.
-                  <br />A gestão também deveria ser.
+                  Sua equipe cuida de pessoas.
+                  <br />A gente cuida da organização.
                 </p>
                 <p className="lp-description">
-                  Membros, encontros e finanças no mesmo lugar. Para sua equipe
-                  ter clareza e sua comunidade ter você por perto.
+                  Membros, agenda e finanças ficam no mesmo lugar, então sua
+                  equipe acompanha tudo sem procurar em três sistemas.
                 </p>
                 <Button asChild className="lp-button lp-primary-cta">
                   <Link href="/auth?mode=signup">
@@ -364,16 +364,16 @@ export function LandingExperience() {
             </div>
             <div id="plataforma" className="lp-product-stage lp-hero-enter">
               <div className="lp-product-caption">
-                <span>SEU DIA A DIA, EM UMA NOVA PERSPECTIVA</span>
+                <span>SEU DIA A DIA, EM UMA TELA SÓ</span>
                 <span>01 / VISÃO GERAL</span>
               </div>
               <ProductPreview />
             </div>
             <div className="lp-hero-story lp-hero-enter" aria-label="Ilustração sobre comunidade e cuidado">
               <div className="lp-hero-story-copy">
-                <span className="lp-eyebrow"><i /> O RITMO POR TRÁS DA ROTINA</span>
-                <h2>Quando as pessoas se encontram, a gestão vira <em>presença.</em></h2>
-                <p>Uma visão compartilhada aproxima quem cuida, quem participa e quem está chegando.</p>
+                <span className="lp-eyebrow"><i /> O QUE MUDA NO DIA A DIA</span>
+                <h2>Com a rotina resolvida, você fica <em>presente.</em></h2>
+                <p>A equipe inteira enxerga a mesma agenda e as mesmas pessoas, sem depender de quem sabe onde está cada coisa.</p>
               </div>
               <div className="lp-hero-story-art">
                 <Image
@@ -388,7 +388,7 @@ export function LandingExperience() {
               </div>
             </div>
             <div className="lp-capabilities">
-              <span>O cuidado conecta tudo.</span>
+              <span>As áreas da igreja trabalham juntas.</span>
               {[
                 { icon: Users, label: "Membros" },
                 { icon: CalendarDays, label: "Encontros" },
@@ -406,16 +406,16 @@ export function LandingExperience() {
             <div className="lp-section-heading lp-reveal">
               <div>
                 <span className="lp-eyebrow">
-                  01 — UM LUGAR PARA O ESSENCIAL
+                  01. O ESSENCIAL EM ORDEM
                 </span>
                 <h2>
-                  A rotina encontra ordem.
-                  <br />O cuidado ganha espaço.
+                  Cada área da igreja,
+                  <br />no seu lugar.
                 </h2>
               </div>
               <p>
-                Do primeiro cadastro ao próximo encontro, as informações
-                acompanham quem faz a igreja acontecer.
+                Do cadastro de um membro ao registro de presença, a informação
+                fica onde a equipe precisa dela.
               </p>
             </div>
             <div className="lp-feature-grid">
@@ -440,18 +440,18 @@ export function LandingExperience() {
           <section id="about" className="lp-manifesto">
             <div className="lp-shell lp-manifesto-grid">
               <div className="lp-reveal">
-                <span className="lp-eyebrow">02 — NOSSA ESSÊNCIA</span>
+                <span className="lp-eyebrow">02. NOSSA ESSÊNCIA</span>
                 <h2>
-                  Por trás de
+                  Cada nome na lista
                   <br />
-                  cada número,
+                  é gente que você
                   <br />
-                  <em>existe alguém.</em>
+                  <em>conhece.</em>
                 </h2>
                 <p>
-                  Uma nova família. Um reencontro. Uma conversa que precisava
-                  acontecer. O Kairos organiza o que é rotina para você se
-                  dedicar ao que tem significado.
+                  Nasce gente nova, volta quem estava longe, tem conversa que só
+                  acontece quando alguém lembra. O Kairos tira a papelada da
+                  frente para você estar presente quando isso acontecer.
                 </p>
                 <Link href="/auth?mode=signup" className="lp-text-link">
                   Mais tempo para estar perto <ArrowUpRight size={20} />
@@ -461,18 +461,18 @@ export function LandingExperience() {
                 {[
                   {
                     n: "01",
-                    title: "Conheça quem caminha com você",
-                    text: "Membros e contatos organizados para um acompanhamento mais próximo.",
+                    title: "Saiba com quem contar",
+                    text: "Membros e contatos com o histórico de cada pessoa à mão.",
                   },
                   {
                     n: "02",
-                    title: "Esteja presente em cada encontro",
-                    text: "Agenda e presença conectadas à vida da sua comunidade.",
+                    title: "Acompanhe a presença de verdade",
+                    text: "Agenda e presença ligadas, para você saber quem veio e quem faltou.",
                   },
                   {
                     n: "03",
-                    title: "Compartilhe a responsabilidade",
-                    text: "Acessos por função para pastores, líderes e equipe administrativa.",
+                    title: "Divida o trabalho com a equipe",
+                    text: "Cada função acessa o que precisa: pastores, líderes e secretaria, com níveis diferentes.",
                   },
                 ].map((item) => (
                   <div key={item.n}>
@@ -490,16 +490,16 @@ export function LandingExperience() {
           <section className="lp-workflow lp-shell">
             <div className="lp-section-heading lp-reveal">
               <div>
-                <span className="lp-eyebrow">03 — DA PORTA PARA DENTRO</span>
+                <span className="lp-eyebrow">03. DA PORTA PARA DENTRO</span>
                 <h2>
-                  Acolher começa
+                  Tudo pronto
                   <br />
-                  com estar preparado.
+                  antes do primeiro chegar.
                 </h2>
               </div>
               <p>
-                Organize o encontro, registre quem chegou e acompanhe a
-                participação. Tudo conectado à sua comunidade.
+                Crie o evento, marque quem chegou e veja a participação. Agenda,
+                presença e relatórios ligados à mesma igreja.
               </p>
             </div>
             <div className="lp-workflow-grid">
@@ -510,9 +510,9 @@ export function LandingExperience() {
                 </div>
                 <h3>É bom ter você aqui.</h3>
                 <p>
-                  Uma recepção organizada.
+                  Recepção sem fila,
                   <br />
-                  Um encontro com mais presença.
+                  presença registrada na hora.
                 </p>
                 <div className="lp-checkin">
                   <span className="lp-check-icon">
@@ -556,17 +556,17 @@ export function LandingExperience() {
           <section id="contact" className="lp-contact lp-shell">
             <div className="lp-contact-inner lp-reveal">
               <span className="lp-eyebrow">
-                O PRÓXIMO PASSO PODE SER SIMPLES.
+                É SIMPLES COMEÇAR.
               </span>
               <h2>
-                Sua comunidade.
+                Sua igreja organizada
                 <br />
-                <em>Mais perto.</em>
+                desde <em>hoje.</em>
               </h2>
               <div className="lp-contact-bottom">
                 <p>
-                  Comece a organizar a rotina da sua igreja.
-                  <br />E devolva tempo ao que realmente importa.
+                  Leva alguns minutos para criar a conta.
+                  <br />O resto você organiza conforme a semana pedir.
                 </p>
                 <Button asChild className="lp-button lp-primary-cta">
                   <Link href="/auth?mode=signup">
@@ -584,7 +584,7 @@ export function LandingExperience() {
         <footer className="lp-footer lp-shell">
           <div>
             <Brand />
-            <p>O tempo certo para cuidar.</p>
+            <p>Membros, agenda e finanças num só lugar.</p>
           </div>
           <nav aria-label="Navegação do rodapé">
             {navigation.map(([label, href]) => (
@@ -598,7 +598,7 @@ export function LandingExperience() {
           </nav>
           <div className="lp-footer-bottom">
             <span>© {new Date().getFullYear()} Kairos</span>
-            <span>Feito para quem cuida de pessoas.</span>
+            <span>Para equipes que cuidam de pessoas.</span>
           </div>
         </footer>
       </div>

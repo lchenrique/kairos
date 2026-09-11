@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Card,
   CardContent,
@@ -248,11 +249,10 @@ function FinanceEntryDialog({ open, onOpenChange, entry }: FinanceDialogProps) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="finance-date">Data</Label>
-            <Input
+            <DatePicker
               id="finance-date"
-              type="date"
               value={occurredAt}
-              onChange={(event) => setOccurredAt(event.target.value)}
+              onChange={setOccurredAt}
             />
           </div>
           <div className="space-y-2">
@@ -467,17 +467,15 @@ export default function FinancePage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Input
-                type="date"
+              <DatePicker
                 value={from}
-                onChange={(event) => setFrom(event.target.value)}
+                onChange={setFrom}
                 aria-label="Data inicial"
                 className="w-[145px]"
               />
-              <Input
-                type="date"
+              <DatePicker
                 value={to}
-                onChange={(event) => setTo(event.target.value)}
+                onChange={setTo}
                 aria-label="Data final"
                 className="w-[145px]"
               />

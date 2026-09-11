@@ -7,7 +7,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { useDrawerStore } from "@/lib/stores/drawer-store"
 
 export function Drawer() {
@@ -15,14 +14,12 @@ export function Drawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={close}>
-      <SheetContent className="w-full sm:max-w-[480px]">
-        <ScrollArea className="h-full">
-          <SheetHeader className="mb-6">
-            <SheetTitle>{title}</SheetTitle>
-            {subtitle && <SheetDescription>{subtitle}</SheetDescription>}
-          </SheetHeader>
-          {content}
-        </ScrollArea>
+      <SheetContent className="flex h-full w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-[480px]">
+        <SheetHeader className="shrink-0 border-b px-6 py-4 pr-12 text-left">
+          <SheetTitle>{title}</SheetTitle>
+          {subtitle && <SheetDescription>{subtitle}</SheetDescription>}
+        </SheetHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto scrollbar-system">{content}</div>
       </SheetContent>
     </Sheet>
   )

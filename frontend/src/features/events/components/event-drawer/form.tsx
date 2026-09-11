@@ -21,6 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { SheetFooter } from "@/components/ui/sheet";
+import { DatePicker } from "@/components/ui/date-picker";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 import type {
   GetEvents200DataItem,
   PostEventsBody,
@@ -107,7 +110,8 @@ export function EventForm({ initialData, id }: EventFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full min-h-0 flex-col">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto scrollbar-system px-6 py-4">
         <FormField
           control={form.control}
           name="title"
@@ -197,7 +201,11 @@ export function EventForm({ initialData, id }: EventFormProps) {
               <FormItem>
                 <FormLabel>Início</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <DateTimePicker
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -210,10 +218,10 @@ export function EventForm({ initialData, id }: EventFormProps) {
               <FormItem>
                 <FormLabel>Fim</FormLabel>
                 <FormControl>
-                  <Input
-                    type="datetime-local"
-                    {...field}
+                  <DateTimePicker
                     value={field.value ?? ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
                   />
                 </FormControl>
                 <FormMessage />
@@ -307,7 +315,11 @@ export function EventForm({ initialData, id }: EventFormProps) {
                 <FormItem>
                   <FormLabel>Repetir até</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} value={field.value ?? ""} />
+                    <DatePicker
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -336,14 +348,15 @@ export function EventForm({ initialData, id }: EventFormProps) {
           </div>
         )}
 
-        <div className="flex justify-end gap-3 pt-2">
+        </div>
+        <SheetFooter className="shrink-0 border-t px-6 py-4">
           <Button type="button" variant="outline" onClick={close}>
             Cancelar
           </Button>
           <Button type="submit" disabled={isCreating || isUpdating}>
             {initialData ? "Salvar alterações" : "Criar evento"}
           </Button>
-        </div>
+        </SheetFooter>
       </form>
     </Form>
   );

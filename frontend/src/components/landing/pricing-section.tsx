@@ -12,14 +12,14 @@ import { cn } from "@/lib/utils"
 const plans = [
   {
     name: "Essencial",
-    description: "Para uma igreja que quer trocar planilhas por uma rotina simples e organizada.",
+    description: "Para uma igreja que quer sair das planilhas.",
     price: "R$ 49",
     period: "por mês",
     features: ["1 igreja", "Membros, grupos e eventos", "Presença e calendário", "Equipe com permissões"],
   },
   {
     name: "Comunidade",
-    description: "Para redes, sedes e congregações que precisam enxergar tudo sem misturar dados.",
+    description: "Para quem responde por mais de uma igreja e precisa ver a rede toda sem misturar os dados.",
     price: "R$ 99",
     period: "por mês",
     features: ["Tudo do Essencial", "Igrejas e unidades ilimitadas", "Visão consolidada da rede", "Relatórios e financeiro", "Permissões por unidade"],
@@ -42,10 +42,10 @@ export function PricingSection() {
             7 dias grátis. Depois, dois planos.
           </span>
           <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Escolha o ritmo ideal da sua comunidade
+            Comece grátis e escolha o plano depois
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Crie sua conta e experimente o plano Essencial por 7 dias, sem cartão. Depois, escolha o formato ideal para sua comunidade.
+            Crie a conta sem cartão e use o Essencial por 7 dias. Depois você escolhe o plano que faz sentido para a sua comunidade.
           </p>
         </motion.div>
 

@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { SheetFooter } from "@/components/ui/sheet"
+import { TimePicker } from "@/components/ui/time-picker"
 import {
   Select,
   SelectContent,
@@ -76,7 +78,8 @@ export function GroupForm({ initialData, id }: GroupFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full min-h-0 flex-col">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto scrollbar-system px-6 py-4">
         <FormField
           control={form.control}
           name="name"
@@ -156,27 +159,35 @@ export function GroupForm({ initialData, id }: GroupFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Início</FormLabel>
-              <FormControl>
-                <Input type="time" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormControl>
+                  <TimePicker
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="endTime"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fim</FormLabel>
-              <FormControl>
-                <Input type="time" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="endTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fim</FormLabel>
+                <FormControl>
+                  <TimePicker
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
         <FormField
           control={form.control}
@@ -192,14 +203,15 @@ export function GroupForm({ initialData, id }: GroupFormProps) {
           )}
         />
 
-        <div className="flex justify-end gap-4">
+        </div>
+        <SheetFooter className="shrink-0 border-t px-6 py-4">
           <Button type="button" variant="outline" onClick={close}>
             Cancelar
           </Button>
           <Button type="submit" disabled={isCreating || isUpdating}>
             {initialData ? "Salvar" : "Criar"}
           </Button>
-        </div>
+        </SheetFooter>
       </form>
     </Form>
   )

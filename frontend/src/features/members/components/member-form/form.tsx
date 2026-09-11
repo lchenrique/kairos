@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { DatePickerInput } from "@/components/ui/date-picker"
+import { DatePicker } from "@/components/ui/date-picker"
+import { SheetFooter } from "@/components/ui/sheet"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { Textarea } from "@/components/ui/textarea"
 import { MaskedInput } from "@/components/ui/masked-input"
@@ -24,7 +25,6 @@ import { useDrawerStore } from "@/lib/stores/drawer-store"
 import { memberFormSchema } from "./schema"
 import { useCreateMember } from "../../hooks/use-create-member"
 import { useUpdateMember } from "../../hooks/use-update-member"
-import { CalendarDate, parseDate } from "@internationalized/date"
 import { useQueryClient } from "@tanstack/react-query"
 import { getGetMembersQueryKey } from "@/lib/api/generated/members/members"
 
@@ -81,7 +81,8 @@ export function MemberForm({ initialData, id }: MemberFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full min-h-0 flex-col">
+        <div className="min-h-0 flex-1 space-y-8 overflow-y-auto scrollbar-system px-6 py-4">
         <FormField
           control={form.control}
           name="image"
@@ -161,16 +162,10 @@ export function MemberForm({ initialData, id }: MemberFormProps) {
               <FormItem>
                 <FormLabel>Data de Nascimento</FormLabel>
                 <FormControl>
-                  <DatePickerInput
-                    value={field.value ? parseDate(field.value.split('T')[0]) : undefined}
-                    onChange={(date) => {
-                      if (date instanceof CalendarDate) {
-                        const isoDate = new Date(date.year, date.month - 1, date.day).toISOString()
-                        field.onChange(isoDate)
-                      } else {
-                        field.onChange(undefined)
-                      }
-                    }}
+                  <DatePicker
+                    value={field.value ?? ""}
+                    onChange={(value) => field.onChange(value || undefined)}
+                    onBlur={field.onBlur}
                   />
                 </FormControl>
                 <FormMessage />
@@ -185,16 +180,10 @@ export function MemberForm({ initialData, id }: MemberFormProps) {
               <FormItem>
                 <FormLabel>Data de Batismo</FormLabel>
                 <FormControl>
-                  <DatePickerInput
-                    value={field.value ? parseDate(field.value.split('T')[0]) : undefined}
-                    onChange={(date) => {
-                      if (date instanceof CalendarDate) {
-                        const isoDate = new Date(date.year, date.month - 1, date.day).toISOString()
-                        field.onChange(isoDate)
-                      } else {
-                        field.onChange(undefined)
-                      }
-                    }}
+                  <DatePicker
+                    value={field.value ?? ""}
+                    onChange={(value) => field.onChange(value || undefined)}
+                    onBlur={field.onBlur}
                   />
                 </FormControl>
                 <FormMessage />
@@ -277,10 +266,13 @@ export function MemberForm({ initialData, id }: MemberFormProps) {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {initialData ? "Salvar alterações" : "Criar membro"}
-        </Button>
+        </div>
+        <SheetFooter className="shrink-0 border-t px-6 py-4">
+          <Button type="submit" className="w-full sm:w-auto" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {initialData ? "Salvar alterações" : "Criar membro"}
+          </Button>
+        </SheetFooter>
       </form>
     </Form>
   )

@@ -40,7 +40,7 @@ export function EventList() {
   const events = data?.data ?? []
   const openCreate = useCallback(() => open({ title: "Novo evento", subtitle: "Planeje o próximo momento da sua comunidade.", content: <EventForm /> }), [open])
   const openEdit = (event: GetEvents200DataItem) => open({ title: "Editar evento", subtitle: event.title, content: <EventForm initialData={event} id={event.id} /> })
-  const openAttendance = (event: GetEvents200DataItem) => open({ title: "Presença do evento", subtitle: event.title, content: <EventAttendanceManager event={event} /> })
+  const openAttendance = (event: GetEvents200DataItem) => open({ title: "Presença do evento", subtitle: event.title, content: <div className="px-6 py-4"><EventAttendanceManager event={event} /></div> })
   useEffect(() => {
     if (canManage && searchParams.get("new") === "1") openCreate()
   }, [canManage, searchParams, openCreate])

@@ -56,7 +56,7 @@ function InfoItem({ icon, label, value, className, delay = 0 }: InfoItemProps) {
 
 export function MemberView({ member }: MemberViewProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-6 py-4">
       <div className="flex flex-col items-center space-y-4 pb-6 pt-2">
         <motion.div
           initial={{ scale: 0 }}

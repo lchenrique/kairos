@@ -17,7 +17,7 @@ export function GroupCard({ group, onEdit }: GroupCardProps) {
   const role = useAuthStore((state) => state.user?.role)
   const canManage = hasPermission(role, 'GROUPS_MANAGE')
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-6 py-4">
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-2xl font-bold">{group.name}</h2>
