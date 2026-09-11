@@ -52,6 +52,8 @@ export default function ReportsPage() {
     { query: { refetchOnWindowFocus: false } },
   );
 
+  const attendance = report?.attendance;
+
   const exportReport = () => {
     if (!report) return;
     downloadCsv(`kairos-relatorio-${period}.csv`, [
@@ -62,11 +64,11 @@ export default function ReportsPage() {
         Grupos: report.groupsTotal,
         "Eventos no período": report.eventsTotal,
         "Próximos eventos": report.upcomingEvents,
-        "Participantes registrados": report.attendance.total,
-        Confirmados: report.attendance.confirmed,
-        Pendentes: report.attendance.pending,
-        Cancelados: report.attendance.cancelled,
-        "Taxa de confirmação": `${report.attendance.rate}%`,
+        "Participantes registrados": attendance?.total ?? 0,
+        Confirmados: attendance?.confirmed ?? 0,
+        Pendentes: attendance?.pending ?? 0,
+        Cancelados: attendance?.cancelled ?? 0,
+        "Taxa de confirmação": `${attendance?.rate ?? 0}%`,
         "Gerado em": new Date(report.generatedAt).toLocaleString("pt-BR"),
       },
     ]);
@@ -148,9 +150,9 @@ export default function ReportsPage() {
             />
             <StatsCard
               title="Taxa de confirmação"
-              value={`${report?.attendance.rate ?? 0}%`}
+              value={`${attendance?.rate ?? 0}%`}
               icon={CheckCircle2}
-              description={`${report?.attendance.confirmed ?? 0} de ${report?.attendance.total ?? 0} participantes`}
+              description={`${attendance?.confirmed ?? 0} de ${attendance?.total ?? 0} participantes`}
               trend="up"
             />
           </>
@@ -194,19 +196,18 @@ export default function ReportsPage() {
         <CardContent className="space-y-5">
           {isLoading ? (
             <Skeleton className="h-36 w-full" />
-          ) : report?.attendance.total ? (
+          ) : attendance?.total ? (
             <>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Confirmados</span>
                   <span className="font-medium">
-                    {report.attendance.confirmed}
+                    {attendance.confirmed}
                   </span>
                 </div>
                 <Progress
                   value={
-                    (report.attendance.confirmed / report.attendance.total) *
-                    100
+                    ((attendance.confirmed ?? 0) / (attendance.total || 1)) * 100
                   }
                 />
               </div>
@@ -214,12 +215,12 @@ export default function ReportsPage() {
                 <div className="flex justify-between text-sm">
                   <span>Pendentes</span>
                   <span className="font-medium">
-                    {report.attendance.pending}
+                    {attendance.pending}
                   </span>
                 </div>
                 <Progress
                   value={
-                    (report.attendance.pending / report.attendance.total) * 100
+                    ((attendance.pending ?? 0) / (attendance.total || 1)) * 100
                   }
                   className="[&>div]:bg-amber-500"
                 />
@@ -228,12 +229,12 @@ export default function ReportsPage() {
                 <div className="flex justify-between text-sm">
                   <span>Cancelados</span>
                   <span className="font-medium">
-                    {report.attendance.cancelled}
+                    {attendance.cancelled}
                   </span>
                 </div>
                 <Progress
                   value={
-                    (report.attendance.cancelled / report.attendance.total) *
+                    ((attendance.cancelled ?? 0) / (attendance.total || 1)) *
                     100
                   }
                   className="[&>div]:bg-destructive"

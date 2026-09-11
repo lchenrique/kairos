@@ -6,9 +6,6 @@ import { Skeleton } from "./skeleton"
 import { PaginationWithInfo } from "./pagination-with-info"
 import { Card, CardHeader, CardContent, CardFooter } from "./card"
 import { motion } from "framer-motion"
-import { MemberCard } from "@/features/members/components/member-card"
-import { useDrawerStore } from "@/lib/stores/drawer-store"
-import type { GetMembers200DataItem } from "@/lib/api/generated/model"
 
 type ViewType = 'grid' | 'table'
 
@@ -156,6 +153,14 @@ export function ViewList<T extends { id: string }>({
 
   const renderContent = () => {
     if (view === 'grid') {
+      if (data.length === 0) {
+        return (
+          <div className="flex h-40 items-center justify-center rounded-md border border-dashed px-4 text-center text-sm text-muted-foreground">
+            Sem resultados.
+          </div>
+        )
+      }
+
       return (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

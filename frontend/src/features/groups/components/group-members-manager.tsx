@@ -84,24 +84,26 @@ export function GroupMembersManager({ group }: { group: GetGroups200DataItem }) 
         <Badge variant="secondary">{members.length}</Badge>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-[1fr_150px_auto] sm:items-end">
-        <div className="space-y-2">
+      <div className="flex flex-col gap-3">
+        <div className="min-w-0 space-y-2">
           <Label htmlFor={`group-member-${group.id}`}>Adicionar membro</Label>
           <Select value={memberId} onValueChange={setMemberId} disabled={isLoadingMembers || !availableMembers.length}>
-            <SelectTrigger id={`group-member-${group.id}`}><SelectValue placeholder={isLoadingMembers ? "Carregando…" : availableMembers.length ? "Selecione uma pessoa" : "Todos já estão no grupo"} /></SelectTrigger>
+            <SelectTrigger id={`group-member-${group.id}`} className="w-full min-w-0"><SelectValue placeholder={isLoadingMembers ? "Carregando…" : availableMembers.length ? "Selecione uma pessoa" : "Todos já estão no grupo"} /></SelectTrigger>
             <SelectContent>{availableMembers.map((member) => <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
-          <Label>Função</Label>
-          <Select value={role} onValueChange={(value) => setRole(value as PostGroupsIdMembersBodyRole)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent><SelectItem value="MEMBER">Membro</SelectItem><SelectItem value="LEADER">Líder</SelectItem></SelectContent>
-          </Select>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="min-w-0 flex-1 space-y-2">
+            <Label>Função</Label>
+            <Select value={role} onValueChange={(value) => setRole(value as PostGroupsIdMembersBodyRole)}>
+              <SelectTrigger className="w-full min-w-0"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="MEMBER">Membro</SelectItem><SelectItem value="LEADER">Líder</SelectItem></SelectContent>
+            </Select>
+          </div>
+          <Button className="shrink-0" type="button" disabled={!memberId || addMember.isPending} onClick={() => addMember.mutate({ id: group.id, data: { memberId, role } })}>
+            <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />Adicionar
+          </Button>
         </div>
-        <Button type="button" disabled={!memberId || addMember.isPending} onClick={() => addMember.mutate({ id: group.id, data: { memberId, role } })}>
-          <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />Adicionar
-        </Button>
       </div>
 
       <div className="space-y-2">

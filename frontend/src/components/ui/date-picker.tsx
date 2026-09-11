@@ -21,6 +21,7 @@ export type DatePickerProps = Omit<
   value?: string | null;
   onChange?: (value: string) => void;
   placeholder?: string;
+  displayFormat?: "long" | "short";
 };
 
 export const DATE_FORMAT = "yyyy-MM-dd";
@@ -34,11 +35,24 @@ export function parseDateValue(value?: string | null): Date | undefined {
 
 export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
   (
-    { value, onChange, placeholder = "Selecione uma data", className, disabled, ...props },
+    {
+      value,
+      onChange,
+      placeholder = "Selecione uma data",
+      displayFormat = "long",
+      className,
+      disabled,
+      ...props
+    },
     ref,
   ) => {
     const [open, setOpen] = React.useState(false);
     const selected = parseDateValue(value);
+    const label = selected
+      ? displayFormat === "short"
+        ? format(selected, "dd/MM/yyyy")
+        : format(selected, "PPP", { locale: ptBR })
+      : placeholder;
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -50,19 +64,16 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             disabled={disabled}
             aria-haspopup="dialog"
             aria-expanded={open}
+            title={label}
             className={cn(
-              "h-10 w-full justify-start text-left font-normal",
+              "h-10 w-full min-w-0 justify-start gap-2 overflow-hidden text-left font-normal",
               !selected && "text-muted-foreground",
               className,
             )}
             {...props}
           >
-            <CalendarIcon className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
-            {selected ? (
-              format(selected, "PPP", { locale: ptBR })
-            ) : (
-              <span>{placeholder}</span>
-            )}
+            <CalendarIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate">{label}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">

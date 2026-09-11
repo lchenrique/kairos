@@ -1,9 +1,11 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { MemberListFilters } from "@/features/members/components/member-list/filters"
-import { MemberList } from "@/features/members/components/member-list"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ListShell } from "@/components/shared/list-shell"
+import { ListToolbar } from "@/components/shared/list-toolbar"
+import { columns } from "@/features/members/components/member-list/columns"
+import { MemberCard } from "@/features/members/components/member-card"
 import { useGetMembers } from "@/lib/api/generated/members/members"
 import { useState, useEffect } from "react"
 import { Download, PlusIcon } from "lucide-react"
@@ -17,6 +19,7 @@ import { GetMembersOrder, GetMembersSortBy } from "@/lib/api/generated/model"
 import { useDrawerStore } from "@/lib/stores/drawer-store"
 import { downloadCsv } from "@/lib/utils/csv"
 import { MemberBirthdays } from "@/features/members/components/member-birthdays"
+import { useDebounce } from "@/hooks/use-debounce"
 
 const container = {
   hidden: { opacity: 0 },
@@ -35,7 +38,8 @@ const item = {
 
 export default function MembersPage() {
   const [view, setView] = useState<'grid' | 'table'>('table')
-  const [search, setSearch] = useState("")
+  const [searchInput, setSearchInput] = useState("")
+  const search = useDebounce(searchInput, 500)
   const [status, setStatus] = useState<"ACTIVE" | "INACTIVE" | null>(null)
   const { open } = useDrawerStore()
   const searchParams = useSearchParams()
@@ -126,35 +130,47 @@ export default function MembersPage() {
       </motion.div>
 
       <motion.div variants={item}>
-        <Card>
-          <CardHeader className="p-5 pb-3">
-            <CardTitle className="text-xl">Lista de Membros</CardTitle>
-            <CardDescription>Gerencie os membros da sua igreja</CardDescription>
-          </CardHeader>
-          <CardContent className="px-5 pb-5">
-            <MemberListFilters 
-              view={view} 
+        <ListShell
+          title="Lista de Membros"
+          description="Gerencie os membros da sua igreja"
+          data={membersResponse?.data ?? []}
+          columns={columns}
+          view={view}
+          isLoading={isLoading}
+          meta={{
+            currentPage: membersResponse?.meta.page ?? 1,
+            totalPages: membersResponse?.meta.totalPages ?? 1,
+            total: membersResponse?.meta.totalItems ?? 0,
+            limit
+          }}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          gridRenderItem={(member, index) => <MemberCard key={index} member={member} />}
+          toolbar={
+            <ListToolbar
+              view={view}
               onViewChange={setView}
-              onSearch={setSearch}
-              onStatusChange={(value) => setStatus(value as "ACTIVE" | "INACTIVE" | null)}
+              search={searchInput}
+              onSearch={setSearchInput}
+              searchPlaceholder="Buscar membros..."
+              filters={
+                <Select
+                  value={status === "ACTIVE" ? "active" : status === "INACTIVE" ? "inactive" : "all"}
+                  onValueChange={(value) => setStatus(value === "active" ? "ACTIVE" : value === "inactive" ? "INACTIVE" : null)}
+                >
+                  <SelectTrigger className="w-[180px]" aria-label="Filtrar membros por status">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="active">Ativos</SelectItem>
+                    <SelectItem value="inactive">Inativos</SelectItem>
+                  </SelectContent>
+                </Select>
+              }
             />
-            <div className="mt-4">
-              <MemberList 
-                members={membersResponse?.data ?? []} 
-                view={view} 
-                isLoading={isLoading} 
-                meta={{
-                  currentPage: membersResponse?.meta.page ?? 1,
-                  totalPages: membersResponse?.meta.totalPages ?? 1,
-                  total: membersResponse?.meta.totalItems ?? 0,
-                  limit
-                }}
-                onPageChange={handlePageChange}
-                onPageSizeChange={handlePageSizeChange}
-              />
-            </div>
-          </CardContent>
-        </Card>
+          }
+        />
       </motion.div>
     </motion.div>
   )

@@ -19,10 +19,10 @@ export function GroupCard({ group, onEdit }: GroupCardProps) {
   return (
     <div className="space-y-6 px-6 py-4">
       <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">{group.name}</h2>
+        <div className="min-w-0">
+          <h2 className="break-words text-2xl font-bold">{group.name}</h2>
           {group.description && (
-            <p className="text-muted-foreground">{group.description}</p>
+            <p className="break-words text-muted-foreground">{group.description}</p>
           )}
         </div>
         {onEdit && (
@@ -42,27 +42,27 @@ export function GroupCard({ group, onEdit }: GroupCardProps) {
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           {group.meetingDay && (
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{group.meetingDay}</span>
+            <div className="flex min-w-0 items-center gap-2">
+              <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 truncate text-sm">{group.meetingDay}</span>
             </div>
           )}
           {group.startTime && (
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{group.startTime}{group.endTime ? `–${group.endTime}` : ""}</span>
+            <div className="flex min-w-0 items-center gap-2">
+              <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 truncate text-sm">{group.startTime}{group.endTime ? `–${group.endTime}` : ""}</span>
             </div>
           )}
           {group.location && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{group.location}</span>
+            <div className="flex min-w-0 items-center gap-2">
+              <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 truncate text-sm">{group.location}</span>
             </div>
           )}
           {canManage && (
-            <div className="flex items-center gap-2">
-              <UsersRound className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{group.members.length} membros</span>
+            <div className="flex min-w-0 items-center gap-2">
+              <UsersRound className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 truncate text-sm">{group.members.length} membros</span>
             </div>
           )}
         </div>

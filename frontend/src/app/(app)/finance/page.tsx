@@ -78,6 +78,16 @@ import { useAuthStore } from "@/lib/stores/auth-store";
 const money = (cents: number) =>
   (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+const dayStartIso = (value: string) => {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day, 0, 0, 0, 0).toISOString();
+};
+
+const dayEndIso = (value: string) => {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day, 23, 59, 59, 999).toISOString();
+};
+
 const categorySuggestions: Record<PostFinanceBodyType, string[]> = {
   INCOME: ["Dízimos", "Ofertas", "Doações", "Eventos", "Outras entradas"],
   EXPENSE: [
@@ -234,7 +244,10 @@ function FinanceEntryDialog({ open, onOpenChange, entry }: FinanceDialogProps) {
                 placeholder="Digite ou escolha uma categoria"
               />
               <Select onValueChange={setCategory}>
-                <SelectTrigger aria-label="Sugestões de categoria">
+                <SelectTrigger
+                  className="min-w-0"
+                  aria-label="Sugestões de categoria"
+                >
                   <SelectValue placeholder="Sugestões" />
                 </SelectTrigger>
                 <SelectContent>
@@ -314,8 +327,8 @@ export default function FinancePage() {
     limit: 100,
     ...(type !== "all" ? { type } : {}),
     ...(category !== "all" ? { category } : {}),
-    ...(from ? { from: new Date(`${from}T00:00:00`).toISOString() } : {}),
-    ...(to ? { to: new Date(`${to}T23:59:59.999`).toISOString() } : {}),
+    ...(from ? { from: dayStartIso(from) } : {}),
+    ...(to ? { to: dayEndIso(to) } : {}),
   };
   const { data, isLoading, isError } = useGetFinance(params, {
     query: { refetchOnWindowFocus: false },
@@ -397,7 +410,7 @@ export default function FinancePage() {
             <CardDescription>Entradas</CardDescription>
             <CardTitle className="flex items-center gap-2 text-2xl text-emerald-600">
               <ArrowUpCircle className="h-5 w-5" aria-hidden="true" />
-              {money(data?.summary.incomeCents ?? 0)}
+              {money(data?.summary?.incomeCents ?? 0)}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -406,7 +419,7 @@ export default function FinancePage() {
             <CardDescription>Saídas</CardDescription>
             <CardTitle className="flex items-center gap-2 text-2xl text-rose-600">
               <ArrowDownCircle className="h-5 w-5" aria-hidden="true" />
-              {money(data?.summary.expenseCents ?? 0)}
+              {money(data?.summary?.expenseCents ?? 0)}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -414,10 +427,10 @@ export default function FinancePage() {
           <CardHeader className="pb-2">
             <CardDescription>Saldo</CardDescription>
             <CardTitle
-              className={`flex items-center gap-2 text-2xl ${(data?.summary.balanceCents ?? 0) >= 0 ? "text-emerald-600" : "text-rose-600"}`}
+              className={`flex items-center gap-2 text-2xl ${(data?.summary?.balanceCents ?? 0) >= 0 ? "text-emerald-600" : "text-rose-600"}`}
             >
               <WalletCards className="h-5 w-5" aria-hidden="true" />
-              {money(data?.summary.balanceCents ?? 0)}
+              {money(data?.summary?.balanceCents ?? 0)}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -429,7 +442,7 @@ export default function FinancePage() {
             <div>
               <CardTitle>Lançamentos</CardTitle>
               <CardDescription>
-                {data?.summary.entriesCount ?? 0} lançamento(s) no filtro atual.
+                {data?.summary?.entriesCount ?? 0} lançamento(s) no filtro atual.
               </CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -453,14 +466,14 @@ export default function FinancePage() {
               </Select>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger
-                  className="w-[170px]"
+                  className="w-[180px] min-w-[170px] max-w-[220px]"
                   aria-label="Filtrar por categoria"
                 >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as categorias</SelectItem>
-                  {data?.categories.map((item) => (
+                  {data?.categories?.map((item) => (
                     <SelectItem key={item} value={item}>
                       {item}
                     </SelectItem>
@@ -471,13 +484,17 @@ export default function FinancePage() {
                 value={from}
                 onChange={setFrom}
                 aria-label="Data inicial"
-                className="w-[145px]"
+                placeholder="Data inicial"
+                displayFormat="short"
+                className="w-[130px]"
               />
               <DatePicker
                 value={to}
                 onChange={setTo}
                 aria-label="Data final"
-                className="w-[145px]"
+                placeholder="Data final"
+                displayFormat="short"
+                className="w-[130px]"
               />
               {(type !== "all" || category !== "all" || from || to) && (
                 <Button variant="ghost" size="sm" onClick={clearFilters}>
@@ -490,7 +507,7 @@ export default function FinancePage() {
         <CardContent>
           {isLoading ? (
             <Skeleton className="h-56 w-full" />
-          ) : !data?.data.length ? (
+          ) : !data?.data?.length ? (
             <div className="rounded-lg border border-dashed p-10 text-center">
               <p className="text-sm text-muted-foreground">
                 Nenhum lançamento encontrado neste período.
