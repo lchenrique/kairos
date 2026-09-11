@@ -44,9 +44,9 @@ export function ChurchSwitcher({ isCollapsed }: { isCollapsed: boolean }) {
   }
 
   return (
-    <div className={cn('px-3', isCollapsed && 'px-0')}>
+    <div className={cn('px-2', isCollapsed && 'px-0')}>
       {!isCollapsed && (
-        <p className="mb-2 truncate px-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-sidebar-muted" title={data.organization.name}>
+        <p className="mb-1.5 truncate px-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-sidebar-muted" title={data.organization.name}>
           {data.organization.name}
         </p>
       )}
@@ -55,7 +55,7 @@ export function ChurchSwitcher({ isCollapsed }: { isCollapsed: boolean }) {
           aria-label="Selecionar igreja ou unidade"
           className={cn(
             'border-sidebar-border bg-sidebar-accent/40 text-sidebar-foreground hover:bg-sidebar-accent/70 focus:border-sidebar-ring',
-            isCollapsed ? 'mx-auto h-10 w-10 justify-center p-0 [&>svg]:hidden' : 'h-10 w-full',
+            isCollapsed ? 'mx-auto h-9 w-9 justify-center p-0 [&>svg]:hidden' : 'h-9 w-full',
           )}
           title={isCollapsed ? selectedChurch?.name || 'Todas as unidades' : undefined}
         >

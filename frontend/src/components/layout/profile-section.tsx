@@ -29,15 +29,15 @@ export function ProfileSection({ isCollapsed = false }: ProfileSectionProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.6 }}
-      className="px-4"
+      className="px-2"
     >
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button 
             variant="ghost" 
             className={cn(
-              "relative h-auto min-h-12 w-full overflow-hidden rounded-xl border border-sidebar-border bg-white/[0.04] px-3 py-2 text-sidebar-foreground hover:bg-white/[0.08] hover:text-sidebar-foreground focus:text-sidebar-foreground data-[state=open]:text-sidebar-foreground",
-              isCollapsed ? "justify-center" : "justify-start gap-3"
+              "relative h-auto min-h-11 w-full overflow-hidden rounded-lg border border-sidebar-border bg-white/[0.04] px-2.5 py-2 text-sidebar-foreground hover:bg-white/[0.08] hover:text-sidebar-foreground focus:text-sidebar-foreground data-[state=open]:text-sidebar-foreground",
+              isCollapsed ? "justify-center" : "justify-start gap-2.5"
             )}
           >
             <div className="relative shrink-0">

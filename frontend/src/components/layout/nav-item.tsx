@@ -33,7 +33,7 @@ export function NavItem({
     <Button
       variant="ghost"
       className={cn(
-        "group relative h-11 w-full justify-start gap-3 overflow-hidden rounded-xl px-3 text-sidebar-muted hover:bg-white/[0.07] hover:text-sidebar-foreground",
+        "group relative h-9 w-full justify-start gap-2 overflow-hidden rounded-lg px-2.5 text-sm text-sidebar-muted hover:bg-white/[0.07] hover:text-sidebar-foreground",
         isActive && "bg-primary text-primary-foreground shadow-md shadow-black/20 hover:bg-primary/90 hover:text-primary-foreground",
         isCollapsed && "justify-center px-0"
       )}
@@ -70,7 +70,7 @@ export function NavItem({
         {isActive && (
           <motion.div
             layoutId="active-nav"
-            className="absolute left-0 top-2 h-7 w-1 rounded-r-full bg-accent"
+            className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-accent"
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           />
         )}
