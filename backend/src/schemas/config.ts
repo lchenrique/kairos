@@ -61,7 +61,7 @@ export const envSchema = z.object({
   SMTP_HOST: z.string().min(1).optional(),
   SMTP_PORT: z.number().int().positive(),
   SMTP_SECURE: z.boolean(),
-  SMTP_USER: z.string().email().optional(),
+  SMTP_USER: z.union([z.literal('resend'), z.string().email()]).optional(),
   SMTP_PASSWORD: z.string().min(1).optional(),
   MAIL_FROM: z.string().min(1).optional(),
   CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
